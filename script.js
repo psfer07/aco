@@ -3,7 +3,7 @@ window.onload = function () {
     canvas.width = canvas.clientWidth;
     canvas.height = canvas.clientHeight;
     const ctx = canvas.getContext("2d");
-
+    
     function module(x1, y1, x2, y2) {
         return parseFloat(Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2).toFixed(4))
     }
