@@ -8,7 +8,6 @@ window.onload = function () {
     canvas.width = gridSize * cellSize;
     canvas.height = gridSize * cellSize;
     windowColor = "cyan"
-
     function createGrid() {
         const grid = [];
         const properties = {
