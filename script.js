@@ -25,13 +25,13 @@ window.onload = function () {
     function drawGrid() {
         paint.strokeStyle = "#aaa";
         paint.beginPath();
-        for (let x = 0; x <= canvas.width; x += cellSize) {
-            paint.moveTo(x, 0);
-            paint.lineTo(x, canvas.height);
+        for (let x = 2 * cellSize; x <= canvas.width - 2 * cellSize; x += cellSize) {
+            paint.moveTo(x, 2 * cellSize);
+            paint.lineTo(x, canvas.height - 2 * cellSize);
         }
-        for (let y = 0; y <= canvas.height; y += cellSize) {
-            paint.moveTo(0, y);
-            paint.lineTo(canvas.width, y);
+        for (let y = 2 * cellSize; y <= canvas.height - 2 * cellSize; y += cellSize) {
+            paint.moveTo(2 * cellSize, y);
+            paint.lineTo(canvas.width - 2 * cellSize, y);
         }
         paint.stroke();
     }
@@ -41,17 +41,14 @@ window.onload = function () {
         const Y = Array.isArray(y) ? y[0] : y;
         const endY = Array.isArray(y) ? y[1] : y;
 
-        paint.fillStyle = color;
         for (let i = X; i <= endX; i++) {
             for (let j = Y; j <= endY; j++) {
                 grid[i][j].color = color
-                paint.fillRect(i * cellSize, j * cellSize, cellSize, cellSize);
             }
         }
     }
     function drawElements() {
         paint.clearRect(0, 0, canvas.width, canvas.height);
-        show_grid ? drawGrid() : false;
         for (const wall of walls.horz.positions) {
             setColor([wall.x, wall.x + walls.horz.width - 1], [wall.y, wall.y + walls.horz.height - 1], walls.color);
         }
@@ -62,6 +59,13 @@ window.onload = function () {
             setColor([window.x, window.x + windows.width - 1], [window.y, window.y + windows.height - 1], windows.color);
         }
         setColor([door.x, door.x + door.width - 1], [door.y, door.y + door.height - 1], door.color);
+        for (let i = 0; i < grid.length; i++) {
+            for (let j = 0; j < grid[i].length; j++) {
+                paint.fillStyle = grid[i][j].color;
+                paint.fillRect(i * cellSize, j * cellSize, cellSize, cellSize);
+            }
+        }
+        show_grid ? drawGrid() : false;
     }
 
     const walls = {
@@ -101,17 +105,40 @@ window.onload = function () {
         height: gridSize * 0.1
     }
     drawElements();
+    let prevRedDotX = null;
+    let prevRedDotY = null;
 
     canvas.addEventListener("click", function (event) {
         const rect = canvas.getBoundingClientRect();
         const mouseX = event.clientX - rect.left;
         const mouseY = event.clientY - rect.top;
-        if (grid[Math.floor(mouseX / cellSize)][Math.floor(mouseY / cellSize)].color === "#ccc") {
-            console.log("Clicked coordinates: X =", mouseX, ", Y =", mouseY, " Coordenadas: (", Math.floor(mouseX / cellSize), ",", Math.floor(mouseY / cellSize), ")");
-            drawElements();
-            setColor(Math.floor(mouseX / cellSize), Math.floor(mouseY / cellSize), "red")
-        } else { alert("No puedes empezar ahí. Haz clic dentro de la habitación") }
+
+        const cellX = Math.floor(mouseX / cellSize);
+        const cellY = Math.floor(mouseY / cellSize);
+
+        switch (grid[cellX][cellY].color) {
+            case "#ccc":
+                console.log("Clicked coordinates: X =", mouseX, ", Y =", mouseY, " Coordenadas: (", cellX, ",", cellY, ")");
+
+                if (prevRedDotX !== null && prevRedDotY !== null) {
+                    setColor(prevRedDotX, prevRedDotY, "#ccc");
+                }
+
+                setColor(cellX, cellY, "red");
+                drawElements();
+
+                prevRedDotX = cellX;
+                prevRedDotY = cellY;
+                break;
+            case "red":
+                alert("Por favor, seleccione otra ubicación o pulse el botón de marcar el punto de partida")
+                break;
+            default:
+                alert("No puedes empezar ahí. Haz clic dentro de la habitación");
+                break;
+        }
     });
+
     document.getElementById("windows").addEventListener("change", function () {
         windowColor = windowColor === "cyan" ? "#1754c4" : "cyan";
         windows.color = windowColor
