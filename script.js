@@ -1,13 +1,31 @@
 window.onload = function () {
     const canvas = document.getElementById("aco_render");
     const paint = canvas.getContext("2d");
-    let windowColor = "cyan";
     const cellSize = 6;
     const gridSize = 100;
+    let windowColor = "cyan";
+    let grid = createGrid()
     canvas.width = gridSize * cellSize;
     canvas.height = gridSize * cellSize;
     windowColor = "cyan"
 
+    function createGrid() {
+        const grid = [];
+        const properties = {
+            alpha: undefined,
+            beta: undefined,
+            gamma: undefined,
+            color: undefined
+        };
+        for (let x = 0; x < gridSize; x++) {
+            const cols = [];
+            for (let y = 0; y < gridSize; y++) {
+                cols.push({ ...properties });
+            }
+            grid.push(cols);
+        }
+        return grid;
+    }
     function drawGrid() {
         paint.strokeStyle = "#aaa";
         paint.beginPath();
