@@ -35,7 +35,7 @@ window.onload = function () {
         }
         paint.stroke();
     }
-    function changeCellColor(x, y, color) {
+    function setColor(x, y, color) {
         const X = Array.isArray(x) ? x[0] : x;
         const endX = Array.isArray(x) ? x[1] : x;
         const Y = Array.isArray(y) ? y[0] : y;
@@ -53,15 +53,15 @@ window.onload = function () {
         paint.clearRect(0, 0, canvas.width, canvas.height);
         show_grid ? drawGrid() : false;
         for (const wall of walls.horz.positions) {
-            changeCellColor([wall.x, wall.x + walls.horz.width - 1], [wall.y, wall.y + walls.horz.height - 1], walls.color);
+            setColor([wall.x, wall.x + walls.horz.width - 1], [wall.y, wall.y + walls.horz.height - 1], walls.color);
         }
         for (const wall of walls.vert.positions) {
-            changeCellColor([wall.x, wall.x + walls.vert.width - 1], [wall.y, wall.y + walls.vert.height - 1], walls.color);
+            setColor([wall.x, wall.x + walls.vert.width - 1], [wall.y, wall.y + walls.vert.height - 1], walls.color);
         }
         for (const window of windows.positions) {
-            changeCellColor([window.x, window.x + windows.width - 1], [window.y, window.y + windows.height - 1], windows.color);
+            setColor([window.x, window.x + windows.width - 1], [window.y, window.y + windows.height - 1], windows.color);
         }
-        changeCellColor([door.x, door.x + door.width - 1], [door.y, door.y + door.height - 1], door.color);
+        setColor([door.x, door.x + door.width - 1], [door.y, door.y + door.height - 1], door.color);
     }
 
     const walls = {
@@ -109,7 +109,7 @@ window.onload = function () {
         if (grid[Math.floor(mouseX / cellSize)][Math.floor(mouseY / cellSize)].color === "#ccc") {
             console.log("Clicked coordinates: X =", mouseX, ", Y =", mouseY, " Coordenadas: (", Math.floor(mouseX / cellSize), ",", Math.floor(mouseY / cellSize), ")");
             drawElements();
-            changeCellColor(Math.floor(mouseX / cellSize), Math.floor(mouseY / cellSize), "red")
+            setColor(Math.floor(mouseX / cellSize), Math.floor(mouseY / cellSize), "red")
         } else { alert("No puedes empezar ahí. Haz clic dentro de la habitación") }
     });
     document.getElementById("windows").addEventListener("change", function () {
