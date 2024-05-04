@@ -4,10 +4,12 @@ window.onload = function () {
     const cellSize = 6;
     const gridSize = 100;
     let windowColor = "cyan";
+    let HasAcoStarted = false
     let grid = createGrid()
     canvas.width = gridSize * cellSize;
     canvas.height = gridSize * cellSize;
     windowColor = "cyan"
+
     function createGrid() {
         const grid = [];
         const properties = {
@@ -67,6 +69,9 @@ window.onload = function () {
         }
         show_grid ? drawGrid() : false;
     }
+    function start_aco(initialX, initialY) {
+        console.log(initialX, initialY)
+    }
 
     const walls = {
         color: "#2d2d2d",
@@ -107,12 +112,11 @@ window.onload = function () {
     drawElements();
     let prevRedDotX = null;
     let prevRedDotY = null;
-
     canvas.addEventListener("click", function (event) {
+        if (HasAcoStarted) { return; }
         const rect = canvas.getBoundingClientRect();
         const mouseX = event.clientX - rect.left;
         const mouseY = event.clientY - rect.top;
-
         const cellX = Math.floor(mouseX / cellSize);
         const cellY = Math.floor(mouseY / cellSize);
 
@@ -138,7 +142,6 @@ window.onload = function () {
                 break;
         }
     });
-
     document.getElementById("windows").addEventListener("change", function () {
         windowColor = windowColor === "cyan" ? "#1754c4" : "cyan";
         windows.color = windowColor
@@ -148,5 +151,9 @@ window.onload = function () {
     document.getElementById("show_grid").addEventListener("change", function () {
         show_grid = !show_grid
         drawElements();
+    });
+    document.getElementById("start").addEventListener("click", function () {
+        HasAcoStarted = true;
+        start_aco(prevRedDotX, prevRedDotY);
     });
 };
