@@ -2,8 +2,8 @@ window.onload = function () {
     const canvas = document.getElementById("aco_render");
     const paint = canvas.getContext("2d");
     let windowColor = "cyan";
-    const cellSize = 5;
-    const gridSize = 150;
+    const cellSize = 6;
+    const gridSize = 100;
     canvas.width = gridSize * cellSize;
     canvas.height = gridSize * cellSize;
     windowColor = "cyan"
@@ -95,6 +95,8 @@ window.onload = function () {
         const mouseY = event.clientY - rect.top;
 
         console.log("Clicked coordinates: X =", mouseX, ", Y =", mouseY);
+        console.log(mouseY / cellSize, Math.floor(mouseY / cellSize));
+        drawSquare(Math.floor(mouseX / cellSize), Math.floor(mouseY / cellSize), "red")
         let clickedElement = "";
 
         // Check if clicked on walls
@@ -138,17 +140,6 @@ window.onload = function () {
         }
 
         drawElements();
-
-        // paint.beginPath();
-        // paint.fillStyle = "red";
-        // paint.arc(mouseX, mouseY, 4, 0, Math.PI * 2);
-        // paint.fill();
-
-    //     initial_points.push({ x: mouseX, y: mouseY });
-
-    //     if (initial_points.length > 1) {
-    //         initial_points.shift();
-    //     }
     });
 
     console.log("Initial points array:", initial_points);
