@@ -52,7 +52,7 @@ window.onload = function () {
     }
     function drawElements() {
         paint.clearRect(0, 0, canvas.width, canvas.height);
-        drawGrid();
+        if (show_grid) { drawGrid(); }
         for (const wall of walls.horz.positions) {
             changeCellColor([wall.x, wall.x + walls.horz.width - 1], [wall.y, wall.y + walls.horz.height - 1], walls.color);
         }
@@ -117,8 +117,13 @@ window.onload = function () {
     });
 
     document.getElementById("windows").addEventListener("change", function () {
-            windowColor = windowColor === "cyan" ? "#1754c4" : "cyan";
-            windows.color = windowColor
-            drawElements();
+        windowColor = windowColor === "cyan" ? "#1754c4" : "cyan";
+        windows.color = windowColor
+        drawElements();
+
+    });
+    document.getElementById("show_grid").addEventListener("change", function () {
+        show_grid = show_grid === false ? true : false;
+        drawElements();
     });
 };
