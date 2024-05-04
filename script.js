@@ -106,14 +106,12 @@ window.onload = function () {
         const rect = canvas.getBoundingClientRect();
         const mouseX = event.clientX - rect.left;
         const mouseY = event.clientY - rect.top;
-
         if (grid[Math.floor(mouseX / cellSize)][Math.floor(mouseY / cellSize)].color === "#ccc") {
             console.log("Clicked coordinates: X =", mouseX, ", Y =", mouseY, " Coordenadas: (", Math.floor(mouseX / cellSize), ",", Math.floor(mouseY / cellSize), ")");
             drawElements();
             changeCellColor(Math.floor(mouseX / cellSize), Math.floor(mouseY / cellSize), "red")
         } else { alert("No puedes empezar ahí. Haz clic dentro de la habitación") }
     });
-
     document.getElementById("windows").addEventListener("change", function () {
         windowColor = windowColor === "cyan" ? "#1754c4" : "cyan";
         windows.color = windowColor
