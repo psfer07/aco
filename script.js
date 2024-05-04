@@ -36,31 +36,33 @@ window.onload = function () {
         }
         paint.stroke();
     }
-    function drawSquare(x, y, color) {
-        const startX = Array.isArray(x) ? x[0] : x;
+    function changeCellColor(x, y, color) {
+        const X = Array.isArray(x) ? x[0] : x;
         const endX = Array.isArray(x) ? x[1] : x;
-        const startY = Array.isArray(y) ? y[0] : y;
+        const Y = Array.isArray(y) ? y[0] : y;
         const endY = Array.isArray(y) ? y[1] : y;
 
         paint.fillStyle = color;
-        for (let i = startX; i <= endX; i++) {
-            for (let j = startY; j <= endY; j++) {
+        for (let i = X; i <= endX; i++) {
+            for (let j = Y; j <= endY; j++) {
+                grid[i][j].color = color
                 paint.fillRect(i * cellSize, j * cellSize, cellSize, cellSize);
             }
         }
     }
     function drawElements() {
+        paint.clearRect(0, 0, canvas.width, canvas.height);
+        drawGrid();
         for (const wall of walls.horz.positions) {
-            drawSquare([wall.x, wall.x + walls.horz.width - 1], [wall.y, wall.y + walls.horz.height - 1], walls.color);
+            changeCellColor([wall.x, wall.x + walls.horz.width - 1], [wall.y, wall.y + walls.horz.height - 1], walls.color);
         }
         for (const wall of walls.vert.positions) {
-            drawSquare([wall.x, wall.x + walls.vert.width - 1], [wall.y, wall.y + walls.vert.height - 1], walls.color);
+            changeCellColor([wall.x, wall.x + walls.vert.width - 1], [wall.y, wall.y + walls.vert.height - 1], walls.color);
         }
         for (const window of windows.positions) {
-            drawSquare([window.x, window.x + windows.width - 1], [window.y, window.y + windows.height - 1], windows.color);
+            changeCellColor([window.x, window.x + windows.width - 1], [window.y, window.y + windows.height - 1], windows.color);
         }
-        drawSquare([door.x, door.x + door.width - 1], [door.y, door.y + door.height - 1], door.color);
-        drawGrid();
+        changeCellColor([door.x, door.x + door.width - 1], [door.y, door.y + door.height - 1], door.color);
     }
 
     const walls = {
@@ -99,8 +101,6 @@ window.onload = function () {
         width: gridSize * 0.02,
         height: gridSize * 0.1
     }
-
-    let initial_points = [];
     drawElements();
 
     canvas.addEventListener("click", function (event) {
@@ -108,61 +108,17 @@ window.onload = function () {
         const mouseX = event.clientX - rect.left;
         const mouseY = event.clientY - rect.top;
 
-        console.log("Clicked coordinates: X =", mouseX, ", Y =", mouseY);
-        console.log(mouseY / cellSize, Math.floor(mouseY / cellSize));
-        drawSquare(Math.floor(mouseX / cellSize), Math.floor(mouseY / cellSize), "red")
-        let clickedElement = "";
-
-        // Check if clicked on walls
-        for (let wall of walls.horz.positions.concat(walls.vert.positions)) {
-            if (mouseX >= wall.x && mouseX <= wall.x + wall.width &&
-                mouseY >= wall.y && mouseY <= wall.y + wall.height) {
-                clickedElement = "walls";
-                break;
-            }
+        if (grid[Math.floor(mouseX / cellSize)][Math.floor(mouseY / cellSize)].color === "#ccc") {
+            console.log("Clicked coordinates: X =", mouseX, ", Y =", mouseY, " Coordenadas: (", Math.floor(mouseX / cellSize), ",", Math.floor(mouseY / cellSize), ")");
+            console.log(Math.floor(mouseY / cellSize));
+            drawElements();
+            changeCellColor(Math.floor(mouseX / cellSize), Math.floor(mouseY / cellSize), "red")
         }
-
-        // Check if clicked on door
-        if (mouseX >= door.x && mouseX <= door.x + door.width &&
-            mouseY >= door.y && mouseY <= door.y + door.height) {
-            clickedElement = "door";
-        }
-
-        // Check if clicked on windows
-        for (let window of windows.positions) {
-            if (mouseX >= window.x && mouseX <= window.x + window.width &&
-                mouseY >= window.y && mouseY <= window.y + window.height) {
-                clickedElement = "windows";
-                break;
-            }
-        }
-
-        switch (clickedElement) {
-            case "walls":
-                console.log("Clicked on a wall.");
-                break;
-            case "door":
-                console.log("Clicked on the door.");
-                break;
-            case "windows":
-                console.log("Clicked on a window.");
-                break;
-            default:
-                console.log("Clicked inside the room." + clickedElement);
-                clickable = true;
-                break;
-        }
-
-        drawElements();
     });
 
-    console.log("Initial points array:", initial_points);
-
     document.getElementById("windows").addEventListener("change", function () {
-        if (document.getElementById("windows").checked) {
             windowColor = windowColor === "cyan" ? "#1754c4" : "cyan";
-            console.log("Updated")
+            windows.color = windowColor
             drawElements();
-        }
     });
 };
