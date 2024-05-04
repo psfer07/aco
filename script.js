@@ -25,13 +25,13 @@ window.onload = function () {
     function drawGrid() {
         paint.strokeStyle = "#aaa";
         paint.beginPath();
-        for (let x = 0; x <= canvas.width; x += cellSize) {
+        for (let x = 2 * cellSize; x <= gridSize; x += cellSize) {
             paint.moveTo(x, 0);
-            paint.lineTo(x, canvas.height);
+            paint.lineTo(x, gridSize);
         }
-        for (let y = 0; y <= canvas.height; y += cellSize) {
+        for (let y = 2 * cellSize; y <= gridSize; y += cellSize) {
             paint.moveTo(0, y);
-            paint.lineTo(canvas.width, y);
+            paint.lineTo(gridSize, y);
         }
         paint.stroke();
     }
