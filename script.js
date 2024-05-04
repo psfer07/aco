@@ -52,7 +52,7 @@ window.onload = function () {
     }
     function drawElements() {
         paint.clearRect(0, 0, canvas.width, canvas.height);
-        show_grid ? drawGrid(): false;
+        show_grid ? drawGrid() : false;
         for (const wall of walls.horz.positions) {
             changeCellColor([wall.x, wall.x + walls.horz.width - 1], [wall.y, wall.y + walls.horz.height - 1], walls.color);
         }
@@ -110,10 +110,9 @@ window.onload = function () {
 
         if (grid[Math.floor(mouseX / cellSize)][Math.floor(mouseY / cellSize)].color === "#ccc") {
             console.log("Clicked coordinates: X =", mouseX, ", Y =", mouseY, " Coordenadas: (", Math.floor(mouseX / cellSize), ",", Math.floor(mouseY / cellSize), ")");
-            console.log(Math.floor(mouseY / cellSize));
             drawElements();
             changeCellColor(Math.floor(mouseX / cellSize), Math.floor(mouseY / cellSize), "red")
-        }
+        } else { alert("No puedes empezar ahí. Haz clic dentro de la habitación") }
     });
 
     document.getElementById("windows").addEventListener("change", function () {
