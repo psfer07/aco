@@ -12,10 +12,7 @@ window.onload = function () {
     function createGrid() {
         const grid = [];
         const properties = {
-            alpha: undefined,
-            beta: undefined,
-            gamma: undefined,
-            color: undefined
+            color: "#ccc"
         };
         for (let x = 0; x < gridSize; x++) {
             const cols = [];
@@ -95,7 +92,6 @@ window.onload = function () {
             { x: 0, y: gridSize * 0.75 }
         ]
     }
-
     const door = {
         color: "brown",
         x: gridSize * 0.98,
@@ -162,17 +158,6 @@ window.onload = function () {
 
     console.log("Initial points array:", initial_points);
 
-    const startButton = document.getElementById("start");
-
-    startButton.addEventListener("click", function () {
-        if (initial_points.length === 0) {
-            console.log("The array is empty.");
-        } else {
-            console.log("The array is not empty.");
-        }
-    });
-
-
     document.getElementById("windows").addEventListener("change", function () {
         if (document.getElementById("windows").checked) {
             windowColor = windowColor === "cyan" ? "#1754c4" : "cyan";
@@ -180,5 +165,4 @@ window.onload = function () {
             drawElements();
         }
     });
-
 };
