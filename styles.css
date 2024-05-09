@@ -4,8 +4,9 @@ header {
     box-shadow: 14px 8px 30px 3px #000000;
     color: #fff;
     text-align: center;
-    padding: 1px;
-    width: 33vh;
+    margin: 0 auto;
+    padding: 15px;
+    width: 90vh;
 }
 canvas {
     display: block;
