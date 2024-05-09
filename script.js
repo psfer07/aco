@@ -1,6 +1,8 @@
 window.onload = function () {
     const canvas = document.getElementById("aco_render");
     const paint = canvas.getContext("2d");
+    const windowsCheckbox = document.getElementById("windows");
+    const show_gridCheckbox = document.getElementById("show_grid");
     const cellSize = 6;
     const gridSize = 100;
     let windowColor = "cyan";
@@ -110,6 +112,7 @@ window.onload = function () {
         height: gridSize * 0.1
     }
     drawElements();
+
     let prevRedDotX = null;
     let prevRedDotY = null;
     canvas.addEventListener("click", function (event) {
@@ -142,18 +145,23 @@ window.onload = function () {
                 break;
         }
     });
-    document.getElementById("windows").addEventListener("change", function () {
+    windowsCheckbox.addEventListener("change", function () {
         windowColor = windowColor === "cyan" ? "#1754c4" : "cyan";
         windows.color = windowColor
         drawElements();
 
     });
-    document.getElementById("show_grid").addEventListener("change", function () {
+    show_gridCheckbox.addEventListener("change", function () {
         show_grid = !show_grid
         drawElements();
     });
     document.getElementById("start").addEventListener("click", function () {
-        HasAcoStarted = true;
-        start_aco(prevRedDotX, prevRedDotY);
+        if (prevRedDotX, prevRedDotY != null) {
+            HasAcoStarted = true;
+            start_aco(prevRedDotX, prevRedDotY);
+        }
+    });
+    document.getElementById("reset").addEventListener("click", function () {
+        location.reload();
     });
 };
