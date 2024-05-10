@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ACO Simulator</title>
+  <title>Buscador de rutas de escape</title>
   <link rel="stylesheet" href="styles.css">
   <script src="script.js"></script>
 </head>
@@ -12,7 +12,9 @@
 <body>
   <header>Simulador de encontrar la ruta óptima de escape</header>
   <br>
-  <canvas id="aco_render"></canvas>
+  <canvas id="canvas_render"></canvas>
+  <br>
+  <br>
   <p>Habilitar ventanas como salida</p>
   <label id="windows" class="switch">
     <input type="checkbox" name="Change window state" checked>
@@ -21,6 +23,11 @@
   <p>Mostrar malla</p>
   <label id="show_grid" class="switch">
     <input type="checkbox" name="Change grid view state" checked>
+    <span class="slider"></span>
+  </label>
+  <p>Mostrar obstáculos</p>
+  <label id="show_obstacles" class="switch">
+    <input type="checkbox" name="Enable or disable obstacles on the space" checked>
     <span class="slider"></span>
   </label>
   <br>

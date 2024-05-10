@@ -1,12 +1,14 @@
 window.onload = function () {
-    const canvas = document.getElementById("aco_render");
+    const canvas = document.getElementById("canvas_render");
     const paint = canvas.getContext("2d");
     const windowsCheckbox = document.getElementById("windows");
     const show_gridCheckbox = document.getElementById("show_grid");
-    const cellSize = 6;
+    const show_obstaclesCheckbox = document.getElementById("show_obstacles");
+    const cellSize = 8;
     const gridSize = 100;
+    let HasSimStarted = false;
     let windowColor = "cyan";
-    let HasAcoStarted = false
+
     let grid = createGrid()
     canvas.width = gridSize * cellSize;
     canvas.height = gridSize * cellSize;
@@ -39,6 +41,22 @@ window.onload = function () {
         }
         paint.stroke();
     }
+    function drawObstacles() {
+        // for (const table of Object.values(obstacles.tables)) {
+        //     const { sectors, margins } = table;
+        //     const sectorWidth = (table.width - margins.marginsector * (sectors.cols - 1)) / sectors.cols;
+        //     const sectorHeight = (table.height - margins.marginsector * (sectors.rows - 1)) / sectors.rows;
+
+        //     for (let row = 0; row < sectors.rows; row++) {
+        //         for (let col = 0; col < sectors.cols; col++) {
+        //             const sectorX = table.x + col * (sectorWidth + margins.marginsector) + margins.marginX;
+        //             const sectorY = table.y + row * (sectorHeight + margins.marginsector) + margins.marginY;
+
+        //             setColor([sectorX, sectorX + sectorWidth - 1], [sectorY, sectorY + sectorHeight - 1], table.color);
+        //         }
+        //     }
+        // }
+    }
     function setColor(x, y, color) {
         const X = Array.isArray(x) ? x[0] : x;
         const endX = Array.isArray(x) ? x[1] : x;
@@ -70,9 +88,7 @@ window.onload = function () {
             }
         }
         show_grid ? drawGrid() : false;
-    }
-    function start_aco(initialX, initialY) {
-        console.log(initialX, initialY)
+        // show_obstacles ? drawObstacles() : false;
     }
 
     const walls = {
@@ -111,12 +127,29 @@ window.onload = function () {
         width: gridSize * 0.02,
         height: gridSize * 0.1
     }
+    const obstacles = {
+        tables: {
+            width: gridSize * 0.05,
+            height: gridSize * 0.03,
+            color: "brown",
+            sectors: {
+                count: 3,
+                rows: 5,
+                cols: 2
+            },
+            margins: {
+                marginX: gridSize * 0.01,
+                marginY: gridSize * 0.02,
+                marginsector: gridSize * 0.1
+            }
+        }
+    }
     drawElements();
 
     let prevRedDotX = null;
     let prevRedDotY = null;
     canvas.addEventListener("click", function (event) {
-        if (HasAcoStarted) { return; }
+        if (HasSimStarted) { return; }
         const rect = canvas.getBoundingClientRect();
         const mouseX = event.clientX - rect.left;
         const mouseY = event.clientY - rect.top;
@@ -146,7 +179,7 @@ window.onload = function () {
         }
     });
     windowsCheckbox.addEventListener("change", function () {
-        windowColor = windowColor === "cyan" ? "#1754c4" : "cyan";
+        windowColor = windowColor === "cyan" ? "#2d2d2d" : "cyan";
         windows.color = windowColor
         drawElements();
 
@@ -155,10 +188,13 @@ window.onload = function () {
         show_grid = !show_grid
         drawElements();
     });
+    show_obstaclesCheckbox.addEventListener("change", function () {
+        show_obstacles = !show_obstacles
+        drawElements();
+    });
     document.getElementById("start").addEventListener("click", function () {
         if (prevRedDotX, prevRedDotY != null) {
-            HasAcoStarted = true;
-            start_aco(prevRedDotX, prevRedDotY);
+            HasSimStarted = true;
         }
     });
     document.getElementById("reset").addEventListener("click", function () {
