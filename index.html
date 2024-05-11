@@ -10,28 +10,33 @@
 </head>
 
 <body>
-  <header>Simulador de encontrar la ruta óptima de escape</header>
+  <div style="display: flex">
+    <div style="margin-top: 30vh">
+      <p>Habilitar ventanas como salida</p>
+      <label class="switch">
+        <input id="windows" type="checkbox" name="Change window state" checked>
+        <span class="slider"></span>
+      </label>
+      <p>Mostrar malla</p>
+      <label class="switch">
+        <input id="show_grid" type="checkbox" name="Change grid view state" checked>
+        <span class="slider"></span>
+      </label>
+      <p>Mostrar obstáculos</p>
+      <label class="switch">
+        <input id="show_obstacles" type="checkbox" name="Enable or disable obstacles on the space" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div style="margin: 0 auto">
+      <header>Simulador de encontrar la ruta de escape óptima</header>
+      <canvas id="canvas_render"></canvas>
+      <div style="margin-top: 1vh; margin-left: 24vh;">
+        <button class="disabled "id="start">Establecer punto de partida</button>
+        <button class="reset" id="reset">Reiniciar simulador</button>
+      </div>
+    </div>
+  </div>
   <br>
-  <canvas id="canvas_render"></canvas>
-  <br>
-  <br>
-  <p>Habilitar ventanas como salida</p>
-  <label id="windows" class="switch">
-    <input id="windows" type="checkbox" name="Change window state" checked>
-    <span class="slider"></span>
-  </label>
-  <p>Mostrar malla</p>
-  <label class="switch">
-    <input id="show_grid" type="checkbox" name="Change grid view state" checked>
-    <span class="slider"></span>
-  </label>
-  <p>Mostrar obstáculos</p>
-  <label id="show_obstacles" class="switch">
-    <input id="show_obstacles" type="checkbox" name="Enable or disable obstacles on the space" checked>
-    <span class="slider"></span>
-  </label>
-  <br>
-  <br>
-  <button id="start">Establecer punto de partida</button>
-  <button id="reset">Reiniciar simulador</button>
 </body>

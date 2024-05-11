@@ -6,11 +6,11 @@ header {
     text-align: center;
     margin: 0 auto;
     padding: 15px;
-    width: 90vh;
+    width: auto;
 }
 canvas {
     display: block;
-    margin: 0 auto;
+    margin-top: 1vh;
     background-color: #ccc;
 }
 .switch {
@@ -50,4 +50,30 @@ input:checked + .slider {
 
 input:checked + .slider:before {
   transform: translateX(26px);
+}
+button {
+  background-color: white;
+  color: black;
+  border: 2px solid green;
+  border-radius: 5px;
+  transition-duration: 0.4s;
+}
+button:hover {
+  background-color: green;
+  color: white;
+}
+.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.reset {
+  background-color: white;
+  color: black;
+  border: 2px solid #2d2d2d;
+  border-radius: 5px;
+  transition-duration: 0.4s;
+}
+.reset:hover {
+  background-color: #2d2d2d;
+  color: white;
 }
