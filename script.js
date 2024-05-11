@@ -30,33 +30,17 @@ window.onload = function () {
     }
     function drawGrid() {
         paint.strokeStyle = "#aaa";
+        paint.lineWidth = 0.3;
         paint.beginPath();
-        for (let x = 2 * cellSize; x <= canvas.width - 2 * cellSize; x += cellSize) {
-            paint.moveTo(x, 2 * cellSize);
-            paint.lineTo(x, canvas.height - 2 * cellSize);
-        }
-        for (let y = 2 * cellSize; y <= canvas.height - 2 * cellSize; y += cellSize) {
-            paint.moveTo(2 * cellSize, y);
-            paint.lineTo(canvas.width - 2 * cellSize, y);
+        for (let i = 0; i <= Math.max(canvas.width, canvas.height) - 0; i += cellSize) {
+            paint.moveTo(0, i);
+            paint.lineTo(canvas.width - 0, i);
+            paint.moveTo(i, 0);
+            paint.lineTo(i, canvas.height - 0);
         }
         paint.stroke();
     }
-    function drawObstacles() {
-        // for (const table of Object.values(obstacles.tables)) {
-        //     const { sectors, margins } = table;
-        //     const sectorWidth = (table.width - margins.marginsector * (sectors.cols - 1)) / sectors.cols;
-        //     const sectorHeight = (table.height - margins.marginsector * (sectors.rows - 1)) / sectors.rows;
 
-        //     for (let row = 0; row < sectors.rows; row++) {
-        //         for (let col = 0; col < sectors.cols; col++) {
-        //             const sectorX = table.x + col * (sectorWidth + margins.marginsector) + margins.marginX;
-        //             const sectorY = table.y + row * (sectorHeight + margins.marginsector) + margins.marginY;
-
-        //             setColor([sectorX, sectorX + sectorWidth - 1], [sectorY, sectorY + sectorHeight - 1], table.color);
-        //         }
-        //     }
-        // }
-    }
     function setColor(x, y, color) {
         const X = Array.isArray(x) ? x[0] : x;
         const endX = Array.isArray(x) ? x[1] : x;
@@ -87,8 +71,20 @@ window.onload = function () {
                 paint.fillRect(i * cellSize, j * cellSize, cellSize, cellSize);
             }
         }
+        // Pillars
+        for (const pillar of obstacles.pillars.positions) {
+            setColor([pillar.x, pillar.x + obstacles.pillars.width - 1], [pillar.y, pillar.y + obstacles.pillars.height - 1], obstacles.pillars.color);
+        }
+        // Teacher's table
+        const Ttable = obstacles.teacher_table
+        setColor([Ttable.x, Ttable.x + Ttable.width - 1], [Ttable.y, Ttable.y + Ttable.height - 1], Ttable.color);
+        for (let i = 0; i < grid.length; i++) {
+            for (let j = 0; j < grid[i].length; j++) {
+                paint.fillStyle = grid[i][j].color;
+                paint.fillRect(i * cellSize, j * cellSize, cellSize, cellSize);
+            }
+        }
         show_grid ? drawGrid() : false;
-        // show_obstacles ? drawObstacles() : false;
     }
 
     const walls = {
@@ -116,8 +112,8 @@ window.onload = function () {
         color: windowColor,
         positions: [
             { x: 0, y: gridSize * 0.1 },
-            { x: 0, y: gridSize * 0.42 },
-            { x: 0, y: gridSize * 0.75 }
+            { x: 0, y: gridSize * 0.4 },
+            { x: 0, y: gridSize * 0.7 }
         ]
     }
     const door = {
@@ -128,14 +124,34 @@ window.onload = function () {
         height: gridSize * 0.1
     }
     const obstacles = {
+        pillars: {
+            color: "#2d2d2d",
+            width: gridSize * 0.03,
+            height: gridSize * 0.1,
+            positions: [
+                { x: gridSize * 0.02, y: gridSize * 0.3 },
+                { x: gridSize * 0.02, y: gridSize * 0.6 },
+                { x: gridSize * 0.95, y: gridSize * 0.3 },
+                { x: gridSize * 0.95, y: gridSize * 0.4 },
+                { x: gridSize * 0.95, y: gridSize * 0.5 },
+                { x: gridSize * 0.95, y: gridSize * 0.6 }
+            ]
+        },
+        teacher_table: {
+            color: "#916242",
+            x: gridSize * 0.05,
+            y: gridSize * 0.1,
+            width: gridSize * 0.3,
+            height: gridSize * 0.1
+        },
         tables: {
             width: gridSize * 0.05,
             height: gridSize * 0.03,
             color: "brown",
             sectors: {
                 count: 3,
-                rows: 5,
-                cols: 2
+                cols: 2,
+                rows: 5
             },
             margins: {
                 marginX: gridSize * 0.01,
@@ -174,7 +190,7 @@ window.onload = function () {
                 alert("Por favor, seleccione otra ubicación o pulse el botón de marcar el punto de partida")
                 break;
             default:
-                alert("No puedes empezar ahí. Haz clic dentro de la habitación");
+                alert("No puedes empezar ahí. Haz clic en el suelo de la habitación");
                 break;
         }
     });
@@ -195,7 +211,7 @@ window.onload = function () {
     document.getElementById("start").addEventListener("click", function () {
         if (prevRedDotX, prevRedDotY != null) {
             HasSimStarted = true;
-        }
+        } else { alert("Antes de empezar la simulación, selecciona un punto de partida") }
     });
     document.getElementById("reset").addEventListener("click", function () {
         location.reload();
