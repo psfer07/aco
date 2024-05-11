@@ -4,6 +4,7 @@ window.onload = function () {
     const windowsCheckbox = document.getElementById("windows");
     const show_gridCheckbox = document.getElementById("show_grid");
     const show_obstaclesCheckbox = document.getElementById("show_obstacles");
+    const startButton = document.getElementById("start");
     const cellSize = 8;
     const gridSize = 100;
     let HasSimStarted = false;
@@ -32,15 +33,36 @@ window.onload = function () {
         paint.strokeStyle = "#aaa";
         paint.lineWidth = 0.3;
         paint.beginPath();
-        for (let i = 0; i <= Math.max(canvas.width, canvas.height) - 0; i += cellSize) {
+        for (let i = 0; i <= Math.max(canvas.width, canvas.height); i += cellSize) {
             paint.moveTo(0, i);
-            paint.lineTo(canvas.width - 0, i);
+            paint.lineTo(canvas.width, i);
             paint.moveTo(i, 0);
-            paint.lineTo(i, canvas.height - 0);
+            paint.lineTo(i, canvas.height);
         }
         paint.stroke();
     }
-
+    function drawObstacles() {
+        // Pillars
+        for (const pillar of obstacles.pillars.positions) {
+            setColor([pillar.x, pillar.x + obstacles.pillars.width - 1], [pillar.y, pillar.y + obstacles.pillars.height - 1], obstacles.pillars.color);
+        }
+        // Teacher's table
+        const Ttable = obstacles.teacher_table
+        setColor([Ttable.x, Ttable.x + Ttable.width - 1], [Ttable.y, Ttable.y + Ttable.height - 1], Ttable.color);
+    }
+    function drawRoom() {
+        setColor([2, gridSize - 3], [2, gridSize - 3], "#ccc");
+        for (const wall of walls.horz.positions) {
+            setColor([wall.x, wall.x + walls.horz.width - 1], [wall.y, wall.y + walls.horz.height - 1], walls.color);
+        }
+        for (const wall of walls.vert.positions) {
+            setColor([wall.x, wall.x + walls.vert.width - 1], [wall.y, wall.y + walls.vert.height - 1], walls.color);
+        }
+        for (const window of windows.positions) {
+            setColor([window.x, window.x + windows.width - 1], [window.y, window.y + windows.height - 1], windows.color);
+        }
+        setColor([door.x, door.x + door.width - 1], [door.y, door.y + door.height - 1], door.color);
+    }
     function setColor(x, y, color) {
         const X = Array.isArray(x) ? x[0] : x;
         const endX = Array.isArray(x) ? x[1] : x;
@@ -53,38 +75,17 @@ window.onload = function () {
             }
         }
     }
-    function drawElements() {
-        paint.clearRect(0, 0, canvas.width, canvas.height);
-        for (const wall of walls.horz.positions) {
-            setColor([wall.x, wall.x + walls.horz.width - 1], [wall.y, wall.y + walls.horz.height - 1], walls.color);
-        }
-        for (const wall of walls.vert.positions) {
-            setColor([wall.x, wall.x + walls.vert.width - 1], [wall.y, wall.y + walls.vert.height - 1], walls.color);
-        }
-        for (const window of windows.positions) {
-            setColor([window.x, window.x + windows.width - 1], [window.y, window.y + windows.height - 1], windows.color);
-        }
-        setColor([door.x, door.x + door.width - 1], [door.y, door.y + door.height - 1], door.color);
+    function drawElements(dotX, dotY) {
+        drawRoom();
+        setColor(dotX, dotY, "red");
+        show_obstaclesCheckbox.checked ? drawObstacles() : false
         for (let i = 0; i < grid.length; i++) {
             for (let j = 0; j < grid[i].length; j++) {
                 paint.fillStyle = grid[i][j].color;
                 paint.fillRect(i * cellSize, j * cellSize, cellSize, cellSize);
             }
         }
-        // Pillars
-        for (const pillar of obstacles.pillars.positions) {
-            setColor([pillar.x, pillar.x + obstacles.pillars.width - 1], [pillar.y, pillar.y + obstacles.pillars.height - 1], obstacles.pillars.color);
-        }
-        // Teacher's table
-        const Ttable = obstacles.teacher_table
-        setColor([Ttable.x, Ttable.x + Ttable.width - 1], [Ttable.y, Ttable.y + Ttable.height - 1], Ttable.color);
-        for (let i = 0; i < grid.length; i++) {
-            for (let j = 0; j < grid[i].length; j++) {
-                paint.fillStyle = grid[i][j].color;
-                paint.fillRect(i * cellSize, j * cellSize, cellSize, cellSize);
-            }
-        }
-        show_grid ? drawGrid() : false;
+        show_gridCheckbox.checked ? drawGrid() : false
     }
 
     const walls = {
@@ -143,21 +144,6 @@ window.onload = function () {
             y: gridSize * 0.1,
             width: gridSize * 0.3,
             height: gridSize * 0.1
-        },
-        tables: {
-            width: gridSize * 0.05,
-            height: gridSize * 0.03,
-            color: "brown",
-            sectors: {
-                count: 3,
-                cols: 2,
-                rows: 5
-            },
-            margins: {
-                marginX: gridSize * 0.01,
-                marginY: gridSize * 0.02,
-                marginsector: gridSize * 0.1
-            }
         }
     }
     drawElements();
@@ -166,6 +152,8 @@ window.onload = function () {
     let prevRedDotY = null;
     canvas.addEventListener("click", function (event) {
         if (HasSimStarted) { return; }
+        startButton.removeAttribute("disabled");
+        startButton.classList.remove("disabled");
         const rect = canvas.getBoundingClientRect();
         const mouseX = event.clientX - rect.left;
         const mouseY = event.clientY - rect.top;
@@ -175,14 +163,7 @@ window.onload = function () {
         switch (grid[cellX][cellY].color) {
             case "#ccc":
                 console.log("Clicked coordinates: X =", mouseX, ", Y =", mouseY, " Coordenadas: (", cellX, ",", cellY, ")");
-
-                if (prevRedDotX !== null && prevRedDotY !== null) {
-                    setColor(prevRedDotX, prevRedDotY, "#ccc");
-                }
-
-                setColor(cellX, cellY, "red");
-                drawElements();
-
+                drawElements(cellX, cellY);
                 prevRedDotX = cellX;
                 prevRedDotY = cellY;
                 break;
@@ -198,20 +179,15 @@ window.onload = function () {
         windowColor = windowColor === "cyan" ? "#2d2d2d" : "cyan";
         windows.color = windowColor
         drawElements();
-
     });
     show_gridCheckbox.addEventListener("change", function () {
-        show_grid = !show_grid
         drawElements();
     });
     show_obstaclesCheckbox.addEventListener("change", function () {
-        show_obstacles = !show_obstacles
         drawElements();
     });
-    document.getElementById("start").addEventListener("click", function () {
-        if (prevRedDotX, prevRedDotY != null) {
-            HasSimStarted = true;
-        } else { alert("Antes de empezar la simulación, selecciona un punto de partida") }
+    startButton.addEventListener("click", function () {
+        prevRedDotX, prevRedDotY ? HasSimStarted = true : false;
     });
     document.getElementById("reset").addEventListener("click", function () {
         location.reload();
