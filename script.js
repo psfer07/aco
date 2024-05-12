@@ -13,7 +13,6 @@ window.onload = function () {
     let grid = createGrid()
     canvas.width = gridSize * cellSize;
     canvas.height = gridSize * cellSize;
-    windowColor = "cyan"
 
     function createGrid() {
         const grid = [];
@@ -130,7 +129,7 @@ window.onload = function () {
         ]
     }
     const door = {
-        color: "brown",
+        color: "#02b200",
         x: gridSize * 0.98,
         y: gridSize * 0.85,
         width: gridSize * 0.02,
