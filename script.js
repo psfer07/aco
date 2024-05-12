@@ -49,6 +49,18 @@ window.onload = function () {
         // Teacher's table
         const Ttable = obstacles.teacher_table
         setColor([Ttable.x, Ttable.x + Ttable.width - 1], [Ttable.y, Ttable.y + Ttable.height - 1], Ttable.color);
+        // Tables
+        const table = obstacles.tables;
+        for (let sector = 0; sector < table.sectors.count; sector++) {
+            const sectorX = 3.3 * table.margins.marginsector * sector + table.margins.marginsector * 0.5;
+            for (let col = 0; col < table.sectors.cols; col++) {
+                const tableX = sectorX + col * (table.width + table.margins.marginX);
+                for (let row = 0; row < table.sectors.rows; row++) {
+                    const tableY = 25 + row * (table.margins.marginY + table.height);
+                    setColor([tableX, tableX + table.width], [tableY, tableY + table.height], table.color);
+                }
+            }
+        }
     }
     function drawRoom() {
         setColor([2, gridSize - 3], [2, gridSize - 3], "#ccc");
@@ -144,6 +156,21 @@ window.onload = function () {
             y: gridSize * 0.1,
             width: gridSize * 0.3,
             height: gridSize * 0.1
+        },
+        tables: {
+            width: gridSize * 0.1,
+            height: gridSize * 0.05,
+            color: "brown",
+            sectors: {
+                count: 3,
+                cols: 2,
+                rows: 5
+            },
+            margins: {
+                marginX: gridSize * 0.02,
+                marginY: gridSize * 0.1,
+                marginsector: gridSize * 0.1
+            }
         }
     }
     drawElements();
