@@ -1,38 +1,79 @@
 header {
     background-color: #2d2d2d;
     border-radius: 35px;
-    box-shadow: 14px 8px 24px 5px #000000;
+    box-shadow: 14px 8px 30px 3px #000000;
     color: #fff;
     text-align: center;
-    padding: 1px;
-    width: 33vh;
-}
-/* canvas {
-    display: block;
-    background-color: #ccc;
-    width: 100%;
-    height: 89vh;
-} */
-.room {
-    width: 70vh;
-    aspect-ratio: 1 / 1;
     margin: 0 auto;
+    padding: 15px;
+    width: auto;
+}
+canvas {
+    display: block;
+    margin-top: 1vh;
     background-color: #ccc;
-    position: relative;
 }
-.wall {
-    position: absolute;
-    background-color: #2d2d2d;
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
 }
-.door {
-    position: absolute;
-    width: 2%;
-    aspect-ratio: 1 / 1;
-    background-color: rgb(255, 255, 0);
+
+.slider {
+  position: absolute;
+  border-radius: 13px;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgb(255, 75, 75);
+  transition: .4s;
 }
-.window {
-    width: 2%;
-    aspect-ratio: 1 / 1;
-    position: absolute;
-    background-color: cyan;
+
+.slider:before {
+  position: absolute;
+  border-radius: 15px;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: lightgoldenrodyellow;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: green;
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+button {
+  background-color: white;
+  color: black;
+  border: 2px solid green;
+  border-radius: 5px;
+  transition-duration: 0.4s;
+}
+button:hover {
+  background-color: green;
+  color: white;
+}
+.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.reset {
+  background-color: white;
+  color: black;
+  border: 2px solid #2d2d2d;
+  border-radius: 5px;
+  transition-duration: 0.4s;
+}
+.reset:hover {
+  background-color: #2d2d2d;
+  color: white;
 }

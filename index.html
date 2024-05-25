@@ -2,25 +2,41 @@
 <html lang="es">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ACO Simulator</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Buscador de rutas de escape</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="script.js"></script>
 </head>
 
 <body>
-    <div class="room">
-        <!-- Bordes -->
-        <div class="wall" style="top: 0; left: 0; width: 100%; height: 2%;"></div>
-        <div class="wall" style="top: 0; right: 0; width: 2%; height: 90%;"></div>
-        <div class="wall" style="bottom: 0; left: 0; width: 100%; height: 2%;"></div>
-        <div class="wall" style="top: 0; left: 0; width: 2%; height: 100%;"></div>
-
-        <div class="door" style="top: 90%; left: 98%; height: 8%;"></div>
-        <div class="window" style="top: 5%; left: 0; height: 25%;"></div>
-        <div class="window" style="top: 35%; left: 0; height: 25%;"></div>
-        <div class="window" style="top: 70%; left: 0; height: 25%;"></div>
+  <div style="display: flex">
+    <div style="margin-top: 30vh">
+      <p>Habilitar ventanas como salida</p>
+      <label class="switch">
+        <input id="windows" type="checkbox" checked>
+        <span class="slider"></span>
+      </label>
+      <p>Mostrar obstáculos</p>
+      <label class="switch">
+        <input id="show_obstacles" type="checkbox">
+        <span class="slider"></span>
+      </label>
+      <p>Mostrar malla</p>
+      <label class="switch">
+        <input id="show_grid" type="checkbox">
+        <span class="slider"></span>
+      </label>
     </div>
-</body>
 
-</html>
+    <div style="margin: 0 auto">
+      <header>Simulador para encontrar la ruta de escape óptima</header>
+      <canvas id="canvas_render"></canvas>
+      <div style="margin-top: 1vh; margin-left: 24vh;">
+        <button class="disabled "id="start">Establecer punto de partida</button>
+        <button class="reset" id="reset">Reiniciar simulador</button>
+      </div>
+    </div>
+  </div>
+  <br>
+</body>
