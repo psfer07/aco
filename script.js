@@ -5,16 +5,17 @@ window.onload = function () {
     const show_gridCheckbox = document.getElementById("show_grid");
     const show_obstaclesCheckbox = document.getElementById("show_obstacles");
     const startButton = document.getElementById("start");
-    const cellSize = 8;
-    const gridSize = 100;
+    const cellSize = 7;
+    const gridHeight = 110;
+    const gridWidth = 100;
     const ants = 10;
     const rho = 0.1;
     let HasSimStarted = false;
     let windowColor = "cyan";
 
     let grid = createGrid()
-    canvas.width = gridSize * cellSize;
-    canvas.height = gridSize * cellSize;
+    canvas.width = gridWidth * cellSize;
+    canvas.height = gridHeight * cellSize;
 
     function createGrid() {
         const grid = [];
@@ -22,9 +23,9 @@ window.onload = function () {
             color: "#ccc",
             pheromone: 1.0
         };
-        for (let x = 0; x < gridSize; x++) {
+        for (let x = 0; x < gridWidth; x++) {
             const cols = [];
-            for (let y = 0; y < gridSize; y++) {
+            for (let y = 0; y < gridHeight; y++) {
                 cols.push({ ...properties });
             }
             grid.push(cols);
@@ -65,7 +66,7 @@ window.onload = function () {
         }
     }
     function drawRoom() {
-        setColor([2, gridSize - 3], [2, gridSize - 3], "#ccc");
+        setColor([2, gridWidth - 3], [2, gridHeight - 3], "#ccc");
         for (const wall of walls.horz.positions) {
             setColor([wall.x, wall.x + walls.horz.width - 1], [wall.y, wall.y + walls.horz.height - 1], walls.color);
         }
@@ -102,8 +103,8 @@ window.onload = function () {
         show_gridCheckbox.checked ? drawGrid() : false
     }
     function updatePheromone() {
-        for (let i = 0; i < gridSize; i++) {
-            for (let j = 0; j < gridSize; j++) {
+        for (let i = 0; i < gridWidth; i++) {
+            for (let j = 0; j < gridHeight; j++) {
                 grid[i][j].pheromone = (1 - rho) * grid[i][j].pheromone
             }
         }
@@ -115,63 +116,63 @@ window.onload = function () {
     const walls = {
         color: "#2d2d2d",
         horz: {
-            width: gridSize,
-            height: gridSize * 0.02,
+            width: gridWidth,
+            height: 2,
             positions: [
                 { x: 0, y: 0 },
-                { x: 0, y: gridSize * 0.98 }
+                { x: 0, y: gridHeight - 2 }
             ]
         },
         vert: {
-            width: gridSize * 0.02,
-            height: gridSize,
+            width: 2,
+            height: gridHeight,
             positions: [
                 { x: 0, y: 0 },
-                { x: gridSize * 0.98, y: 0 }
+                { x: gridWidth - 2, y: 0 }
             ]
         },
     }
     const windows = {
-        width: gridSize * 0.02,
-        height: gridSize * 0.2,
+        width: 2,
+        height: 20,
         color: windowColor,
         positions: [
-            { x: 0, y: gridSize * 0.1 },
-            { x: 0, y: gridSize * 0.4 },
-            { x: 0, y: gridSize * 0.7 }
+            { x: 0, y: 10 },
+            { x: 0, y: 45 },
+            { x: 0, y: 80 }
         ]
     }
     const door = {
         color: "#02b200",
-        x: gridSize * 0.98,
-        y: gridSize * 0.85,
-        width: gridSize * 0.02,
-        height: gridSize * 0.1
+        x: gridWidth - 2,
+        y: 90,
+        width: 2,
+        height: 15
     }
     const obstacles = {
         pillars: {
             color: "#2d2d2d",
-            width: gridSize * 0.03,
-            height: gridSize * 0.1,
+            width: 3,
+            height: 10,
             positions: [
-                { x: gridSize * 0.02, y: gridSize * 0.3 },
-                { x: gridSize * 0.02, y: gridSize * 0.6 },
-                { x: gridSize * 0.95, y: gridSize * 0.3 },
-                { x: gridSize * 0.95, y: gridSize * 0.4 },
-                { x: gridSize * 0.95, y: gridSize * 0.5 },
-                { x: gridSize * 0.95, y: gridSize * 0.6 }
+                { x: 2, y: 30 },
+                { x: 2, y: 60 },
+                { x: gridWidth - 5, y: 30 },
+                { x: gridWidth - 5, y: 40 },
+                { x: gridWidth - 5, y: 50 },
+                { x: gridWidth - 5, y: 60 }
             ]
         },
         teacher_table: {
             color: "#916242",
-            x: gridSize * 0.05,
-            y: gridSize * 0.1,
-            width: gridSize * 0.3,
-            height: gridSize * 0.1
+            x: 5,
+            y: 10,
+            width: 30,
+            height: 10
         },
         tables: {
-            width: gridSize * 0.1,
-            height: gridSize * 0.05,
+            width: 10,
+            height: 5,
             color: "brown",
             sectors: {
                 count: 3,
@@ -179,9 +180,9 @@ window.onload = function () {
                 rows: 5
             },
             margins: {
-                marginX: gridSize * 0.02,
-                marginY: gridSize * 0.1,
-                marginsector: gridSize * 0.1
+                marginX: 2,
+                marginY: 10,
+                marginsector: 10
             }
         }
     }
