@@ -7,6 +7,8 @@ window.onload = function () {
     const startButton = document.getElementById("start");
     const cellSize = 8;
     const gridSize = 100;
+    const ants = 10;
+    const rho = 0.1;
     let HasSimStarted = false;
     let windowColor = "cyan";
 
@@ -17,7 +19,8 @@ window.onload = function () {
     function createGrid() {
         const grid = [];
         const properties = {
-            color: "#ccc"
+            color: "#ccc",
+            pheromone: 1.0
         };
         for (let x = 0; x < gridSize; x++) {
             const cols = [];
@@ -97,6 +100,16 @@ window.onload = function () {
             }
         }
         show_gridCheckbox.checked ? drawGrid() : false
+    }
+    function updatePheromone() {
+        for (let i = 0; i < gridSize; i++) {
+            for (let j = 0; j < gridSize; j++) {
+                grid[i][j].pheromone = (1 - rho) * grid[i][j].pheromone
+            }
+        }
+    }
+    function start() {
+
     }
 
     const walls = {
@@ -213,7 +226,8 @@ window.onload = function () {
         drawElements();
     });
     startButton.addEventListener("click", function () {
-        prevRedDotX, prevRedDotY ? HasSimStarted = true : false;
+        HasSimStarted = prevRedDotX, prevRedDotY ? true : false;
+        start()
     });
     document.getElementById("reset").addEventListener("click", function () {
         location.reload();
