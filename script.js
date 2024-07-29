@@ -113,6 +113,79 @@ window.onload = function () {
 
     }
 
+    const walls = {
+        color: "#2d2d2d",
+        horz: {
+            width: gridWidth,
+            height: 2,
+            positions: [
+                { x: 0, y: 0 },
+                { x: 0, y: gridHeight - 2 }
+            ]
+        },
+        vert: {
+            width: 2,
+            height: gridHeight,
+            positions: [
+                { x: 0, y: 0 },
+                { x: gridWidth - 2, y: 0 }
+            ]
+        },
+    }
+    const windows = {
+        width: 2,
+        height: 20,
+        color: windowColor,
+        positions: [
+            { x: 0, y: 10 },
+            { x: 0, y: 45 },
+            { x: 0, y: 80 }
+        ]
+    }
+    const door = {
+        color: "#02b200",
+        x: gridWidth - 2,
+        y: 90,
+        width: 2,
+        height: 15
+    }
+    const obstacles = {
+        pillars: {
+            color: "#2d2d2d",
+            width: 3,
+            height: 15,
+            positions: [
+                { x: 2, y: 30 },
+                { x: 2, y: 65 },
+                { x: gridWidth - 5, y: 30 },
+                { x: gridWidth - 5, y: 41 },
+                { x: gridWidth - 5, y: 53 },
+                { x: gridWidth - 5, y: 65 }
+            ]
+        },
+        teacher_table: {
+            color: "#916242",
+            x: 5,
+            y: 10,
+            width: 30,
+            height: 10
+        },
+        tables: {
+            width: 10,
+            height: 5,
+            color: "brown",
+            sectors: {
+                count: 3,
+                cols: 2,
+                rows: 5
+            },
+            margins: {
+                marginX: 2,
+                marginY: 10,
+                marginsector: 10
+            }
+        }
+    }
     drawElements();
 
     let prevRedDotX = null;
