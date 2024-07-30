@@ -102,7 +102,7 @@ window.onload = function () {
         }
         show_gridCheckbox.checked ? drawGrid() : false
     }
-    function detectPoint(color) {
+    function getCoords(color) {
         for (let x = 0; x < gridWidth; x++) {
             for (let y = 0; y < gridHeight; y++) {
                 if (grid[x][y].color === color) {
@@ -120,7 +120,8 @@ window.onload = function () {
         }
     }
     function start() {
-
+    // Set starting point
+    startingPoint = { x: prevRedDotX, y: prevRedDotY };
     }
 
     const walls = {
