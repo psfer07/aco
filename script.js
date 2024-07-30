@@ -123,7 +123,8 @@ window.onload = function () {
     }
     function start() {
     // Set all the available exits
-    exits = getCoords("cyan");
+    exits = getCoords("cyan"); // Windows
+    exits = getCoords("#02b200"); // Door
     }
 
     const walls = {
