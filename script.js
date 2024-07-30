@@ -103,16 +103,17 @@ window.onload = function () {
         show_gridCheckbox.checked ? drawGrid() : false
     }
     function getCoords(color) {
+        let cells = [];
         for (let x = 0; x < gridWidth; x++) {
             for (let y = 0; y < gridHeight; y++) {
                 if (grid[x][y].color === color) {
-                    return { x: x, y: y };
+                    cells.push({ x: x, y: y });
                 }
             }
         }
-        return null;
+        return cells;
     }
-    function updatePheromone() {
+    function pheromoneEvaporation() {
         for (let i = 0; i < gridWidth; i++) {
             for (let j = 0; j < gridHeight; j++) {
                 grid[i][j].pheromone = (1 - rho) * grid[i][j].pheromone
@@ -121,7 +122,8 @@ window.onload = function () {
     }
     function start() {
     // Set starting point
-    startingPoint = { x: prevRedDotX, y: prevRedDotY };
+    startingPoint = getCoords("red");
+    exits = getCoords("cyan");
     }
 
     const walls = {
