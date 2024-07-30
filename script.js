@@ -202,7 +202,6 @@ window.onload = function () {
     drawElements();
 
     canvas.addEventListener("click", function (event) {
-        if (HasSimStarted) { return; }
         startButton.removeAttribute("disabled");
         startButton.classList.remove("disabled");
         const rect = canvas.getBoundingClientRect();
