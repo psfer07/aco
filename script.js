@@ -206,14 +206,12 @@ window.onload = function () {
         startButton.removeAttribute("disabled");
         startButton.classList.remove("disabled");
         const rect = canvas.getBoundingClientRect();
-        const mouseX = event.clientX - rect.left;
-        const mouseY = event.clientY - rect.top;
-        const cellX = Math.floor(mouseX / cellSize);
-        const cellY = Math.floor(mouseY / cellSize);
+        const cellX = Math.floor((event.clientX - rect.left) / cellSize);
+        const cellY = Math.floor((event.clientY - rect.top) / cellSize);
 
         switch (grid[cellX][cellY].color) {
             case "#ccc":
-                console.log("Clicked coordinates: X =", mouseX, ", Y =", mouseY, " Coordenadas: (", cellX, ",", cellY, ")");
+                console.log("Coordenadas: (", cellX, ",", cellY, ")");
                 drawElements(cellX, cellY);
                 startingPoint = {x: cellX, y: cellY}
                 break;
