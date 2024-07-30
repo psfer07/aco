@@ -12,15 +12,16 @@ window.onload = function () {
     const rho = 0.1;
     let HasSimStarted = false;
     let windowColor = "cyan";
-    let startingPoint = null
-
+    let startingPoint, exits = null
     let grid = createGrid()
+
+    // Set canvas size
     canvas.width = gridWidth * cellSize;
     canvas.height = gridHeight * cellSize;
 
     function createGrid() {
         const grid = [];
-        const properties = {
+        const properties = { // Each cell will have these properties by default
             color: "#ccc",
             pheromone: 1.0
         };
@@ -33,6 +34,7 @@ window.onload = function () {
         }
         return grid;
     }
+    // This is not the grid created by the createGrid function but the separator lines between cells
     function drawGrid() {
         paint.strokeStyle = "#aaa";
         paint.lineWidth = 0.3;
@@ -67,16 +69,20 @@ window.onload = function () {
         }
     }
     function drawRoom() {
+        // Floor
         setColor([2, gridWidth - 3], [2, gridHeight - 3], "#ccc");
+        // Walls
         for (const wall of walls.horz.positions) {
             setColor([wall.x, wall.x + walls.horz.width - 1], [wall.y, wall.y + walls.horz.height - 1], walls.color);
         }
         for (const wall of walls.vert.positions) {
             setColor([wall.x, wall.x + walls.vert.width - 1], [wall.y, wall.y + walls.vert.height - 1], walls.color);
         }
+        // Windows
         for (const window of windows.positions) {
             setColor([window.x, window.x + windows.width - 1], [window.y, window.y + windows.height - 1], windows.color);
         }
+        // Door
         setColor([door.x, door.x + door.width - 1], [door.y, door.y + door.height - 1], door.color);
     }
     function setColor(x, y, color) {
@@ -122,9 +128,8 @@ window.onload = function () {
         }
     }
     function start() {
-    // Set all the available exits
-    exits = getCoords("cyan"); // Windows
-    exits = getCoords("#02b200"); // Door
+    // Add cells from the windows and the door
+    exits = getCoords("cyan").concat(getCoords("#02b200"));
     }
 
     const walls = {
