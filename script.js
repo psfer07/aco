@@ -102,6 +102,16 @@ window.onload = function () {
         }
         show_gridCheckbox.checked ? drawGrid() : false
     }
+    function detectPoint(color) {
+        for (let x = 0; x < gridWidth; x++) {
+            for (let y = 0; y < gridHeight; y++) {
+                if (grid[x][y].color === color) {
+                    return { x: x, y: y };
+                }
+            }
+        }
+        return null;
+    }
     function updatePheromone() {
         for (let i = 0; i < gridWidth; i++) {
             for (let j = 0; j < gridHeight; j++) {
