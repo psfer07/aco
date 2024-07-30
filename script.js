@@ -12,6 +12,7 @@ window.onload = function () {
     const rho = 0.1;
     let HasSimStarted = false;
     let windowColor = "cyan";
+    let startingPoint = null
 
     let grid = createGrid()
     canvas.width = gridWidth * cellSize;
@@ -121,8 +122,7 @@ window.onload = function () {
         }
     }
     function start() {
-    // Set starting point
-    startingPoint = getCoords("red");
+    // Set all the available exits
     exits = getCoords("cyan");
     }
 
@@ -201,8 +201,6 @@ window.onload = function () {
     }
     drawElements();
 
-    let prevRedDotX = null;
-    let prevRedDotY = null;
     canvas.addEventListener("click", function (event) {
         if (HasSimStarted) { return; }
         startButton.removeAttribute("disabled");
@@ -217,8 +215,7 @@ window.onload = function () {
             case "#ccc":
                 console.log("Clicked coordinates: X =", mouseX, ", Y =", mouseY, " Coordenadas: (", cellX, ",", cellY, ")");
                 drawElements(cellX, cellY);
-                prevRedDotX = cellX;
-                prevRedDotY = cellY;
+                startingPoint = {x: cellX, y: cellY}
                 break;
             case "red":
                 alert("Por favor, seleccione otra ubicación o pulse el botón de marcar el punto de partida")
@@ -240,7 +237,7 @@ window.onload = function () {
         drawElements();
     });
     startButton.addEventListener("click", function () {
-        HasSimStarted = prevRedDotX, prevRedDotY ? true : false;
+        HasSimStarted = startingPoint ? true : false;
         start()
     });
     document.getElementById("reset").addEventListener("click", function () {
