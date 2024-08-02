@@ -9,6 +9,8 @@ window.onload = function () {
     const gridHeight = 110;
     const gridWidth = 100;
     const ants = 10;
+    const alpha = 0.5;
+    const beta = 0.2;
     const rho = 0.1;
     let HasSimStarted = false;
     let windowColor = "cyan";
@@ -16,10 +18,12 @@ window.onload = function () {
     let grid = createGrid()
 
     class Ant {
-        constructor(startX, startY) {
-            this.currentX = startX; // Actual coords (x)
-            this.currentY = startY; // Actual coords (y)
+        constructor(startX, startY, alpha, beta) {
+            this.currentX = startX; // Actual coord (x)
+            this.currentY = startY; // Actual coord (y)
             this.visited = [{ x: startX, y: startY }]; // Cells where the ant passes
+            this.alpha = alpha; // Influence of pheromone
+            this.beta = beta; // Influence of heuristic
         }
         movement(grid) {
             const directions = [
@@ -28,17 +32,16 @@ window.onload = function () {
                 { dx: -1, dy: 0 },  // Left
                 { dx: 1, dy: 0 }    // Right
             ];
-            let validMoves = directions.filter(direction => {
+            directions.filter(direction => {
                 let newX = this.currentX + direction.dx; // Moves ant
                 let newY = this.currentY + direction.dy; // Moves ant
                 return newX >= 0 && newX < grid.length && newY >= 0 && newY < grid[0].length && // If the moved cell is inside the grid
-                       !this.visited.some(visited => visited.x === newX && visited.y === newY); // If the new position doesn't match a visited cell
+                    !this.visited.some(visited => visited.x === newX && visited.y === newY); // If the new position doesn't match a visited cell
             });
-            if (validMoves.length > 0) {
-                this.currentX += move.dx;
-                this.currentY += move.dy;
-                this.visited.push({ x: this.currentX, y: this.currentY });
-            }
+            let move = directions[Math.floor(Math.random() * directions.length)];
+            this.currentX += move.dx;
+            this.currentY += move.dy;
+            this.visited.push({ x: this.currentX, y: this.currentY });
         }
     }
 
@@ -243,8 +246,19 @@ window.onload = function () {
 
         switch (grid[cellX][cellY].color) {
             case "#ccc":
-                console.log("Coordenadas: (", cellX, ",", cellY, ")");
+                // console.log("Coordenadas: (", cellX, ",", cellY, ")");
+                const ant = new Ant(cellX, cellY);
+
+                // Print initial position
+                console.log(`Initial Position: (${ant.currentX}, ${ant.currentY})`);
+
+                // Move the ant
+                ant.movement(grid);
+                // Print new position
+                console.log(`New Position: (${ant.currentX}, ${ant.currentY})`);
                 drawElements(cellX, cellY);
+                paint.fillStyle = "green"
+                paint.fillRect(ant.currentX * cellSize , ant.currentY * cellSize, cellSize, cellSize);
                 startingPoint = { x: cellX, y: cellY }
                 break;
             case "red":
