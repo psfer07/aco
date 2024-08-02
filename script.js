@@ -15,6 +15,33 @@ window.onload = function () {
     let startingPoint, exits = null
     let grid = createGrid()
 
+    class Ant {
+        constructor(startX, startY) {
+            this.currentX = startX; // Actual coords (x)
+            this.currentY = startY; // Actual coords (y)
+            this.visited = [{ x: startX, y: startY }]; // Cells where the ant passes
+        }
+        movement(grid) {
+            const directions = [
+                { dx: 0, dy: -1 },  // Up
+                { dx: 0, dy: 1 },   // Down
+                { dx: -1, dy: 0 },  // Left
+                { dx: 1, dy: 0 }    // Right
+            ];
+            let validMoves = directions.filter(direction => {
+                let newX = this.currentX + direction.dx; // Moves ant
+                let newY = this.currentY + direction.dy; // Moves ant
+                return newX >= 0 && newX < grid.length && newY >= 0 && newY < grid[0].length && // If the moved cell is inside the grid
+                       !this.visited.some(visited => visited.x === newX && visited.y === newY); // If the new position doesn't match a visited cell
+            });
+            if (validMoves.length > 0) {
+                this.currentX += move.dx;
+                this.currentY += move.dy;
+                this.visited.push({ x: this.currentX, y: this.currentY });
+            }
+        }
+    }
+
     // Set canvas size
     canvas.width = gridWidth * cellSize;
     canvas.height = gridHeight * cellSize;
@@ -128,8 +155,8 @@ window.onload = function () {
         }
     }
     function start() {
-    // Add cells from the windows and the door
-    exits = getCoords("cyan").concat(getCoords("#02b200"));
+        // Add cells from the windows and the door
+        exits = getCoords("cyan").concat(getCoords("#02b200"));
     }
 
     const walls = {
@@ -218,7 +245,7 @@ window.onload = function () {
             case "#ccc":
                 console.log("Coordenadas: (", cellX, ",", cellY, ")");
                 drawElements(cellX, cellY);
-                startingPoint = {x: cellX, y: cellY}
+                startingPoint = { x: cellX, y: cellY }
                 break;
             case "red":
                 alert("Por favor, seleccione otra ubicación o pulse el botón de marcar el punto de partida")
