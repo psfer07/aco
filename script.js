@@ -232,12 +232,15 @@ window.onload = function () {
         windowColor = windowColor === "cyan" ? "#2d2d2d" : "cyan";
         windows.color = windowColor
         drawElements();
+        startingPoint = null;
     });
     show_gridCheckbox.addEventListener("change", function () {
         drawElements();
+        startingPoint = null;
     });
     show_obstaclesCheckbox.addEventListener("change", function () {
         drawElements();
+        startingPoint = null;
     });
     startButton.addEventListener("click", function () {
         HasSimStarted = startingPoint ? true : false;
