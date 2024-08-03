@@ -4,18 +4,23 @@ window.onload = function () {
     const windowsCheckbox = document.getElementById("windows");
     const show_gridCheckbox = document.getElementById("show_grid");
     const show_obstaclesCheckbox = document.getElementById("show_obstacles");
+    const antsRange = document.getElementById("ants");
+    const ants_value = document.getElementById("ants_value");
     const startButton = document.getElementById("start");
     const cellSize = 7;
     const gridHeight = 110;
     const gridWidth = 100;
-    const ants = 10;
-    const alpha = 0.5;
-    const beta = 0.2;
+    const alpha = 2;
+    const beta = 5;
     const rho = 0.1;
     let HasSimStarted = false;
     let windowColor = "cyan";
     let startingPoint, exits = null
     let grid = createGrid()
+
+    // Set canvas size
+    canvas.width = gridWidth * cellSize;
+    canvas.height = gridHeight * cellSize;
 
     class Ant {
         constructor(startX, startY, alpha, beta) {
@@ -44,10 +49,6 @@ window.onload = function () {
             this.visited.push({ x: this.currentX, y: this.currentY });
         }
     }
-
-    // Set canvas size
-    canvas.width = gridWidth * cellSize;
-    canvas.height = gridHeight * cellSize;
 
     function createGrid() {
         const grid = [];
@@ -283,9 +284,8 @@ window.onload = function () {
         drawElements();
         startingPoint = null;
     });
-    startButton.addEventListener("click", function () {
-        HasSimStarted = startingPoint ? true : false;
-        start()
+    antsRange.addEventListener("change", function () {
+        ants_value.textContent = ants_range.value
     });
     document.getElementById("reset").addEventListener("click", function () {
         location.reload();
