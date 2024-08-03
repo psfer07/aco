@@ -7,9 +7,9 @@ window.onload = function () {
     const antsRange = document.getElementById("ants");
     const ants_value = document.getElementById("ants_value");
     const startButton = document.getElementById("start");
-    const cellSize = 7;
-    const gridHeight = 110;
     const gridWidth = 100;
+    const gridHeight = 110;
+    const cellSize = 7;
     const alpha = 2;
     const beta = 5;
     const rho = 0.1;
@@ -23,12 +23,14 @@ window.onload = function () {
     canvas.height = gridHeight * cellSize;
 
     class Ant {
-        constructor(startX, startY, alpha, beta) {
+        constructor(startX, startY, alpha, beta, obstacles, exits) {
             this.currentX = startX; // Actual coord (x)
             this.currentY = startY; // Actual coord (y)
             this.visited = [{ x: startX, y: startY }]; // Cells where the ant passes
             this.alpha = alpha; // Influence of pheromone
             this.beta = beta; // Influence of heuristic
+            this.obstacles = obstacles; // Cells marked as obstacles
+            this.exits = exits; // Cells marked as exits
         }
         movement(grid) {
             const directions = [
@@ -37,16 +39,20 @@ window.onload = function () {
                 { dx: -1, dy: 0 },  // Left
                 { dx: 1, dy: 0 }    // Right
             ];
+            // Filter all the available directions from the new position
             directions.filter(direction => {
                 let newX = this.currentX + direction.dx; // Moves ant
                 let newY = this.currentY + direction.dy; // Moves ant
                 return newX >= 0 && newX < grid.length && newY >= 0 && newY < grid[0].length && // If the moved cell is inside the grid
-                    !this.visited.some(visited => visited.x === newX && visited.y === newY); // If the new position doesn't match a visited cell
+                    !this.visited.some(visited => visited.x === newX && visited.y === newY) && // If the new position doesn't match a visited cell
+                    !this.obstacles.some(obstacle => obstacle.x === newX && obstacle.y === newY); // If the new position is not marked as an exit
             });
-            let move = directions[Math.floor(Math.random() * directions.length)];
-            this.currentX += move.dx;
-            this.currentY += move.dy;
-            this.visited.push({ x: this.currentX, y: this.currentY });
+            do {
+                let move = directions[Math.floor(Math.random() * directions.length)];
+                this.currentX += move.dx;
+                this.currentY += move.dy;
+                this.visited.push({ x: this.currentX, y: this.currentY });
+            } while (this.visited.length < 10000 && !this.exits.some(exit => exit.x === this.currentX && exit.y === this.currentY))
         }
     }
 
@@ -128,9 +134,10 @@ window.onload = function () {
             }
         }
     }
-    function drawElements(dotX, dotY) {
+    function drawElements(x, y, antX, antY) {
         drawRoom();
-        setColor(dotX, dotY, "red");
+        setColor(x, y, "red");
+        setColor(antX, antY, "green");
         show_obstaclesCheckbox.checked ? drawObstacles() : false
         for (let i = 0; i < grid.length; i++) {
             for (let j = 0; j < grid[i].length; j++) {
@@ -157,10 +164,6 @@ window.onload = function () {
                 grid[i][j].pheromone = (1 - rho) * grid[i][j].pheromone
             }
         }
-    }
-    function start() {
-        // Add cells from the windows and the door
-        exits = getCoords("cyan").concat(getCoords("#02b200"));
     }
 
     const walls = {
@@ -247,17 +250,15 @@ window.onload = function () {
 
         switch (grid[cellX][cellY].color) {
             case "#ccc":
-                const ant = new Ant(cellX, cellY);
-
+                const objects = getCoords(walls.color).concat(getCoords(obstacles.teacher_table.color)).concat(getCoords(obstacles.tables.color))
+                const exits = getCoords(door.color).concat(getCoords("cyan"))
+                const ant = new Ant(cellX, cellY, alpha, beta, objects, exits);
                 console.log(`Ha pulsado en el punto (${ant.currentX}, ${ant.currentY})`);
 
-                // Move the ant
                 ant.movement(grid);
-                // Print new position
                 console.log(`La hormiga se ha desplazado al punto (${ant.currentX}, ${ant.currentY})`);
-                drawElements(cellX, cellY);
-                paint.fillStyle = "green"
-                paint.fillRect(ant.currentX * cellSize , ant.currentY * cellSize, cellSize, cellSize);
+                drawElements(cellX, cellY, ant.currentX, ant.currentY);
+                console.log(ant.visited)
                 startingPoint = { x: cellX, y: cellY }
                 break;
             case "red":
