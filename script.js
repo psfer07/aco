@@ -247,16 +247,14 @@ window.onload = function () {
 
         switch (grid[cellX][cellY].color) {
             case "#ccc":
-                // console.log("Coordenadas: (", cellX, ",", cellY, ")");
                 const ant = new Ant(cellX, cellY);
 
-                // Print initial position
-                console.log(`Initial Position: (${ant.currentX}, ${ant.currentY})`);
+                console.log(`Ha pulsado en el punto (${ant.currentX}, ${ant.currentY})`);
 
                 // Move the ant
                 ant.movement(grid);
                 // Print new position
-                console.log(`New Position: (${ant.currentX}, ${ant.currentY})`);
+                console.log(`La hormiga se ha desplazado al punto (${ant.currentX}, ${ant.currentY})`);
                 drawElements(cellX, cellY);
                 paint.fillStyle = "green"
                 paint.fillRect(ant.currentX * cellSize , ant.currentY * cellSize, cellSize, cellSize);
@@ -285,7 +283,7 @@ window.onload = function () {
         startingPoint = null;
     });
     antsRange.addEventListener("change", function () {
-        ants_value.textContent = ants_range.value
+        ants_value.textContent = antsRange.value
     });
     document.getElementById("reset").addEventListener("click", function () {
         location.reload();
