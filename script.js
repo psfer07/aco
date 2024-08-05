@@ -7,9 +7,9 @@ window.onload = function () {
     const antsRange = document.getElementById("ants");
     const ants_value = document.getElementById("ants_value");
     const startButton = document.getElementById("start");
-    const gridWidth = 100;
-    const gridHeight = 110;
-    const cellSize = 7;
+    const gridWidth = 400;
+    const gridHeight = 440;
+    const cellSize = 2;
     const alpha = 2;
     const beta = 5;
     const rho = 0.1;
@@ -99,7 +99,7 @@ window.onload = function () {
             for (let col = 0; col < table.sectors.cols; col++) {
                 const tableX = sectorX + col * (table.width + table.margins.marginX);
                 for (let row = 0; row < table.sectors.rows; row++) {
-                    const tableY = 25 + row * (table.margins.marginY + table.height);
+                    const tableY = 100 + row * (table.margins.marginY + table.height);
                     setColor([tableX, tableX + table.width], [tableY, tableY + table.height], table.color);
                 }
             }
@@ -136,7 +136,7 @@ window.onload = function () {
     }
     function drawElements(x, y, antX, antY) {
         drawRoom();
-        setColor(x, y, "red");
+        setColor([x - 2, x + 2], [y - 2, y + 2], "red");
         setColor(antX, antY, "green");
         show_obstaclesCheckbox.checked ? drawObstacles() : false
         for (let i = 0; i < grid.length; i++) {
@@ -170,62 +170,62 @@ window.onload = function () {
         color: "#2d2d2d",
         horz: {
             width: gridWidth,
-            height: 2,
+            height: 8,
             positions: [
                 { x: 0, y: 0 },
-                { x: 0, y: gridHeight - 2 }
+                { x: 0, y: gridHeight - 8 }
             ]
         },
         vert: {
-            width: 2,
+            width: 8,
             height: gridHeight,
             positions: [
                 { x: 0, y: 0 },
-                { x: gridWidth - 2, y: 0 }
+                { x: gridWidth - 8, y: 0 }
             ]
         },
     }
     const windows = {
-        width: 2,
-        height: 20,
+        width: 8,
+        height: 80,
         color: windowColor,
         positions: [
-            { x: 0, y: 10 },
-            { x: 0, y: 45 },
-            { x: 0, y: 80 }
+            { x: 0, y: 40 },
+            { x: 0, y: 180 },
+            { x: 0, y: 320 }
         ]
     }
     const door = {
         color: "#02b200",
-        x: gridWidth - 2,
-        y: 90,
-        width: 2,
-        height: 15
+        x: gridWidth - 8,
+        y: 360,
+        width: 8,
+        height: 60
     }
     const obstacles = {
         pillars: {
             color: "#2d2d2d",
-            width: 3,
-            height: 15,
+            width: 12,
+            height: 60,
             positions: [
-                { x: 2, y: 30 },
-                { x: 2, y: 65 },
-                { x: gridWidth - 5, y: 30 },
-                { x: gridWidth - 5, y: 41 },
-                { x: gridWidth - 5, y: 53 },
-                { x: gridWidth - 5, y: 65 }
+                { x: 8, y: 120 },
+                { x: 8, y: 260 },
+                { x: gridWidth - 20, y: 120 },
+                { x: gridWidth - 20, y: 164 },
+                { x: gridWidth - 20, y: 212 },
+                { x: gridWidth - 20, y: 260 }
             ]
         },
         teacher_table: {
             color: "#916242",
-            x: 5,
-            y: 10,
-            width: 30,
-            height: 10
+            x: 20,
+            y: 40,
+            width: 120,
+            height: 40
         },
         tables: {
-            width: 10,
-            height: 5,
+            width: 40,
+            height: 20,
             color: "brown",
             sectors: {
                 count: 3,
@@ -233,9 +233,9 @@ window.onload = function () {
                 rows: 5
             },
             margins: {
-                marginX: 2,
-                marginY: 10,
-                marginsector: 10
+                marginX: 8,
+                marginY: 40,
+                marginsector: 40
             }
         }
     }
