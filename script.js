@@ -6,12 +6,12 @@ window.onload = function () {
     const antsRange = document.getElementById("ants");
     const ants_value = document.getElementById("ants_value");
     const startButton = document.getElementById("start");
+    const rho = document.getElementById("rho");
+    const alpha = document.getElementById("alpha");
+    const heuristic = document.getElementById("heuristic");
     const gridWidth = 400;
     const gridHeight = 440;
     const cellSize = 2;
-    const alpha = 2;
-    const heuristic = 5;
-    const rho = 0.1;
     let HasSimStarted = false;
     let windowColor = "cyan";
     let startingPoint, exits = null
@@ -32,35 +32,58 @@ window.onload = function () {
             this.exits = exits; // Cells marked as exits
         }
         movement(grid) {
+            const check_visited = (newX, newY, visites) => {
+                return !visites.some(visit => visit.x === newX && visit.y === newY);
+            };
+
             const directions = [
                 { dx: 0, dy: -1 },  // Up
                 { dx: 0, dy: 1 },   // Down
                 { dx: -1, dy: 0 },  // Left
                 { dx: 1, dy: 0 }    // Right
             ];
+
             // Filter all the available directions from the new position
-            directions.filter(direction => {
-                let newX = this.currentX + direction.dx; // Moves ant
-                let newY = this.currentY + direction.dy; // Moves ant
-                return newX >= 0 && newX < grid.length && newY >= 0 && newY < grid[0].length && // If the moved cell is inside the grid
-                    !this.visited.some(visited => visited.x === newX && visited.y === newY) && // If the new position doesn't match a visited cell
-                    !this.obstacles.some(obstacle => obstacle.x === newX && obstacle.y === newY); // If the new position is not marked as an exit
+            const availableDirections = directions.filter(direction => {
+                const newX = this.currentX + direction.dx;
+                const newY = this.currentY + direction.dy;
+                return (
+                    newX >= 0 && newX < grid.length && newY >= 0 && newY < grid[0].length &&  // Ensure the new cell is inside the grid
+                    !this.visited.some(visited => visited.x === newX && visited.y === newY) && // Ensure the new cell hasn't been visited
+                    !this.obstacles.some(obstacle => obstacle.x === newX && obstacle.y === newY) // Ensure the new cell isn't an obstacle
+                );
             });
-            do {
-                let move = directions[Math.floor(Math.random() * directions.length)];
-                let available_pheromone = []; // Pheromone on each next cell
-                for (let i = 0; i < directions.length; i++) {
-                    let x = this.currentX + directions[i].dx;
-                    let y = this.currentY + directions[i].dy;
+
+            // If no directions are available, stop movement or choose a fallback
+            if (availableDirections.length === 0) {
+                console.log("No valid moves available for the ant.");
+                return; // Exit the function or handle this case differently
+            }
+
+            // Choose a random move from the available directions
+            const move = availableDirections[Math.floor(Math.random() * availableDirections.length)];
+
+            const condition = check_visited(this.currentX + move.dx, this.currentY + move.dy, this.visited) &&
+                this.visited.length < 10000 &&
+                !this.exits.some(exit => exit.x === this.currentX && exit.y === this.currentY);
+
+            if (condition) {
+                let available_pheromone = [];
+                for (const direction of availableDirections) {
+                    const x = this.currentX + direction.dx;
+                    const y = this.currentY + direction.dy;
                     available_pheromone.push(grid[x][y].pheromone);
                 }
+
                 this.currentX += move.dx;
                 this.currentY += move.dy;
                 this.visited.push({ x: this.currentX, y: this.currentY });
-                grid[this.currentX][this.currentY].pheromone += heuristic; // Update new pheromone
-            } while (this.visited.length < 10000 && !this.exits.some(exit => exit.x === this.currentX && exit.y === this.currentY)) // Until 10K iterations and any exit visited
+
+                grid[this.currentX][this.currentY].pheromone += this.heuristic; // Update the pheromone on the new cell
+            }
         }
     }
+
 
     function createGrid() {
         const grid = [];
@@ -127,7 +150,7 @@ window.onload = function () {
             }
         }
     }
-    function drawElements(x, y, antX, antY, visited) {
+    function drawElements(x, y, visited) {
         drawRoom();
         setColor([x - 2, x + 2], [y - 2, y + 2], "red");
         if (visited) {
@@ -135,7 +158,6 @@ window.onload = function () {
                 setColor(visited[i].x, visited[i].y, "green")
             }
         }
-        setColor([antX - 2, antX + 2], [antY - 2, antY + 2], "green");
         show_obstaclesCheckbox.checked ? drawObstacles() : false
         for (let i = 0; i < grid.length; i++) {
             for (let j = 0; j < grid[i].length; j++) {
@@ -254,9 +276,9 @@ window.onload = function () {
 
                 ant.movement(grid);
                 console.log(`La hormiga se ha desplazado al punto (${ant.currentX}, ${ant.currentY})`);
-                drawElements(cellX, cellY, ant.currentX, ant.currentY, ant.visited);
+                drawElements(cellX, cellY, ant.visited);
                 pheromoneEvaporation()
-                console.log(grid)
+                console.log(ant.visited)
                 startingPoint = { x: cellX, y: cellY }
                 break;
             case "red":
