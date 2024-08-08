@@ -11,7 +11,7 @@ window.onload = function () {
     const gridHeight = 440;
     const cellSize = 2;
     const alpha = 2;
-    const beta = 5;
+    const heuristic = 5;
     const rho = 0.1;
     let HasSimStarted = false;
     let windowColor = "cyan";
@@ -23,12 +23,12 @@ window.onload = function () {
     canvas.height = gridHeight * cellSize;
 
     class Ant {
-        constructor(startX, startY, alpha, beta, obstacles, exits) {
+        constructor(startX, startY, alpha, heuristic, obstacles, exits) {
             this.currentX = startX; // Actual coord (x)
             this.currentY = startY; // Actual coord (y)
             this.visited = [{ x: startX, y: startY }]; // Cells where the ant passes
             this.alpha = alpha; // Influence of pheromone
-            this.beta = beta; // Influence of heuristic
+            this.heuristic = heuristic; // Influence of heuristic
             this.obstacles = obstacles; // Cells marked as obstacles
             this.exits = exits; // Cells marked as exits
         }
@@ -49,10 +49,17 @@ window.onload = function () {
             });
             do {
                 let move = directions[Math.floor(Math.random() * directions.length)];
+                let available_pheromone = []; // Pheromone on each next cell
+                for (let i = 0; i < directions.length; i++) {
+                    let x = this.currentX + directions[i].dx;
+                    let y = this.currentY + directions[i].dy;
+                    available_pheromone.push(grid[x][y].pheromone);
+                }
                 this.currentX += move.dx;
                 this.currentY += move.dy;
                 this.visited.push({ x: this.currentX, y: this.currentY });
-            } while (this.visited.length < 10000 && !this.exits.some(exit => exit.x === this.currentX && exit.y === this.currentY))
+                grid[this.currentX][this.currentY].pheromone += heuristic; // Update new pheromone
+            } while (this.visited.length < 10000 && !this.exits.some(exit => exit.x === this.currentX && exit.y === this.currentY)) // Until 10K iterations and any exit visited
         }
     }
 
@@ -134,10 +141,15 @@ window.onload = function () {
             }
         }
     }
-    function drawElements(x, y, antX, antY) {
+    function drawElements(x, y, antX, antY, visited) {
         drawRoom();
         setColor([x - 2, x + 2], [y - 2, y + 2], "red");
-        setColor(antX, antY, "green");
+        if (visited) {
+            for (let i = 0; i < visited.length; i++) {
+                setColor(visited[i].x, visited[i].y, "green")
+            }
+        }
+        setColor([antX - 2, antX + 2], [antY - 2, antY + 2], "green");
         show_obstaclesCheckbox.checked ? drawObstacles() : false
         for (let i = 0; i < grid.length; i++) {
             for (let j = 0; j < grid[i].length; j++) {
@@ -252,13 +264,14 @@ window.onload = function () {
             case "#ccc":
                 const objects = getCoords(walls.color).concat(getCoords(obstacles.teacher_table.color)).concat(getCoords(obstacles.tables.color))
                 const exits = getCoords(door.color).concat(getCoords("cyan"))
-                const ant = new Ant(cellX, cellY, alpha, beta, objects, exits);
+                const ant = new Ant(cellX, cellY, alpha, heuristic, objects, exits);
                 console.log(`Ha pulsado en el punto (${ant.currentX}, ${ant.currentY})`);
 
                 ant.movement(grid);
                 console.log(`La hormiga se ha desplazado al punto (${ant.currentX}, ${ant.currentY})`);
-                drawElements(cellX, cellY, ant.currentX, ant.currentY);
-                console.log(ant.visited)
+                drawElements(cellX, cellY, ant.currentX, ant.currentY, ant.visited);
+                pheromoneEvaporation()
+                console.log(grid)
                 startingPoint = { x: cellX, y: cellY }
                 break;
             case "red":
