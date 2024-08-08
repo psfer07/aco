@@ -2,7 +2,6 @@ window.onload = function () {
     const canvas = document.getElementById("canvas_render");
     const paint = canvas.getContext("2d");
     const windowsCheckbox = document.getElementById("windows");
-    const show_gridCheckbox = document.getElementById("show_grid");
     const show_obstaclesCheckbox = document.getElementById("show_obstacles");
     const antsRange = document.getElementById("ants");
     const ants_value = document.getElementById("ants_value");
@@ -78,19 +77,6 @@ window.onload = function () {
         }
         return grid;
     }
-    // This is not the grid created by the createGrid function but the separator lines between cells
-    function drawGrid() {
-        paint.strokeStyle = "#aaa";
-        paint.lineWidth = 0.3;
-        paint.beginPath();
-        for (let i = 0; i <= Math.max(canvas.width, canvas.height); i += cellSize) {
-            paint.moveTo(0, i);
-            paint.lineTo(canvas.width, i);
-            paint.moveTo(i, 0);
-            paint.lineTo(i, canvas.height);
-        }
-        paint.stroke();
-    }
     function drawObstacles() {
         // Pillars
         for (const pillar of obstacles.pillars.positions) {
@@ -157,7 +143,6 @@ window.onload = function () {
                 paint.fillRect(i * cellSize, j * cellSize, cellSize, cellSize);
             }
         }
-        show_gridCheckbox.checked ? drawGrid() : false
     }
     function getCoords(color) {
         let cells = [];
@@ -285,10 +270,6 @@ window.onload = function () {
     windowsCheckbox.addEventListener("change", function () {
         windowColor = windowColor === "cyan" ? "#2d2d2d" : "cyan";
         windows.color = windowColor
-        drawElements();
-        startingPoint = null;
-    });
-    show_gridCheckbox.addEventListener("change", function () {
         drawElements();
         startingPoint = null;
     });
