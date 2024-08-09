@@ -1,8 +1,6 @@
 window.onload = function () {
     const canvas = document.getElementById("canvas_render");
     const paint = canvas.getContext("2d");
-    const windowsCheckbox = document.getElementById("windows");
-    const show_obstaclesCheckbox = document.getElementById("show_obstacles");
     const antsRange = document.getElementById("ants");
     const ants_value = document.getElementById("ants_value");
     const startButton = document.getElementById("start");
@@ -12,107 +10,132 @@ window.onload = function () {
     const gridWidth = 360;
     const gridHeight = 400;
     const cellSize = 2;
-    let HasSimStarted = false;
-    let windowColor = "cyan";
-    let startingPoint, exits = null
-    let grid = createGrid()
+    let grid = [];
+    let properties = { // Each cell will have these properties by default
+        color: "#ccc",
+        pheromone: 1.0
+    };
 
+    
     // Set canvas size
     canvas.width = gridWidth * cellSize;
     canvas.height = gridHeight * cellSize;
+    
+    // Create matrix
+    for (let x = 0; x < gridWidth; x++) {
+        let cols = [];
+        for (let y = 0; y < gridHeight; y++) {
+            cols.push({ ...properties });
+        }
+        grid.push(cols);
+    }
 
     class Ant {
-        constructor(startX, startY, alpha, heuristic, obstacles, exits) {
+        constructor(startX, startY, alpha, heuristic, id) {
             this.currentX = startX; // Actual coord (x)
             this.currentY = startY; // Actual coord (y)
             this.visited = [{ x: startX, y: startY }]; // Cells where the ant passes
             this.alpha = alpha; // Influence of pheromone
             this.heuristic = heuristic; // Influence of heuristic
-            this.obstacles = obstacles; // Cells marked as obstacles
-            this.exits = exits; // Cells marked as exits
+            this.id = id; // Assigns an ID to the current ant
         }
 
-        movement(grid) {
+        move(grid) {
+            function choosePath(pheromone) {
+                // Calculate the sum of all pheromone
+                const totalSum = pheromone.reduce((sum, value) => sum + value, 0);
+
+                // Calculate probabilities for each value
+                const probabilities = pheromone.map(value => value / totalSum);
+
+                // Determine which variable to choose based on the random number
+                let cumulativeProbability = 0;
+                for (let i = 0; i < probabilities.length; i++) {
+                    cumulativeProbability += probabilities[i];
+                    if (Math.random() < cumulativeProbability) {
+                        return i;
+                    }
+                }
+            }
             const directions = [
-                { dx: 0, dy: -1 },  // Up
-                { dx: 0, dy: 1 },   // Down
-                { dx: -1, dy: 0 },  // Left
-                { dx: 1, dy: 0 }    // Right
+                { dx: 0, dy: -1 }, // Up
+                { dx: 0, dy: 1 },  // Down
+                { dx: -1, dy: 0 }, // Left
+                { dx: 1, dy: 0 },  // Right
+                { dx: 1, dy: 1 },  // Up-left
+                { dx: 1, dy: -1 }, // Up-right
+                { dx: -1, dy: 1 }, // Down-left
+                { dx: 1, dy: 1 }   // Down-right
             ];
 
-            let k = 0;
-
             do {
-                // Filter available directions that are within bounds, not visited, and not obstacles
-                const availableDirections = directions.filter(direction => {
+                let availableDirections;
+                availableDirections = directions.filter(direction => {
                     const newX = this.currentX + direction.dx;
                     const newY = this.currentY + direction.dy;
-                    return (
-                        grid[newX][newY].color === "#ccc" && // Ensure the ant is still on the floor
-                        !this.visited.some(visited => visited.x === newX && visited.y === newY) // Not visited
-                    );
+
+                    // Checks if the new coords are inside the grid
+                    if (newX >= 0 && newX < grid.length && newY >= 0 && newY < grid[newX].length) {
+                        return grid[newX][newY].color === "#ccc" && !this.visited.some(visited => visited.x === newX && visited.y === newY); // Check immediate cells are within bounds and are floor and have not been visited before
+                    } else {   /*      Obstacles colors      */
+                        return !["#2d2d2d", "cyan", "#916242", "brown"].some(obstacle => grid[newX][newY].color === obstacle);
+                    }
                 });
                 console.log(availableDirections)
+
                 if (availableDirections.length === 0) {
-                    console.log("No valid moves available, stopping ant movement.");
-                    break;
+                    availableDirections.push(directions[Math.floor(Math.random() * 4)]);
                 }
 
-                // Select a random valid direction
-                const move = availableDirections[Math.floor(Math.random() * availableDirections.length)];
+                let available_pheromone = [];
+                for (let i = 0; i < availableDirections.length; i++) {
+                    const x = this.currentX + availableDirections[i].dx;
+                    const y = this.currentY + availableDirections[i].dy;
+                    if (x >= 0 && x < grid.length && y >= 0 && y < grid[0].length) {
+                        available_pheromone.push(grid[x][y].pheromone);
+                    }
+                }
+                console.log("Pheromones available:", available_pheromone);
+                console.log("Chosen path:", choosePath(available_pheromone));
+                const move = availableDirections[choosePath(available_pheromone)];
 
-                console.log("Before move:", this.currentX, this.currentY);
+                console.log("Moving to:", this.currentX + move.dx, "fromX", this.currentX, this.currentY + move.dy, "fromY", this.currentY);
+                console.log(move, (this.visited.length + 1) / 40 + "% completed");
 
                 // Move the ant to the new position
                 this.currentX += move.dx;
                 this.currentY += move.dy;
 
+                if (grid[this.currentX][this.currentY].color === "#02b200") { alert("Se ha encontrado la salida"); break; }
+
                 // Push the new position to the visited list
                 this.visited.push({ x: this.currentX, y: this.currentY });
 
-                // Optionally, gather pheromone information if needed
-                let available_pheromone = [];
-                for (const direction of directions) {
-                    const x = this.currentX + direction.dx;
-                    const y = this.currentY + direction.dy;
-                    if (x >= 0 && x < grid.length && y >= 0 && y < grid[0].length) {
-                        available_pheromone.push(grid[x][y].pheromone);
-                    }
-                }
-                console.log("Available pheromones around:", available_pheromone);
-
-                // Update the pheromone level at the new position
-                grid[this.currentX][this.currentY].pheromone += this.heuristic;
-
-                // console.log("After move:", this.currentX, this.currentY, grid[this.currentX][this.currentY].pheromone);
-                console.log("Visited cells:", this.visited);
-
-                k++;
-            } while (k < 500);
+            } while (this.visited.length < 4000);
         }
     }
 
 
-    function createGrid() {
-        const grid = [];
-        const properties = { // Each cell will have these properties by default
-            color: "#ccc",
-            pheromone: 1.0
-        };
-        for (let x = 0; x < gridWidth; x++) {
-            const cols = [];
-            for (let y = 0; y < gridHeight; y++) {
-                cols.push({ ...properties });
-            }
-            grid.push(cols);
-        }
-        return grid;
-    }
-    function drawObstacles() {
+    function drawRoom() {
+        // Floor
+        setColor([2, gridWidth - 3], [2, gridHeight - 3], "#ccc");
+        // Walls
+        walls.horz.positions.forEach(wall => {
+            setColor([wall.x, wall.x + walls.horz.width - 1], [wall.y, wall.y + walls.horz.height - 1], walls.color);
+        });
+        walls.vert.positions.forEach(wall => {
+            setColor([wall.x, wall.x + walls.vert.width - 1], [wall.y, wall.y + walls.vert.height - 1], walls.color);
+        });
+        // Windows
+        windows.positions.forEach(window => {
+            setColor([window.x, window.x + windows.width - 1], [window.y, window.y + windows.height - 1], windows.color);
+        });
+        // Door
+        setColor([door.x, door.x + door.width - 1], [door.y, door.y + door.height - 1], door.color);
         // Pillars
-        for (const pillar of obstacles.pillars.positions) {
+        obstacles.pillars.positions.forEach(pillar => {
             setColor([pillar.x, pillar.x + obstacles.pillars.width - 1], [pillar.y, pillar.y + obstacles.pillars.height - 1], obstacles.pillars.color);
-        }
+        });
         // Teacher's table
         const Ttable = obstacles.teacher_table
         setColor([Ttable.x, Ttable.x + Ttable.width - 1], [Ttable.y, Ttable.y + Ttable.height - 1], Ttable.color);
@@ -128,23 +151,6 @@ window.onload = function () {
                 }
             }
         }
-    }
-    function drawRoom() {
-        // Floor
-        setColor([2, gridWidth - 3], [2, gridHeight - 3], "#ccc");
-        // Walls
-        for (const wall of walls.horz.positions) {
-            setColor([wall.x, wall.x + walls.horz.width - 1], [wall.y, wall.y + walls.horz.height - 1], walls.color);
-        }
-        for (const wall of walls.vert.positions) {
-            setColor([wall.x, wall.x + walls.vert.width - 1], [wall.y, wall.y + walls.vert.height - 1], walls.color);
-        }
-        // Windows
-        for (const window of windows.positions) {
-            setColor([window.x, window.x + windows.width - 1], [window.y, window.y + windows.height - 1], windows.color);
-        }
-        // Door
-        setColor([door.x, door.x + door.width - 1], [door.y, door.y + door.height - 1], door.color);
     }
     function setColor(x, y, color) {
         const X = Array.isArray(x) ? x[0] : x;
@@ -170,29 +176,10 @@ window.onload = function () {
                 }
             }
         }
-        show_obstaclesCheckbox.checked ? drawObstacles() : false
         for (let i = 0; i < grid.length; i++) {
             for (let j = 0; j < grid[i].length; j++) {
                 paint.fillStyle = grid[i][j].color;
                 paint.fillRect(i * cellSize, j * cellSize, cellSize, cellSize);
-            }
-        }
-    }
-    function getCoords(color) {
-        let cells = [];
-        for (let x = 0; x < gridWidth; x++) {
-            for (let y = 0; y < gridHeight; y++) {
-                if (grid[x][y].color === color) {
-                    cells.push({ x: x, y: y });
-                }
-            }
-        }
-        return cells;
-    }
-    function pheromoneEvaporation() {
-        for (let i = 0; i < gridWidth; i++) {
-            for (let j = 0; j < gridHeight; j++) {
-                grid[i][j].pheromone = (1 - rho) * grid[i][j].pheromone
             }
         }
     }
@@ -219,7 +206,7 @@ window.onload = function () {
     const windows = {
         width: 8,
         height: 80,
-        color: windowColor,
+        color: "cyan",
         positions: [
             { x: 0, y: 30 },
             { x: 0, y: 160 },
@@ -281,17 +268,13 @@ window.onload = function () {
 
         switch (grid[cellX][cellY].color) {
             case "#ccc":
-                const objects = getCoords(walls.color).concat(getCoords(obstacles.teacher_table.color)).concat(getCoords(obstacles.tables.color))
-                const exits = getCoords(door.color).concat(getCoords("cyan"))
-                const ant = new Ant(cellX, cellY, alpha, heuristic, objects, exits);
+                const ant = new Ant(cellX, cellY, alpha, heuristic, 1);
                 console.log(`Ha pulsado en el punto (${ant.currentX}, ${ant.currentY})`);
 
-                ant.movement(grid);
+                ant.move(grid);
                 console.log(`La hormiga se ha desplazado al punto (${ant.currentX}, ${ant.currentY})`);
                 drawElements(cellX, cellY, ant.visited);
-                // pheromoneEvaporation()
                 console.log(ant.visited)
-                startingPoint = { x: cellX, y: cellY }
                 break;
             case "red":
                 alert("Por favor, seleccione otra ubicación o pulse el botón de marcar el punto de partida")
@@ -300,16 +283,6 @@ window.onload = function () {
                 alert("No puedes empezar ahí. Haz clic en el suelo de la habitación");
                 break;
         }
-    });
-    windowsCheckbox.addEventListener("change", function () {
-        windowColor = windowColor === "cyan" ? "#2d2d2d" : "cyan";
-        windows.color = windowColor
-        drawElements();
-        startingPoint = null;
-    });
-    show_obstaclesCheckbox.addEventListener("change", function () {
-        drawElements();
-        startingPoint = null;
     });
     antsRange.addEventListener("change", function () {
         ants_value.textContent = antsRange.value
