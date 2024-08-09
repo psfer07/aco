@@ -11,19 +11,15 @@
 
 <body>
   <div style="display: flex">
-    <div style="margin-top: 30vh">
-      <p>Habilitar ventanas como salida</p>
-      <label class="switch">
-        <input id="windows" type="checkbox" checked>
-        <span class="slider"></span>
-      </label>
-      <p>Mostrar obstáculos</p>
-      <label class="switch">
-        <input id="show_obstacles" type="checkbox">
-        <span class="slider"></span>
-      </label>
+    <div style="margin-top: 20vh">
+      <h2>Parámetros numéricos</h2>
+      <p>Evaporación de la feromona</p>
+      <input type="number" id="rho" step="0.1" min="0" value="0.1">
+      <p>Valor de alfa</p>
+      <input type="number" id="alpha" step="0.1" min="0" value="2">
+      <p>Valor de heurística (feromona depositada)</p>
+      <input type="number" id="heuristic" step="0.1" min="0" value="5">
     </div>
-
     <div style="margin: 0 auto">
       <header>Simulador para encontrar la ruta de escape óptima</header>
       <canvas id="canvas_render"></canvas>
@@ -34,15 +30,6 @@
         <button class="disabled " id="start">Establecer punto de partida</button>
         <button class="reset" id="reset">Reiniciar simulador</button>
       </div>
-    </div>
-    <div style="margin-top: 20vh">
-      <h2>Parámetros numéricos</h2>
-      <p>Evaporación de la feromona</p>
-      <input type="number" id="rho" step="0.1" min="0" value="0.1">
-      <p>Valor de alfa</p>
-      <input type="number" id="alpha" step="0.1" min="0" value="2">
-      <p>Valor de heurística (feromona depositada)</p>
-      <input type="number" id="heuristic" step="0.1" min="0" value="5">
     </div>
   </div>
   <br>
