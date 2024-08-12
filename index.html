@@ -17,8 +17,19 @@
       <input type="number" id="rho" step="0.1" min="0" value="0.1">
       <p>Valor de alfa</p>
       <input type="number" id="alpha" step="0.1" min="0" value="2">
+      <p>Valor de beta</p>
+      <input type="number" id="beta" step="0.1" min="0" value="5">
       <p>Valor de heurística (feromona depositada)</p>
-      <input type="number" id="heuristic" step="0.1" min="0" value="5">
+      <input type="number" id="deposit" step="0.1" min="0" value="4">
+      <p>Número de iteraciones (idas y vueltas de cada hormiga)</p>
+      <select id="interactions">
+        <option name="20">20 iteraciones</option>
+        <option name="50">50 iteraciones</option>
+        <option name="100">100 iteraciones</option>
+        <option name="200">200 iteraciones</option>
+        <option name="500">500 iteraciones</option>
+        <option name="1000">1000 iteraciones</option>
+      </select>
     </div>
     <div style="margin: 0 auto">
       <header>Simulador para encontrar la ruta de escape óptima</header>
