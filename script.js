@@ -6,7 +6,8 @@ window.onload = function () {
     const startButton = document.getElementById("start");
     const rho = document.getElementById("rho");
     const alpha = document.getElementById("alpha");
-    const heuristic = document.getElementById("heuristic");
+    const beta = document.getElementById("beta");
+    const deposit = document.getElementById("deposit");
     const gridWidth = 360;
     const gridHeight = 400;
     const cellSize = 2;
@@ -16,11 +17,11 @@ window.onload = function () {
         pheromone: 1.0
     };
 
-    
+
     // Set canvas size
     canvas.width = gridWidth * cellSize;
     canvas.height = gridHeight * cellSize;
-    
+
     // Create matrix
     for (let x = 0; x < gridWidth; x++) {
         let cols = [];
@@ -30,92 +31,57 @@ window.onload = function () {
         grid.push(cols);
     }
 
-    class Ant {
-        constructor(startX, startY, alpha, heuristic, id) {
-            this.currentX = startX; // Actual coord (x)
-            this.currentY = startY; // Actual coord (y)
-            this.visited = [{ x: startX, y: startY }]; // Cells where the ant passes
-            this.alpha = alpha; // Influence of pheromone
-            this.heuristic = heuristic; // Influence of heuristic
-            this.id = id; // Assigns an ID to the current ant
-        }
+    function ant_move(x, y, alpha, beta) {
+        function calcCost(pheromone) {
+            let sum = 0;
+            let distances = [];
+            let costs = [];
 
-        move(grid) {
-            function choosePath(pheromone) {
-                // Calculate the sum of all pheromone
-                const totalSum = pheromone.reduce((sum, value) => sum + value, 0);
-
-                // Calculate probabilities for each value
-                const probabilities = pheromone.map(value => value / totalSum);
-
-                // Determine which variable to choose based on the random number
-                let cumulativeProbability = 0;
-                for (let i = 0; i < probabilities.length; i++) {
-                    cumulativeProbability += probabilities[i];
-                    if (Math.random() < cumulativeProbability) {
-                        return i;
-                    }
+            // Set distances according to the vectors
+            for (let i = 0; i < directions.length; i++) {
+                if (i < 4) {
+                    distances.push(1); // If the movement is a straight line
+                } else {
+                    distances.push(Math.sqrt(2)); // If it is a diagonal
                 }
             }
-            const directions = [
-                { dx: 0, dy: -1 }, // Up
-                { dx: 0, dy: 1 },  // Down
-                { dx: -1, dy: 0 }, // Left
-                { dx: 1, dy: 0 },  // Right
-                { dx: 1, dy: 1 },  // Up-left
-                { dx: 1, dy: -1 }, // Up-right
-                { dx: -1, dy: 1 }, // Down-left
-                { dx: 1, dy: 1 }   // Down-right
-            ];
+            for (let i = 0; i < pheromone.length; i++) {
+                costs.push(Math.pow(pheromone[i], alpha) * Math.pow(distances[i], beta));
+            }
 
-            do {
-                let availableDirections;
-                availableDirections = directions.filter(direction => {
-                    const newX = this.currentX + direction.dx;
-                    const newY = this.currentY + direction.dy;
+            // Calculate probabilities for each value
+            const costSum = costs.reduce((sum, value) => sum + value, 0);
+            const probabilities = costs.map(cost => cost / costSum);
 
-                    // Checks if the new coords are inside the grid
-                    if (newX >= 0 && newX < grid.length && newY >= 0 && newY < grid[newX].length) {
-                        return grid[newX][newY].color === "#ccc" && !this.visited.some(visited => visited.x === newX && visited.y === newY); // Check immediate cells are within bounds and are floor and have not been visited before
-                    } else {   /*      Obstacles colors      */
-                        return !["#2d2d2d", "cyan", "#916242", "brown"].some(obstacle => grid[newX][newY].color === obstacle);
-                    }
-                });
-                console.log(availableDirections)
-
-                if (availableDirections.length === 0) {
-                    availableDirections.push(directions[Math.floor(Math.random() * 4)]);
+            console.log(costSum);
+            for (let i = 0; i < probabilities.length; i++) {
+                sum += probabilities[i];
+                if (Math.random() < sum) {
+                    return i;
                 }
-
-                let available_pheromone = [];
-                for (let i = 0; i < availableDirections.length; i++) {
-                    const x = this.currentX + availableDirections[i].dx;
-                    const y = this.currentY + availableDirections[i].dy;
-                    if (x >= 0 && x < grid.length && y >= 0 && y < grid[0].length) {
-                        available_pheromone.push(grid[x][y].pheromone);
-                    }
-                }
-                console.log("Pheromones available:", available_pheromone);
-                console.log("Chosen path:", choosePath(available_pheromone));
-                const move = availableDirections[choosePath(available_pheromone)];
-
-                console.log("Moving to:", this.currentX + move.dx, "fromX", this.currentX, this.currentY + move.dy, "fromY", this.currentY);
-                console.log(move, (this.visited.length + 1) / 40 + "% completed");
-
-                // Move the ant to the new position
-                this.currentX += move.dx;
-                this.currentY += move.dy;
-
-                if (grid[this.currentX][this.currentY].color === "#02b200") { alert("Se ha encontrado la salida"); break; }
-
-                // Push the new position to the visited list
-                this.visited.push({ x: this.currentX, y: this.currentY });
-
-            } while (this.visited.length < 4000);
+            }
         }
+        const directions = [
+            { x: 0, y: -1 }, // Up
+            { x: 0, y: 1 }, // Down
+            { x: -1, y: 0 }, // Left
+            { x: 1, y: 0 }, // Right
+            { x: 1, y: 1 }, // Up-left
+            { x: 1, y: -1 }, // Up-right
+            { x: -1, y: 1 }, // Down-left
+            { x: 1, y: 1 }  // Down-right
+        ];
+        total_pheromone = [];
+        for (const direction of directions) {
+            const inX = x + direction.x;
+            const inY = y + direction.y;
+            total_pheromone.push(grid[inX][inY].pheromone);
+        };
+        const path = calcCost(total_pheromone);
+
+        const movedTo = { x: x + directions[path].x, y: y + directions[path].y, z: path };
+        return movedTo;
     }
-
-
     function drawRoom() {
         // Floor
         setColor([2, gridWidth - 3], [2, gridHeight - 3], "#ccc");
@@ -164,17 +130,10 @@ window.onload = function () {
             }
         }
     }
-    function drawElements(x, y, visited) {
+    function drawCells(x, y) {
         drawRoom();
-        if (x, y || visited) {
-            if (x, y) {
-                setColor([x - 2, x + 2], [y - 2, y + 2], "red");
-            }
-            if (visited) {
-                for (let i = 0; i < visited.length; i++) {
-                    setColor(visited[i].x, visited[i].y, "green")
-                }
-            }
+        if (x, y) {
+            setColor([x - 2, x + 2], [y - 2, y + 2], "red");
         }
         for (let i = 0; i < grid.length; i++) {
             for (let j = 0; j < grid[i].length; j++) {
@@ -257,7 +216,7 @@ window.onload = function () {
             }
         }
     }
-    drawElements();
+    drawCells();
 
     canvas.addEventListener("click", function (event) {
         startButton.removeAttribute("disabled");
@@ -268,13 +227,10 @@ window.onload = function () {
 
         switch (grid[cellX][cellY].color) {
             case "#ccc":
-                const ant = new Ant(cellX, cellY, alpha, heuristic, 1);
-                console.log(`Ha pulsado en el punto (${ant.currentX}, ${ant.currentY})`);
-
-                ant.move(grid);
-                console.log(`La hormiga se ha desplazado al punto (${ant.currentX}, ${ant.currentY})`);
-                drawElements(cellX, cellY, ant.visited);
-                console.log(ant.visited)
+                console.log("Coordenadas iniciales:", cellX, cellY);
+                drawCells(cellX, cellY);
+                let ant = ant_move(cellX, cellY, alpha.value, beta.value);
+                console.log("La hormiga se ha desplazado a la celda:", ant.x, ant.y, ant.z);
                 break;
             case "red":
                 alert("Por favor, seleccione otra ubicación o pulse el botón de marcar el punto de partida")
@@ -288,6 +244,6 @@ window.onload = function () {
         ants_value.textContent = antsRange.value
     });
     document.getElementById("reset").addEventListener("click", function () {
-        location.reload();
+        drawCells();
     });
 };
