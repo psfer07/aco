@@ -82,7 +82,19 @@ window.onload = function () {
         const movedTo = { x: x + directions[path].x, y: y + directions[path].y, z: path };
         return movedTo;
     }
-    function drawRoom() {
+    function setColor(x, y, color) {
+        const X = Array.isArray(x) ? x[0] : x;
+        const endX = Array.isArray(x) ? x[1] : x;
+        const Y = Array.isArray(y) ? y[0] : y;
+        const endY = Array.isArray(y) ? y[1] : y;
+
+        for (let i = X; i <= endX; i++) {
+            for (let j = Y; j <= endY; j++) {
+                grid[i][j].color = color
+            }
+        }
+    }
+    function drawCells(x, y) {
         // Floor
         setColor([2, gridWidth - 3], [2, gridHeight - 3], "#ccc");
         // Walls
@@ -117,24 +129,11 @@ window.onload = function () {
                 }
             }
         }
-    }
-    function setColor(x, y, color) {
-        const X = Array.isArray(x) ? x[0] : x;
-        const endX = Array.isArray(x) ? x[1] : x;
-        const Y = Array.isArray(y) ? y[0] : y;
-        const endY = Array.isArray(y) ? y[1] : y;
-
-        for (let i = X; i <= endX; i++) {
-            for (let j = Y; j <= endY; j++) {
-                grid[i][j].color = color
-            }
-        }
-    }
-    function drawCells(x, y) {
-        drawRoom();
+        // Where the user clicks
         if (x, y) {
             setColor([x - 2, x + 2], [y - 2, y + 2], "red");
         }
+        // Paints each cell with its corresponding color
         for (let i = 0; i < grid.length; i++) {
             for (let j = 0; j < grid[i].length; j++) {
                 paint.fillStyle = grid[i][j].color;
