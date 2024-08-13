@@ -6,17 +6,15 @@ window.onload = function () {
     const alpha = document.getElementById("alpha");
     const beta = document.getElementById("beta");
     const deposit = document.getElementById("deposit");
-    const gridWidth = 360;
-    const gridHeight = 400;
-    const cellSize = 2;
+    const gridWidth = 180;
+    const gridHeight = 200;
+    const cellSize = 4;
     let start;
     let grid = [];
-    let visited = [];
     let properties = { // Each cell will have these properties by default
         color: "#ccc",
         pheromone: 1.0
     };
-
 
     // Set canvas size
     canvas.width = gridWidth * cellSize;
@@ -124,18 +122,18 @@ window.onload = function () {
             // Tables
             const table = obstacles.tables;
             for (let sector = 0; sector < table.sectors.count; sector++) {
-                const sectorX = 2.8 * table.margins.marginsector * sector + table.margins.marginsector * 0.5;
+                const sectorX = 2.8 * table.margins.marginsector * sector + table.margins.marginsector * 0.6;
                 for (let col = 0; col < table.sectors.cols; col++) {
                     const tableX = sectorX + col * (table.width + table.margins.marginX);
                     for (let row = 0; row < table.sectors.rows; row++) {
-                        const tableY = 90 + row * (table.margins.marginY + table.height);
+                        const tableY = 48 + row * (table.margins.marginY + table.height);
                         setColor([tableX, tableX + table.width], [tableY, tableY + table.height], table.color);
                     }
                 }
             }
             // Where the user clicks
             if (x, y) {
-                setColor([x - 2, x + 2], [y - 2, y + 2], "red");
+                setColor([x - 1, x + 1], [y - 1, y + 1], "red");
             }
         } else { setColor(x, y, "green"); }
 
@@ -149,8 +147,8 @@ window.onload = function () {
     }
     function isFloor(x, y) {
         let state = true;
-        for (let i = x - 2; i <= x + 2; i++) {
-            for (let j = y - 2; j <= y + 2; j++) {
+        for (let i = x - 1; i <= x + 1; i++) {
+            for (let j = y - 1; j <= y + 1; j++) {
                 if (grid[i][j].color != "#ccc") {
                     state = false;
                 }
@@ -166,13 +164,15 @@ window.onload = function () {
         }
     }
     function antStart(initial, alpha, beta, rho, deposit) {
+        let visited = [];
         let x = initial.x;
         let y = initial.y;
-        for (let i = 0; i < 40; i++) {
+        for (let i = 0; i < 750000; i++) {
+            console.log(x, y);
+            pheromoneEvaporation(rho);
             let ant = ant_move(x, y, visited, alpha, beta);
             visited.push({ x: ant.x, y: ant.y });
             drawCells(ant.x, ant.y, 1);
-            pheromoneEvaporation(rho);
             console.log("La hormiga se ha desplazado a la celda:", ant.x, ant.y);
             x = ant.x;
             y = ant.y;
@@ -187,62 +187,62 @@ window.onload = function () {
         color: "#2d2d2d",
         horz: {
             width: gridWidth,
-            height: 8,
+            height: cellSize,
             positions: [
                 { x: 0, y: 0 },
-                { x: 0, y: gridHeight - 8 }
+                { x: 0, y: gridHeight - cellSize }
             ]
         },
         vert: {
-            width: 8,
+            width: cellSize,
             height: gridHeight,
             positions: [
                 { x: 0, y: 0 },
-                { x: gridWidth - 8, y: 0 }
+                { x: gridWidth - cellSize, y: 0 }
             ]
         },
     }
     const windows = {
-        width: 8,
-        height: 80,
+        width: cellSize,
+        height: 9 * cellSize,
         color: "cyan",
         positions: [
-            { x: 0, y: 30 },
-            { x: 0, y: 160 },
-            { x: 0, y: 290 }
+            { x: 0, y: 3 * cellSize },
+            { x: 0, y: 18 * cellSize },
+            { x: 0, y: 33 * cellSize }
         ]
     }
     const door = {
         color: "#02b200",
-        x: gridWidth - 8,
-        y: 310,
-        width: 8,
-        height: 60
+        x: gridWidth - cellSize,
+        y: gridHeight - 10 * cellSize,
+        width: cellSize,
+        height: 7 * cellSize
     }
     const obstacles = {
         pillars: {
             color: "#2d2d2d",
-            width: 12,
-            height: 50,
+            width: 2 * cellSize,
+            height: 6 * cellSize,
             positions: [
-                { x: 8, y: 110 },
-                { x: 8, y: 240 },
-                { x: gridWidth - 20, y: 120 },
-                { x: gridWidth - 20, y: 164 },
-                { x: gridWidth - 20, y: 212 },
-                { x: gridWidth - 20, y: 250 }
+                { x: cellSize, y: 12 * cellSize },
+                { x: cellSize, y: 27 * cellSize },
+                { x: gridWidth - 2 * cellSize, y: 13 * cellSize },
+                { x: gridWidth - 2 * cellSize, y: 18 * cellSize },
+                { x: gridWidth - 2 * cellSize, y: 24 * cellSize },
+                { x: gridWidth - 2 * cellSize, y: 29 * cellSize }
             ]
         },
         teacher_table: {
             color: "#916242",
-            x: 20,
-            y: 40,
-            width: 120,
-            height: 40
+            x: 4 * cellSize,
+            y: 5 * cellSize,
+            width: 15 * cellSize,
+            height: 5 * cellSize
         },
         tables: {
-            width: 40,
-            height: 20,
+            width: 4 * cellSize,
+            height: 2 * cellSize,
             color: "brown",
             sectors: {
                 count: 3,
@@ -250,16 +250,15 @@ window.onload = function () {
                 rows: 5
             },
             margins: {
-                marginX: 8,
-                marginY: 40,
-                marginsector: 40
+                marginX: 2 * cellSize,
+                marginY: 5 * cellSize,
+                marginsector: 5 * cellSize
             }
         }
     }
     drawCells();
 
     canvas.addEventListener("click", function (event) {
-        visited = [];
         startButton.removeAttribute("disabled");
         startButton.classList.remove("disabled");
         const rect = canvas.getBoundingClientRect();
