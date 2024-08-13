@@ -167,21 +167,27 @@ window.onload = function () {
         let visited = [];
         let x = initial.x;
         let y = initial.y;
-        for (let i = 0; i < 750000; i++) {
-            console.log(x, y);
-            pheromoneEvaporation(rho);
-            let ant = ant_move(x, y, visited, alpha, beta);
-            visited.push({ x: ant.x, y: ant.y });
-            drawCells(ant.x, ant.y, 1);
-            console.log("La hormiga se ha desplazado a la celda:", ant.x, ant.y);
-            x = ant.x;
-            y = ant.y;
+        let i = 0;
+
+        function moveAnt() {
+            if (i < 750000) {
+                console.log(x, y);
+                pheromoneEvaporation(rho);
+                let ant = ant_move(x, y, visited, alpha, beta);
+                visited.push({ x: ant.x, y: ant.y });
+                drawCells(ant.x, ant.y, 1);
+                grid[ant.x][ant.y].pheromone += deposit;
+                console.log("La hormiga se ha desplazado a la celda:", ant.x, ant.y);
+                x = ant.x;
+                y = ant.y;
+                i++;
+                requestAnimationFrame(moveAnt); // Sync with the browser's repaint cycle
+            }
         }
-        for (const visit of visited) {
-            grid[visit.x][visit.y].pheromone += deposit;
-            console.log(visit, grid[visit.x][visit.y].pheromone)
-        }
+
+        moveAnt(); // Start the ant's movement
     }
+
 
     const walls = {
         color: "#2d2d2d",
