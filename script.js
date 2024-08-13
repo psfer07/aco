@@ -32,7 +32,7 @@ window.onload = function () {
     }
 
     function ant_move(x, y, visited, alpha, beta) {
-        function calcCost(pheromone) {
+        function calcCost(pheromone, directions) {
             let sum = 0;
             let distances = [];
             let costs = [];
@@ -46,7 +46,7 @@ window.onload = function () {
                 }
             }
 
-            for (let i = 0; i < pheromone.length; i++) {
+            for (let i = 0; i < directions.length; i++) {
                 costs.push(Math.pow(pheromone[i], alpha) * Math.pow(distances[i], beta));
             }
 
@@ -75,13 +75,14 @@ window.onload = function () {
         for (const direction of directions) {
             const inX = x + direction.x;
             const inY = y + direction.y;
-            if (visited.some(cell => cell.x === x && cell.y === y)) {
-                grid[x][y].pheromone = 0;
-            }
             total_pheromone.push(grid[inX][inY].pheromone);
         };
-        const path = calcCost(total_pheromone, visited);
-        const movedTo = { x: x + directions[path].x, y: y + directions[path].y };
+        available_directions = directions.filter(direction => {
+            return !visited.some(visit => x + direction.x === visit.x && y + direction.y === visit.y);
+        });
+        const path = calcCost(total_pheromone, available_directions);
+        console.log(path, available_directions)
+        const movedTo = { x: x + available_directions[path].x, y: y + available_directions[path].y };
         return movedTo;
     }
     function setColor(x, y, color) {
@@ -160,26 +161,23 @@ window.onload = function () {
     function pheromoneEvaporation(rho) {
         for (let i = 0; i < gridWidth; i++) {
             for (let j = 0; j < gridHeight; j++) {
-                grid[i][j].pheromone = (1 - rho) * grid[i][j].pheromone;
+                grid[i][j].pheromone = (1 - (rho / 5)) * grid[i][j].pheromone;
             }
         }
     }
     function antStart(initial, alpha, beta, rho, deposit) {
         let x = initial.x;
         let y = initial.y;
-        let k = 0;
-        do {
+        for (let i = 0; i < 40; i++) {
             let ant = ant_move(x, y, visited, alpha, beta);
-            drawCells(ant.x, ant.y, 1);
             visited.push({ x: ant.x, y: ant.y });
-            console.log("La hormiga se ha desplazado a la celda:", visited);
+            drawCells(ant.x, ant.y, 1);
             pheromoneEvaporation(rho);
+            console.log("La hormiga se ha desplazado a la celda:", ant.x, ant.y);
             x = ant.x;
             y = ant.y;
-            k++;
-        } while (k < 20)
+        }
         for (const visit of visited) {
-            console.log(alpha, beta, rho, deposit)
             grid[visit.x][visit.y].pheromone += deposit;
             console.log(visit, grid[visit.x][visit.y].pheromone)
         }
@@ -265,7 +263,10 @@ window.onload = function () {
         startButton.removeAttribute("disabled");
         startButton.classList.remove("disabled");
         const rect = canvas.getBoundingClientRect();
-        start = { x: Math.floor((event.clientX - rect.left) / cellSize), y: Math.floor((event.clientY - rect.top) / cellSize) };
+        start = {
+            x: Math.floor((event.clientX - rect.left) / cellSize),
+            y: Math.floor((event.clientY - rect.top) / cellSize)
+        };
 
         if (isFloor(start.x, start.y)) {
             console.log("Coordenadas establecidas en:", start.x, start.y);
