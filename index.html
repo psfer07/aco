@@ -11,34 +11,31 @@
 
 <body>
   <div style="display: flex">
-    <div style="margin-top: 20vh">
+    <div style="margin-top: 5vh">
       <h2>Parámetros numéricos</h2>
       <p>Evaporación de la feromona</p>
       <input type="number" id="rho" step="0.1" min="0" value="0.1">
       <p>Valor de alfa</p>
       <input type="number" id="alpha" step="0.1" min="0" value="2">
       <p>Valor de beta</p>
-      <input type="number" id="beta" step="0.1" min="0" value="5">
+      <input type="number" id="beta" step="0.1" min="0" value="2">
       <p>Valor de heurística (feromona depositada)</p>
       <input type="number" id="deposit" step="0.1" min="0" value="4">
       <p>Número de iteraciones (idas y vueltas de cada hormiga)</p>
-      <select id="interactions">
-        <option name="20">20 iteraciones</option>
-        <option name="50">50 iteraciones</option>
-        <option name="100">100 iteraciones</option>
-        <option name="200">200 iteraciones</option>
-        <option name="500">500 iteraciones</option>
-        <option name="1000">1000 iteraciones</option>
+      <select id="steps">
+        <option name="20">20 pasos</option>
+        <option name="50">50 pasos</option>
+        <option name="100">100 pasos</option>
+        <option name="200">200 pasos</option>
+        <option name="500">500 pasos</option>
+        <option name="1000">1000 pasos</option>
       </select>
     </div>
     <div style="margin: 0 auto">
       <header>Simulador para encontrar la ruta de escape óptima</header>
       <canvas id="canvas_render"></canvas>
-      <div style="margin-top: 1vh; margin-left: 5vh;">
-        <label for="ants">Cantidad de hormigas:</label>
-        <span id="ants_value">10</span>
-        <input type="range" id="ants" min="1" max="50" value="10">
-        <button class="disabled " id="start">Establecer punto de partida</button>
+      <div style="margin-top: 1vh; margin-left: 22vh">
+        <button id="start">Iniciar/Detener la simulación</button>
         <button class="reset" id="reset">Reiniciar simulador</button>
       </div>
     </div>
