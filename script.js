@@ -9,7 +9,8 @@ window.onload = function () {
     const gridWidth = 180;
     const gridHeight = 200;
     const cellSize = 4;
-    let start;
+    let start, alreadyRunning;
+    const objects = [];
     let grid = [];
     let properties = { // Each cell will have these properties by default
         color: "#ccc",
@@ -29,7 +30,7 @@ window.onload = function () {
         grid.push(cols);
     }
 
-    function ant_move(x, y, visited, alpha, beta) {
+    function ant_move(x, y, visited, objects, alpha, beta) {
         function calcCost(pheromone, directions) {
             let sum = 0;
             let distances = [];
@@ -76,12 +77,11 @@ window.onload = function () {
             total_pheromone.push(grid[inX][inY].pheromone);
         };
         available_directions = directions.filter(direction => {
-            return !visited.some(visit => x + direction.x === visit.x && y + direction.y === visit.y);
+            return !objects.some(object => x + direction.x === object.x && y + direction.y === object.y) &&
+                !visited.some(visit => x + direction.x === visit.x && y + direction.y === visit.y);
         });
         const path = calcCost(total_pheromone, available_directions);
-        console.log(path, available_directions)
-        const movedTo = { x: x + available_directions[path].x, y: y + available_directions[path].y };
-        return movedTo;
+        return { x: x + available_directions[path].x, y: y + available_directions[path].y, dirs: available_directions };
     }
     function setColor(x, y, color) {
         const X = Array.isArray(x) ? x[0] : x;
@@ -164,28 +164,38 @@ window.onload = function () {
         }
     }
     function antStart(initial, alpha, beta, rho, deposit) {
+        alreadyRunning = true;
         let visited = [];
-        let x = initial.x;
-        let y = initial.y;
+        let { x, y } = initial;
         let i = 0;
+        const delay = 20;
+        let lastTime = 0;
 
-        function moveAnt() {
-            if (i < 750000) {
-                console.log(x, y);
+        function moveAnt(timestamp) {
+            if (timestamp - lastTime >= delay && i < 750000) {
                 pheromoneEvaporation(rho);
-                let ant = ant_move(x, y, visited, alpha, beta);
+                let [oldX, oldY] = [x, y];
+                let ant;
+                try {
+                    ant = ant_move(x, y, visited, objects, alpha, beta);
+                } catch (error) {
+                    if (ant.dirs.length === 0) {
+                        ant = ant_move(oldX, oldY, visited, objects, alpha, beta);
+                    }
+                }
+                console.log(ant.dirs.length);
                 visited.push({ x: ant.x, y: ant.y });
                 drawCells(ant.x, ant.y, 1);
                 grid[ant.x][ant.y].pheromone += deposit;
-                console.log("La hormiga se ha desplazado a la celda:", ant.x, ant.y);
-                x = ant.x;
-                y = ant.y;
+                [x, y] = [ant.x, ant.y];
                 i++;
-                requestAnimationFrame(moveAnt); // Sync with the browser's repaint cycle
+                lastTime = timestamp;
             }
+
+            if (i < 750000) requestAnimationFrame(moveAnt); // Continue the loop
         }
 
-        moveAnt(); // Start the ant's movement
+        requestAnimationFrame(moveAnt); // Start the loop
     }
 
 
@@ -263,7 +273,11 @@ window.onload = function () {
         }
     }
     drawCells();
-
+    for (let i = 0; i < gridWidth; i++) {
+        for (let j = 0; j < gridHeight; j++) {
+            if (grid[i][j].color != "#ccc" && grid[i][j].color != "red" && grid[i][j].color != "green" && grid[i][j].color != "#02b200") { objects.push({ x: i, y: j }); }
+        }
+    }
     canvas.addEventListener("click", function (event) {
         startButton.removeAttribute("disabled");
         startButton.classList.remove("disabled");
@@ -283,9 +297,9 @@ window.onload = function () {
         }
     });
     document.getElementById("reset").addEventListener("click", function () {
-        drawCells();
+        location.reload();
     });
     startButton.addEventListener("click", function () {
-        if (start) { antStart(start, Number(alpha.value), Number(beta.value), Number(rho.value), Number(deposit.value)); }
+        if (start && !alreadyRunning) { antStart(start, Number(alpha.value), Number(beta.value), Number(rho.value), Number(deposit.value)); }
     });
 };
