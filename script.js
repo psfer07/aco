@@ -30,6 +30,98 @@ window.onload = function () {
         grid.push(cols);
     }
 
+    class Ant {
+        constructor(x, y, visited, objects, alpha, beta, deposit, rho) {
+            this.x = x;
+            this.y = y;
+            this.visited = visited;
+            this.objects = objects;
+            this.alpha = alpha;
+            this.beta = beta;
+            this.deposit = deposit;
+            this.rho = rho;
+            this.directions = [
+                { x: 0, y: -1 }, // Up
+                { x: 0, y: 1 }, // Down
+                { x: -1, y: 0 }, // Left
+                { x: 1, y: 0 }, // Right
+                { x: -1, y: -1 }, // Up-left
+                { x: 1, y: -1 }, // Up-right
+                { x: -1, y: 1 }, // Down-left
+                { x: 1, y: 1 }  // Down-right
+            ];
+        }
+        _calcCost(pheromone, directions) {
+            let sum = 0;
+            let distances = [];
+            let costs = [];
+
+            // Set distances according to the vectors
+            for (const direction of directions) {
+                if (Math.abs(direction.x) + Math.abs(direction.y) === 2) { // If it moves in two directions
+                    distances.push(Math.sqrt(2));
+                } else {
+                    distances.push(1); // Other options treated as straight lines
+                }
+            }
+
+            for (let i = 0; i < directions.length; i++) {
+                costs.push(Math.pow(pheromone[i], this.alpha) * Math.pow(distances[i], this.beta));
+            }
+            // Calculate probabilities for each value
+            const costSum = costs.reduce((sum, value) => sum + value, 0);
+            const probabilities = costs.map(cost => cost / costSum);
+            console.log(costs, costSum, probabilities, pheromone, distances);
+
+            for (let i = 0; i < probabilities.length; i++) {
+                sum += probabilities[i];
+                if (Math.random() < sum) {
+                    return i;
+                }
+            }
+        }
+        move(grid) {
+            let total_pheromone = [];
+            for (const direction of this.directions) {
+                const inX = this.x + direction.x;
+                const inY = this.y + direction.y;
+                total_pheromone.push(grid[inX][inY].pheromone);
+            };
+            let available_directions = this.directions.filter(direction => {
+                return !this.objects.some(object => this.x + direction.x === object.x && this.y + direction.y === object.y) &&
+                    !this.visited.some(visit => this.x + direction.x === visit.x && this.y + direction.y === visit.y);
+            });
+            if (available_directions.length === 0) {
+                const revert = this._revertMove(available_directions);
+                this.x = revert.oldX;
+                this.y = revert.oldY;
+                available_directions = revert.dirs;
+                console.log(this.x, this.y, available_directions);
+            }
+            console.log(this.x, this.y, available_directions);
+            const path = this._calcCost(total_pheromone, available_directions);
+            console.log("Available directions:", available_directions.length, available_directions)
+            grid[this.x + available_directions[path].x][this.y + available_directions[path].y].pheromone += this.deposit;
+            return { x: this.x + available_directions[path].x, y: this.y + available_directions[path].y };
+        }
+        _revertMove(available_directions) {
+            let oldX, oldY;
+            do {
+                let lastVisited = this.visited[this.visited.length - 1]; // Get the new last element safely
+                let { x: oldX, y: oldY } = this.visited[this.visited.length - 2]; // Get the new last element safely
+
+                available_directions = this.directions.filter(direction => {
+                    return !this.objects.some(object => oldX + direction.x === object.x && oldY + direction.y === object.y) &&
+                        !this.visited.some(visit => oldX + direction.x === visit.x && oldY + direction.y === visit.y) &&
+                        !(lastVisited.x === oldX + direction.x && lastVisited.y === oldY + direction.y); // Avoid revisiting last visited
+                });
+                console.log("Old coords", oldX, oldY)
+                console.log("Available directions left", available_directions)
+            } while (available_directions < 2)
+            return { x: oldX, y: oldY, dirs: available_directions };
+        }
+    }
+
     function setColor(x, y, color) {
         const X = Array.isArray(x) ? x[0] : x;
         const endX = Array.isArray(x) ? x[1] : x;
@@ -103,76 +195,6 @@ window.onload = function () {
         }
         return state;
     }
-    function ant_move(x, y, visited, objects, alpha, beta) {
-        function calcCost(pheromone, directions) {
-            let sum = 0;
-            let distances = [];
-            let costs = [];
-
-            // Set distances according to the vectors
-            for (let i = 0; i < directions.length; i++) {
-                if (i < 4) {
-                    distances.push(1); // If the movement is a straight line
-                } else {
-                    distances.push(Math.sqrt(2)); // If it is a diagonal
-                }
-            }
-
-            for (let i = 0; i < directions.length; i++) {
-                costs.push(Math.pow(pheromone[i], alpha) * Math.pow(distances[i], beta));
-            }
-
-            // Calculate probabilities for each value
-            const costSum = costs.reduce((sum, value) => sum + value, 0);
-            const probabilities = costs.map(cost => cost / costSum);
-
-            for (let i = 0; i < probabilities.length; i++) {
-                sum += probabilities[i];
-                if (Math.random() < sum) {
-                    return i;
-                }
-            }
-        }
-        function backTrack(visited) {
-            if (available_directions.length === 0) {
-                let { x: oldX, y: oldY } = visited.pop(); // Get the new last element safely
-
-                available_directions = directions.filter(direction => {
-                    return !objects.some(object => oldX + direction.x === object.x && oldY + direction.y === object.y) &&
-                        !visited.some(visit => oldX + direction.x === visit.x && oldY + direction.y === visit.y) &&
-                        !(lastVisited.x === oldX + direction.x && lastVisited.y === oldY + direction.y); // Avoid revisiting last visited
-                });
-                return { x: oldX, y: oldY };
-            }
-        }
-        const directions = [
-            { x: 0, y: -1 }, // Up
-            { x: 0, y: 1 }, // Down
-            { x: -1, y: 0 }, // Left
-            { x: 1, y: 0 }, // Right
-            { x: -1, y: -1 }, // Up-left
-            { x: 1, y: -1 }, // Up-right
-            { x: -1, y: 1 }, // Down-left
-            { x: 1, y: 1 }  // Down-right
-        ];
-        let total_pheromone = [];
-        for (const direction of directions) {
-            const inX = x + direction.x;
-            const inY = y + direction.y;
-            total_pheromone.push(grid[inX][inY].pheromone);
-        };
-        available_directions = directions.filter(direction => {
-            return !objects.some(object => x + direction.x === object.x && y + direction.y === object.y) &&
-                !visited.some(visit => x + direction.x === visit.x && y + direction.y === visit.y);
-        });
-        console.log(x, y)
-        const path = calcCost(total_pheromone, available_directions);
-        console.log("Hola ", available_directions.length, available_directions)
-        if (available_directions.length === 0) {
-            return backTrack(visited);
-        }
-        return { x: x + available_directions[path].x, y: y + available_directions[path].y };
-    }
     function pheromoneEvaporation(rho) {
         for (let i = 0; i < gridWidth; i++) {
             for (let j = 0; j < gridHeight; j++) {
@@ -185,17 +207,20 @@ window.onload = function () {
         let visited = [];
         let { x, y } = initial;
         let i = 0;
-        const delay = 0;
+        const delay = 200;
         let lastTime = 0;
 
         function moveAnt(timestamp) {
-            if (timestamp - lastTime >= delay && i < 750000) {
+            if (timestamp - lastTime >= delay && i < 100000) {
                 pheromoneEvaporation(rho);
-                const ant = ant_move(x, y, visited, objects, alpha, beta);
-                visited.push({ x: ant.x, y: ant.y });
-                drawCells(ant.x, ant.y, 1);
-                grid[ant.x][ant.y].pheromone += deposit;
-                [x, y] = [ant.x, ant.y];
+                const ant = new Ant(x, y, visited, objects, alpha, beta, deposit, rho);
+                const movedTo = ant.move(grid);
+                if (movedTo == visited[visited.length - 1]) {
+                    return
+                }
+                visited.push({ x: movedTo.x, y: movedTo.y });
+                drawCells(movedTo.x, movedTo.y, 1);
+                [x, y] = [movedTo.x, movedTo.y];
                 i++;
                 lastTime = timestamp;
             }
@@ -204,6 +229,7 @@ window.onload = function () {
         }
 
         requestAnimationFrame(moveAnt); // Start the loop
+        alreadyRunning = false;
     }
 
 
