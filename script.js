@@ -101,6 +101,12 @@ window.onload = function () {
             console.log(this.x, this.y, available_directions);
             const path = this._calcCost(total_pheromone, available_directions);
             console.log("Available directions:", available_directions.length, available_directions)
+            const gridHeight = grid[0].length;
+            for (let i = 0; i < grid.length; i++) {
+                for (let j = 0; j < gridHeight; j++) {
+                    grid[i][j].pheromone = (1 - (this.rho / 5)) * grid[i][j].pheromone;
+                }
+            }
             grid[this.x + available_directions[path].x][this.y + available_directions[path].y].pheromone += this.deposit;
             return { x: this.x + available_directions[path].x, y: this.y + available_directions[path].y };
         }
@@ -195,14 +201,7 @@ window.onload = function () {
         }
         return state;
     }
-    function pheromoneEvaporation(rho) {
-        for (let i = 0; i < gridWidth; i++) {
-            for (let j = 0; j < gridHeight; j++) {
-                grid[i][j].pheromone = (1 - (rho / 5)) * grid[i][j].pheromone;
-            }
-        }
-    }
-    function antStart(initial, alpha, beta, rho, deposit) {
+    function antStart(initial, alpha, beta, deposit, rho) {
         alreadyRunning = true;
         let visited = [];
         let { x, y } = initial;
@@ -212,7 +211,6 @@ window.onload = function () {
 
         function moveAnt(timestamp) {
             if (timestamp - lastTime >= delay && i < 100000) {
-                pheromoneEvaporation(rho);
                 const ant = new Ant(x, y, visited, objects, alpha, beta, deposit, rho);
                 const movedTo = ant.move(grid);
                 if (movedTo == visited[visited.length - 1]) {
