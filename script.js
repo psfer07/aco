@@ -71,11 +71,6 @@ window.onload = function () {
             // Calculate probabilities for each value
             const costSum = costs.reduce((sum, value) => sum + value, 0);
             const probabilities = costs.map(cost => cost / costSum);
-            // console.log("Costs", costs);
-            // console.log("Total sum", costSum);
-            // console.log("Probabilities", probabilities);
-            // console.log("Pheromone levels", pheromone);
-            // console.log("Distances", distances);
 
             for (let i = 0; i < probabilities.length; i++) {
                 sum += probabilities[i];
@@ -84,60 +79,41 @@ window.onload = function () {
                 }
             }
         }
-        move(grid) {
-            let total_pheromone = [];
-            let available_directions = this.directions.filter(direction => {
-                return !this.objects.some(object => this.x + direction.x === object.x && this.y + direction.y === object.y) &&
-                    !this.visited.some(visit => this.x + direction.x === visit.x && this.y + direction.y === visit.y);
-            });
-            console.log("gyat", this.x, this.y, available_directions);
-            if (available_directions.length === 0) {
-                console.log("Hola mundo");
-                const revert = this._revertMove(available_directions);
-                this.x = revert.x;
-                this.y = revert.y;
-                available_directions = revert.dirs;
-                console.log("wasaaaaaa", this.x, this.y, this.visited[this.visited.length - 1]);
-                console.log("Available directions after reverting:", available_directions.length, available_directions)
+        getDirs(x, y, avoid) {
+            if (!x && !y) {
+                x = this.x;
+                y = this.y;
             }
-            for (const direction of available_directions) {
+            if (avoid) { // If the ant is reverting its path
+                return this.directions.filter(direction => {
+                    return !this.objects.some(object => x + direction.x === object.x && y + direction.y === object.y) &&
+                        !this.visited.some(visit => x + direction.x === visit.x && y + direction.y === visit.y) &&
+                        !avoid.some(deadEnd => deadEnd.x === x + direction.x && deadEnd.y === y + direction.y);
+                });
+            } else {
+                return this.directions.filter(direction => {
+                    return !this.objects.some(object => x + direction.x === object.x && y + direction.y === object.y) &&
+                        !this.visited.some(visit => x + direction.x === visit.x && y + direction.y === visit.y);
+                });
+            }
+        }
+        move(grid, directions) {
+            let total_pheromone = [];
+            for (const direction of directions) {
                 const inX = this.x + direction.x;
                 const inY = this.y + direction.y;
                 total_pheromone.push(grid[inX][inY].pheromone);
             };
-            console.log("After checking dirs", this.x, this.y);
-            console.log(total_pheromone, available_directions);
-            const path = this._calcCost(total_pheromone, available_directions);
-            console.log("Available directions:", path, available_directions.length, available_directions)
-
-            for (const visit of this.visited) {
-                grid[visit.x][visit.y].pheromone = (1 - (this.rho / 5)) * grid[visit.x][visit.y].pheromone;
-            }
-            const newX = this.x + available_directions[path].x;
-            const newY = this.y + available_directions[path].y;
+            const path = this._calcCost(total_pheromone, directions);
+            const newX = this.x + directions[path].x;
+            const newY = this.y + directions[path].y;
             grid[newX][newY].pheromone += this.deposit;
             return { x: newX, y: newY };
         }
-        _revertMove(available_directions) {
-            let lastVisited = this.visited.pop(); // Remove from visited the last element
-            let { x: oldX, y: oldY } = this.visited[this.visited.length - 1]; // Get the new last element
-            available_directions = this.directions.filter(direction => {
-                return !this.objects.some(object => oldX + direction.x === object.x && oldY + direction.y === object.y) &&
-                    !this.visited.some(visit => oldX + direction.x === visit.x && oldY + direction.y === visit.y) &&
-                    !(lastVisited.x === oldX + direction.x && lastVisited.y === oldY + direction.y); // Avoid revisiting last visited
-            });
-            do {
-                let { x: oldX, y: oldY } = this.visited[this.visited.length - 2]; // Get the new last element
-                let lastVisited = this.visited.pop(); // Remove from visited the last element
-                available_directions = this.directions.filter(direction => {
-                    return !this.objects.some(object => oldX + direction.x === object.x && oldY + direction.y === object.y) &&
-                        !this.visited.some(visit => oldX + direction.x === visit.x && oldY + direction.y === visit.y) &&
-                        !(lastVisited.x === oldX + direction.x && lastVisited.y === oldY + direction.y); // Avoid revisiting last visited
-                });
-            } while (available_directions < 2)
-            console.log("Old coords", oldX, oldY)
-            console.log("Available directions left", available_directions)
-            return { x: oldX, y: oldY, dirs: available_directions };
+        revertMove() {
+            const deadEnd = this.visited.pop(); // Remove from visited the last element
+            const { x, y } = this.visited[this.visited.length - 1]; // Get the new last element
+            return { x: x, y: y, avoid: deadEnd };
         }
     }
 
@@ -216,31 +192,44 @@ window.onload = function () {
     }
     function antStart(initial, alpha, beta, deposit, rho) {
         alreadyRunning = true;
-        const delay = 0;
-        let visited = [];
-        let { x, y } = initial;
         let i = 0;
         let lastTime = 0;
+        let { x, y } = initial;
+        let visited = [];
+        let deadEnds = [];
         visited.push({ x: x, y: y });
 
         function moveAnt(timestamp) {
-            if (timestamp - lastTime >= delay && i < 50000) {
-                const ant = new Ant(x, y, visited, objects, alpha, beta, deposit, rho);
-                const movedTo = ant.move(grid);
-                if (movedTo == visited[visited.length - 1]) {
-                    return
+            if (timestamp - lastTime >= 0 && i < 50000) {
+                let ant = new Ant(x, y, visited, objects, alpha, beta, deposit, rho);
+                let dirs = ant.getDirs(x, y);
+                if (dirs.length === 0) {
+                    let newdirs = [];
+                    do {
+                        let revert = ant.revertMove()
+                        deadEnds.push(revert.avoid);
+                        [x, y] = [revert.x, revert.y];
+                        newdirs = ant.getDirs(x, y, deadEnds);
+                    } while (newdirs.length < 1)
+                    ant.x = x;
+                    ant.y = y;
+                    dirs = newdirs;
+                }
+                const movedTo = ant.move(grid, dirs);
+                if (i % 50 === 0) { // Evaporates pheromone every 50 iterations
+                    for (const visit of visited) { grid[visit.x][visit.y].pheromone = (1 - this.rho) * grid[visit.x][visit.y].pheromone; }
                 }
                 visited.push({ x: movedTo.x, y: movedTo.y });
                 drawCells(movedTo.x, movedTo.y, 1);
                 [x, y] = [movedTo.x, movedTo.y];
+                console.log(x, y);
                 i++;
                 lastTime = timestamp;
             }
-
             if (i < 750000) requestAnimationFrame(moveAnt); // Continue the loop
         }
-
         requestAnimationFrame(moveAnt); // Start the loop
+        alreadyRunning = false;
     }
 
 
@@ -346,6 +335,5 @@ window.onload = function () {
     });
     startButton.addEventListener("click", function () {
         if (start && !alreadyRunning) { antStart(start, Number(alpha.value), Number(beta.value), Number(rho.value), Number(deposit.value)); }
-        alreadyRunning = false;
     });
 };
