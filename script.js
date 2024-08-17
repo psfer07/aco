@@ -9,7 +9,7 @@ window.onload = function () {
     const gridWidth = 180;
     const gridHeight = 200;
     const cellSize = 4;
-    let start, alreadyRunning;
+    let start;
     const objects = [];
     let grid = [];
     let properties = { // Each cell will have these properties by default
@@ -80,7 +80,7 @@ window.onload = function () {
             }
         }
         getDirs(x, y, avoid) {
-            if (!x && !y) {
+            if ((!(x && y))) {
                 x = this.x;
                 y = this.y;
             }
@@ -114,6 +114,18 @@ window.onload = function () {
             const deadEnd = this.visited.pop(); // Remove from visited the last element
             const { x, y } = this.visited[this.visited.length - 1]; // Get the new last element
             return { x: x, y: y, avoid: deadEnd };
+        }
+        checkExit(x, y, grid) {
+            if (!(x && y)) {
+                x = this.x;
+                y = this.y;
+            }
+            for (const direction of this.directions) {
+                let exitX = x + direction.x;
+                let exitY = y + direction.y;
+                if (grid[exitX][exitY].color === "#02b200") return true;
+            }
+            return false;
         }
     }
 
@@ -191,7 +203,6 @@ window.onload = function () {
         return state;
     }
     function antStart(initial, alpha, beta, deposit, rho) {
-        alreadyRunning = true;
         let i = 0;
         let lastTime = 0;
         let { x, y } = initial;
@@ -200,7 +211,7 @@ window.onload = function () {
         visited.push({ x: x, y: y });
 
         function moveAnt(timestamp) {
-            if (timestamp - lastTime >= 0 && i < 50000) {
+            if (timestamp - lastTime >= 0) {
                 let ant = new Ant(x, y, visited, objects, alpha, beta, deposit, rho);
                 let dirs = ant.getDirs(x, y);
                 if (dirs.length === 0) {
@@ -225,11 +236,14 @@ window.onload = function () {
                 console.log(x, y);
                 i++;
                 lastTime = timestamp;
+                if (ant.checkExit(x, y, grid)) { // If the door is found
+                    console.log("Se ha encontrado la salida");
+                    return;
+                }
             }
-            if (i < 750000) requestAnimationFrame(moveAnt); // Continue the loop
+            requestAnimationFrame(moveAnt); // Continue the loop
         }
         requestAnimationFrame(moveAnt); // Start the loop
-        alreadyRunning = false;
     }
 
 
@@ -334,6 +348,6 @@ window.onload = function () {
         location.reload();
     });
     startButton.addEventListener("click", function () {
-        if (start && !alreadyRunning) { antStart(start, Number(alpha.value), Number(beta.value), Number(rho.value), Number(deposit.value)); }
+        if (start) { antStart(start, Number(alpha.value), Number(beta.value), Number(rho.value), Number(deposit.value)); }
     });
 };
