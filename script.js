@@ -59,7 +59,7 @@ window.onload = function () {
             // Set distances according to the vectors
             for (const direction of directions) {
                 if (Math.abs(direction.x) + Math.abs(direction.y) === 2) { // If it moves in two directions
-                    distances.push(Math.sqrt(2));
+                    distances.push(1 / Math.sqrt(2));
                 } else {
                     distances.push(1); // Other options treated as straight lines
                 }
