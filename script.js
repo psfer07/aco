@@ -22,16 +22,21 @@ window.onload = function () {
     canvas.height = gridHeight * cellSize;
 
     // Create matrix
+    let gradientX = 0;
     for (let x = 0; x < gridWidth; x++) {
         let cols = [];
+        let gradientY = 0;
+        gradientX += 0.00015;
         for (let y = 0; y < gridHeight; y++) {
+            gradientY += 0.00015;
+            properties.pheromone = properties.pheromone + gradientX * gradientY;
             cols.push({ ...properties });
         }
         grid.push(cols);
     }
 
     class Ant {
-        constructor(x, y, visited, objects, alpha, beta, deposit, rho) {
+        constructor(x, y, visited, objects, alpha, beta, deposit) {
             this.x = x;
             this.y = y;
             this.visited = visited;
@@ -39,7 +44,6 @@ window.onload = function () {
             this.alpha = alpha;
             this.beta = beta;
             this.deposit = deposit;
-            this.rho = rho;
             this.directions = [
                 { x: 0, y: -1 }, // Up
                 { x: 0, y: 1 }, // Down
@@ -71,7 +75,7 @@ window.onload = function () {
             // Calculate probabilities for each value
             const costSum = costs.reduce((sum, value) => sum + value, 0);
             const probabilities = costs.map(cost => cost / costSum);
-
+            console.log(pheromone)
             for (let i = 0; i < probabilities.length; i++) {
                 sum += probabilities[i];
                 if (Math.random() < sum) {
@@ -143,8 +147,6 @@ window.onload = function () {
     }
     function drawCells(x, y, noReload) {
         if (!noReload) {
-            // Floor
-            setColor([2, gridWidth - 3], [2, gridHeight - 3], "#ccc");
             // Walls
             walls.horz.positions.forEach(wall => {
                 setColor([wall.x, wall.x + walls.horz.width - 1], [wall.y, wall.y + walls.horz.height - 1], walls.color);
@@ -212,7 +214,7 @@ window.onload = function () {
 
         function moveAnt(timestamp) {
             if (timestamp - lastTime >= 0) {
-                let ant = new Ant(x, y, visited, objects, alpha, beta, deposit, rho);
+                let ant = new Ant(x, y, visited, objects, alpha, beta, deposit);
                 let dirs = ant.getDirs(x, y);
                 if (dirs.length === 0) {
                     let newdirs = [];
@@ -228,7 +230,10 @@ window.onload = function () {
                 }
                 const movedTo = ant.move(grid, dirs);
                 if (i % 50 === 0) { // Evaporates pheromone every 50 iterations
-                    for (const visit of visited) { grid[visit.x][visit.y].pheromone = (1 - this.rho) * grid[visit.x][visit.y].pheromone; }
+                    for (let i = 0; i < gridWidth; i++) {
+                        for (let j = 0; j < gridHeight; j++)
+                            grid[i][j].pheromone = (1 - rho) * grid[i][j].pheromone;
+                    }
                 }
                 visited.push({ x: movedTo.x, y: movedTo.y });
                 drawCells(movedTo.x, movedTo.y, 1);
@@ -238,14 +243,17 @@ window.onload = function () {
                 lastTime = timestamp;
                 if (ant.checkExit(x, y, grid)) { // If the door is found
                     console.log("Se ha encontrado la salida");
-                    return;
+                    for (const visit of visited) {
+                        setColor(visit.x, visit.y, "darkgreen");
+                        drawCells();
+                    }
+                    visited = [];
                 }
             }
             requestAnimationFrame(moveAnt); // Continue the loop
         }
         requestAnimationFrame(moveAnt); // Start the loop
     }
-
 
     const walls = {
         color: "#2d2d2d",
@@ -334,7 +342,6 @@ window.onload = function () {
             x: Math.floor((event.clientX - rect.left) / cellSize),
             y: Math.floor((event.clientY - rect.top) / cellSize)
         };
-
         if (isFloor(start.x, start.y)) {
             console.log("Coordenadas establecidas en:", start.x, start.y);
             drawCells(start.x, start.y);
