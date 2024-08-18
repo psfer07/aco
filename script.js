@@ -145,8 +145,10 @@ window.onload = function () {
             }
         }
     }
-    function drawCells(x, y, noReload) {
+    function drawCells(noReload) {
         if (!noReload) {
+            // Floor
+            setColor([2, gridWidth - 3], [2, gridHeight - 3], "#ccc");
             // Walls
             walls.horz.positions.forEach(wall => {
                 setColor([wall.x, wall.x + walls.horz.width - 1], [wall.y, wall.y + walls.horz.height - 1], walls.color);
@@ -179,12 +181,7 @@ window.onload = function () {
                     }
                 }
             }
-            // Where the user clicks
-            if (x, y) {
-                setColor([x - 1, x + 1], [y - 1, y + 1], "red");
-            }
-        } else { setColor(x, y, "green"); }
-
+        }
         // Paints each cell with its corresponding color
         for (let i = 0; i < grid.length; i++) {
             for (let j = 0; j < grid[i].length; j++) {
@@ -236,16 +233,18 @@ window.onload = function () {
                     }
                 }
                 visited.push({ x: movedTo.x, y: movedTo.y });
-                drawCells(movedTo.x, movedTo.y, 1);
+                setColor(movedTo.x, movedTo.y, "green");
+                drawCells(1);
                 [x, y] = [movedTo.x, movedTo.y];
                 console.log(x, y);
                 i++;
                 lastTime = timestamp;
                 if (ant.checkExit(x, y, grid)) { // If the door is found
+                    drawCells();
                     console.log("Se ha encontrado la salida");
                     for (const visit of visited) {
                         setColor(visit.x, visit.y, "darkgreen");
-                        drawCells();
+                        drawCells(1);
                     }
                     visited = [];
                 }
@@ -344,7 +343,9 @@ window.onload = function () {
         };
         if (isFloor(start.x, start.y)) {
             console.log("Coordenadas establecidas en:", start.x, start.y);
-            drawCells(start.x, start.y);
+            drawCells();
+            setColor([start.x - 1, start.x + 1], [start.y - 1, start.y + 1], "red")
+            drawCells(1);
         } else {
             if (grid[start.x][start.y].color === "red") {
                 alert("Por favor, seleccione otro punto o inicie la simulación.")
