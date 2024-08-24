@@ -1,11 +1,6 @@
 window.onload = function () {
     const canvas = document.getElementById("canvas_render");
     const paint = canvas.getContext("2d");
-    const startButton = document.getElementById("start");
-    const rho = document.getElementById("rho");
-    const alpha = document.getElementById("alpha");
-    const beta = document.getElementById("beta");
-    const deposit = document.getElementById("deposit");
     const gridWidth = 180;
     const gridHeight = 200;
     const cellSize = 4;
@@ -140,8 +135,8 @@ window.onload = function () {
             }
         }
     }
-    function drawCells(noReload) {
-        if (!noReload) {
+    function drawCells(reload) {
+        if (!reload) {
             // Floor
             setColor([2, gridWidth - 3], [2, gridHeight - 3], "#ccc");
             // Walls
@@ -196,7 +191,18 @@ window.onload = function () {
         }
         return state;
     }
-    function antStart(initial, alpha, beta, deposit, rho) {
+    function runSimulations(start, alpha, beta, rho, deposit, steps, iteration = 0) {
+        if (iteration < steps) {
+            console.log("Iteration nº", iteration + 1, "of", steps);
+            antStart(start, alpha, beta, rho, deposit, () => {
+                antReturn(alpha, beta, rho, deposit);
+                runSimulations(start, alpha, beta, rho, deposit, steps, iteration + 1);
+            });
+        } else {
+            console.log("All simulations completed.");
+        }
+    }
+    function antStart(initial, alpha, beta, rho, deposit, callback) {
         let i = 0;
         let lastTime = 0;
         let { x, y } = initial;
@@ -227,26 +233,26 @@ window.onload = function () {
                             grid[i][j].pheromone = (1 - rho) * grid[i][j].pheromone;
                     }
                 }
+                i++;
                 visited.push({ x: movedTo.x, y: movedTo.y });
                 setColor(movedTo.x, movedTo.y, "green");
                 drawCells(1);
                 [x, y] = [movedTo.x, movedTo.y];
                 console.log(x, y);
-                i++;
                 lastTime = timestamp;
-                if (ant.checkExit(x, y, grid)) { // If the door is found
-                    drawCells();
-                    console.log("Se ha encontrado la salida");
-                    for (const visit of visited) {
-                        setColor(visit.x, visit.y, "darkgreen");
-                        drawCells(1);
-                    }
-                    visited = [];
+                // If the exit is found
+                if (ant.checkExit(x, y, grid)) {
+                    callback(); // Simulation done
+                    return;
+
                 }
             }
             requestAnimationFrame(moveAnt); // Continue the loop
         }
         requestAnimationFrame(moveAnt); // Start the loop
+    }
+    function antReturn(alpha, beta, rho, deposit) {
+        console.log("Se ha encontrado la salida");
     }
 
     const walls = {
@@ -329,8 +335,6 @@ window.onload = function () {
         }
     }
     canvas.addEventListener("click", function (event) {
-        startButton.removeAttribute("disabled");
-        startButton.classList.remove("disabled");
         const rect = canvas.getBoundingClientRect();
         start = {
             x: Math.floor((event.clientX - rect.left) / cellSize),
@@ -350,7 +354,16 @@ window.onload = function () {
     document.getElementById("reset").addEventListener("click", function () {
         location.reload();
     });
-    startButton.addEventListener("click", function () {
-        if (start) { antStart(start, Number(alpha.value), Number(beta.value), Number(rho.value), Number(deposit.value)); }
+    document.getElementById("start").addEventListener("click", function () {
+        if (start) {
+            const alpha = Number(document.getElementById("alpha").value)
+            const beta = Number(document.getElementById("beta").value)
+            const rho = Number(document.getElementById("rho").value)
+            const deposit = Number(document.getElementById("deposit").value)
+            const steps = Number(document.getElementById("steps").value)
+            runSimulations(start, alpha, beta, rho, deposit, steps);
+        } else {
+            alert("Debes tener seleccionado un punto de partida antes the iniciar la simulación.");
+        }
     });
 };
