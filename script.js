@@ -56,62 +56,58 @@ window.onload = function () {
             ];
         }
         _calcCost(pheromone, directions) {
-            let sum = 0;
-            let distances = [];
             let costs = [];
 
-            // Set distances according to the vectors
-            for (const direction of directions) {
-                if (Math.abs(direction.x) + Math.abs(direction.y) === 2) { // If it moves in two directions
-                    distances.push(1 / Math.sqrt(2));
-                } else {
-                    distances.push(1); // Other options treated as straight lines
-                }
+            for (let i = 0; i < directions.length; i++) {
+                const distance = (Math.abs(directions[i].x) + Math.abs(directions[i].y)) === 2 ? Math.sqrt(2) : 1;
+                const cost = Math.pow(pheromone[i], this.alpha) * Math.pow(1 / distance, this.beta);
+                costs.push(cost);
             }
 
-            for (let i = 0; i < directions.length; i++) {
-                costs.push(Math.pow(pheromone[i], this.alpha) * Math.pow(distances[i], this.beta));
-            }
-            // Calculate probabilities for each value
             const costSum = costs.reduce((sum, value) => sum + value, 0);
             const probabilities = costs.map(cost => cost / costSum);
-            console.log(pheromone)
+
+            let rand = Math.random();
+            let cumulative = 0;
             for (let i = 0; i < probabilities.length; i++) {
-                sum += probabilities[i];
-                if (Math.random() < sum) {
+                cumulative += probabilities[i];
+                if (rand < cumulative) {
                     return i;
                 }
             }
         }
         getDirs(x, y, avoid) {
-            if ((!(x && y))) {
+            if (!(x && y)) {
                 x = this.x;
                 y = this.y;
             }
-            if (avoid) { // If the ant is reverting its path
-                return this.directions.filter(direction => {
-                    return !this.objects.some(object => x + direction.x === object.x && y + direction.y === object.y) &&
-                        !this.visited.some(visit => x + direction.x === visit.x && y + direction.y === visit.y) &&
-                        !avoid.some(deadEnd => deadEnd.x === x + direction.x && deadEnd.y === y + direction.y);
-                });
-            } else {
-                return this.directions.filter(direction => {
-                    return !this.objects.some(object => x + direction.x === object.x && y + direction.y === object.y) &&
-                        !this.visited.some(visit => x + direction.x === visit.x && y + direction.y === visit.y);
-                });
-            }
+            return this.directions.filter(direction => {
+                const newX = x + direction.x;
+                const newY = y + direction.y;
+                const isObject = this.objects.some(object => newX === object.x && newY === object.y);
+                const isVisited = this.visited.some(visit => newX === visit.x && newY === visit.y);
+                const isAvoided = avoid && avoid.some(deadEnd => deadEnd.x === newX && deadEnd.y === newY);
+
+                return !isObject && !isVisited && !isAvoided;
+            });
         }
         move(grid, directions) {
-            let total_pheromone = [];
-            for (const direction of directions) {
+            const total_pheromone = directions.map(direction => {
                 const inX = this.x + direction.x;
                 const inY = this.y + direction.y;
-                total_pheromone.push(grid[inX][inY].pheromone);
-            };
-            const path = this._calcCost(total_pheromone, directions);
-            const newX = this.x + directions[path].x;
-            const newY = this.y + directions[path].y;
+                return grid[inX][inY].pheromone;
+            });
+
+            const index = this._calcCost(total_pheromone, directions);
+            const newX = this.x + directions[index].x;
+            const newY = this.y + directions[index].y;
             grid[newX][newY].pheromone += this.deposit;
+
+            // Update ant's position and visited path
+            this.visited.push({ x: this.x, y: this.y });
+            this.x = newX;
+            this.y = newY;
+
             return { x: newX, y: newY };
         }
         revertMove() {
@@ -124,12 +120,11 @@ window.onload = function () {
                 x = this.x;
                 y = this.y;
             }
-            for (const direction of this.directions) {
-                let exitX = x + direction.x;
-                let exitY = y + direction.y;
-                if (grid[exitX][exitY].color === "#02b200") return true;
-            }
-            return false;
+            return this.directions.some(direction => {
+                const exitX = x + direction.x;
+                const exitY = y + direction.y;
+                return grid[exitX][exitY].color === "#02b200"; // Example condition for exit
+            });
         }
     }
 
