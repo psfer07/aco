@@ -264,15 +264,12 @@ window.onload = function () {
         }
         return state;
     }
-    function runSimulations(start, alpha, beta, rho, deposit, steps, iteration = 0) {
-        if (iteration < steps) {
-            console.log("Iteration nº", iteration + 1, "of", steps);
-            antStart(start, alpha, beta, rho, deposit, () => {
-                antReturn(alpha, beta, rho, deposit);
-                runSimulations(start, alpha, beta, rho, deposit, steps, iteration + 1);
-            });
-        } else {
-            console.log("All simulations completed.");
+    function runSimulations(start, alpha, beta, rho, deposit, steps) {
+        let currentPoint = start;
+        for (let i = 0; i < steps; i++) {
+            console.log("Iteration nº", i + 1, "of", steps);
+            currentPoint = antStart(currentPoint, alpha, beta, rho, deposit); // Update current point
+            antReturn(currentPoint, alpha, beta, rho, deposit); // Use the returned point as new start
         }
     }
     function antStart(initial, alpha, beta, rho, deposit, callback) {
