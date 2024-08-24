@@ -4,13 +4,86 @@ window.onload = function () {
     const gridWidth = 180;
     const gridHeight = 200;
     const cellSize = 4;
-    let start;
     const objects = [];
+    let start;
     let grid = [];
     let properties = { // Each cell will have these properties by default
         color: "#ccc",
         pheromone: 1.0
     };
+    const walls = {
+        color: "#2d2d2d",
+        horz: {
+            width: gridWidth,
+            height: cellSize,
+            positions: [
+                { x: 0, y: 0 },
+                { x: 0, y: gridHeight - cellSize }
+            ]
+        },
+        vert: {
+            width: cellSize,
+            height: gridHeight,
+            positions: [
+                { x: 0, y: 0 },
+                { x: gridWidth - cellSize, y: 0 }
+            ]
+        },
+    }
+    const windows = {
+        width: cellSize,
+        height: 9 * cellSize,
+        color: "cyan",
+        positions: [
+            { x: 0, y: 3 * cellSize },
+            { x: 0, y: 18 * cellSize },
+            { x: 0, y: 33 * cellSize }
+        ]
+    }
+    const door = {
+        color: "#02b200",
+        x: gridWidth - cellSize,
+        y: gridHeight - 10 * cellSize,
+        width: cellSize,
+        height: 7 * cellSize
+    }
+    const obstacles = {
+        pillars: {
+            color: "#2d2d2d",
+            width: 2 * cellSize,
+            height: 6 * cellSize,
+            positions: [
+                { x: cellSize, y: 12 * cellSize },
+                { x: cellSize, y: 27 * cellSize },
+                { x: gridWidth - 2 * cellSize, y: 13 * cellSize },
+                { x: gridWidth - 2 * cellSize, y: 18 * cellSize },
+                { x: gridWidth - 2 * cellSize, y: 24 * cellSize },
+                { x: gridWidth - 2 * cellSize, y: 29 * cellSize }
+            ]
+        },
+        teacher_table: {
+            color: "#916242",
+            x: 4 * cellSize,
+            y: 5 * cellSize,
+            width: 15 * cellSize,
+            height: 5 * cellSize
+        },
+        tables: {
+            width: 4 * cellSize,
+            height: 2 * cellSize,
+            color: "brown",
+            sectors: {
+                count: 3,
+                cols: 2,
+                rows: 5
+            },
+            margins: {
+                marginX: 2 * cellSize,
+                marginY: 5 * cellSize,
+                marginsector: 5 * cellSize
+            }
+        }
+    }
 
     // Set canvas size
     canvas.width = gridWidth * cellSize;
@@ -243,91 +316,17 @@ window.onload = function () {
                 // If the exit is found
                 if (ant.checkExit(x, y, grid)) {
                     callback(); // Simulation done
-                    return;
-
+                    return visited[visited.length - 1];
                 }
             }
             requestAnimationFrame(moveAnt); // Continue the loop
         }
         requestAnimationFrame(moveAnt); // Start the loop
     }
-    function antReturn(alpha, beta, rho, deposit) {
+    function antReturn(returnPoint, alpha, beta, rho, deposit) {
         console.log("Se ha encontrado la salida");
     }
 
-    const walls = {
-        color: "#2d2d2d",
-        horz: {
-            width: gridWidth,
-            height: cellSize,
-            positions: [
-                { x: 0, y: 0 },
-                { x: 0, y: gridHeight - cellSize }
-            ]
-        },
-        vert: {
-            width: cellSize,
-            height: gridHeight,
-            positions: [
-                { x: 0, y: 0 },
-                { x: gridWidth - cellSize, y: 0 }
-            ]
-        },
-    }
-    const windows = {
-        width: cellSize,
-        height: 9 * cellSize,
-        color: "cyan",
-        positions: [
-            { x: 0, y: 3 * cellSize },
-            { x: 0, y: 18 * cellSize },
-            { x: 0, y: 33 * cellSize }
-        ]
-    }
-    const door = {
-        color: "#02b200",
-        x: gridWidth - cellSize,
-        y: gridHeight - 10 * cellSize,
-        width: cellSize,
-        height: 7 * cellSize
-    }
-    const obstacles = {
-        pillars: {
-            color: "#2d2d2d",
-            width: 2 * cellSize,
-            height: 6 * cellSize,
-            positions: [
-                { x: cellSize, y: 12 * cellSize },
-                { x: cellSize, y: 27 * cellSize },
-                { x: gridWidth - 2 * cellSize, y: 13 * cellSize },
-                { x: gridWidth - 2 * cellSize, y: 18 * cellSize },
-                { x: gridWidth - 2 * cellSize, y: 24 * cellSize },
-                { x: gridWidth - 2 * cellSize, y: 29 * cellSize }
-            ]
-        },
-        teacher_table: {
-            color: "#916242",
-            x: 4 * cellSize,
-            y: 5 * cellSize,
-            width: 15 * cellSize,
-            height: 5 * cellSize
-        },
-        tables: {
-            width: 4 * cellSize,
-            height: 2 * cellSize,
-            color: "brown",
-            sectors: {
-                count: 3,
-                cols: 2,
-                rows: 5
-            },
-            margins: {
-                marginX: 2 * cellSize,
-                marginY: 5 * cellSize,
-                marginsector: 5 * cellSize
-            }
-        }
-    }
     drawCells();
     for (let i = 0; i < gridWidth; i++) {
         for (let j = 0; j < gridHeight; j++) {
@@ -356,12 +355,11 @@ window.onload = function () {
     });
     document.getElementById("start").addEventListener("click", function () {
         if (start) {
-            const alpha = Number(document.getElementById("alpha").value)
-            const beta = Number(document.getElementById("beta").value)
-            const rho = Number(document.getElementById("rho").value)
-            const deposit = Number(document.getElementById("deposit").value)
-            const steps = Number(document.getElementById("steps").value)
-            runSimulations(start, alpha, beta, rho, deposit, steps);
+            runSimulations(start, Number(document.getElementById("alpha").value),
+                Number(document.getElementById("beta").value),
+                Number(document.getElementById("rho").value),
+                Number(document.getElementById("deposit").value),
+                Number(document.getElementById("steps").value));
         } else {
             alert("Debes tener seleccionado un punto de partida antes the iniciar la simulación.");
         }
