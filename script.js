@@ -264,15 +264,15 @@ window.onload = function () {
         }
         return state;
     }
-    function runSimulations(start, alpha, beta, rho, deposit, steps) {
+    async function runSimulations(start, alpha, beta, rho, deposit, steps) {
         let currentPoint = start;
         for (let i = 0; i < steps; i++) {
             console.log("Iteration nº", i + 1, "of", steps);
-            currentPoint = antStart(currentPoint, alpha, beta, rho, deposit); // Update current point
-            antReturn(currentPoint, alpha, beta, rho, deposit); // Use the returned point as new start
+            currentPoint = antStart(1, currentPoint, alpha, beta, rho, deposit); // Update current point
+            antStart(0, currentPoint, alpha, beta, rho, deposit); // Use the returned point as new start
         }
     }
-    function antStart(initial, alpha, beta, rho, deposit, callback) {
+    function antStart(state, initial, alpha, beta, rho, deposit) {
         let i = 0;
         let lastTime = 0;
         let { x, y } = initial;
@@ -305,7 +305,7 @@ window.onload = function () {
                 }
                 i++;
                 visited.push({ x: movedTo.x, y: movedTo.y });
-                setColor(movedTo.x, movedTo.y, "green");
+                setColor(movedTo.x, movedTo.y, state ? "green" : "darkgreen");
                 drawCells(1);
                 [x, y] = [movedTo.x, movedTo.y];
                 console.log(x, y);
@@ -319,9 +319,6 @@ window.onload = function () {
             requestAnimationFrame(moveAnt); // Continue the loop
         }
         requestAnimationFrame(moveAnt); // Start the loop
-    }
-    function antReturn(returnPoint, alpha, beta, rho, deposit) {
-        console.log("Se ha encontrado la salida");
     }
 
     drawCells();
@@ -357,8 +354,13 @@ window.onload = function () {
                 Number(document.getElementById("rho").value),
                 Number(document.getElementById("deposit").value),
                 Number(document.getElementById("steps").value));
+            start = false;
         } else {
-            alert("Debes tener seleccionado un punto de partida antes the iniciar la simulación.");
+            if (start === false) {
+                alert("Espera a que la simulación actual termine o reinicia el simulador.")
+            } else {
+                alert("Debes tener seleccionado un punto de partida antes the iniciar la simulación.");
+            }
         }
     });
 };
