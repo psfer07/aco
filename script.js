@@ -204,7 +204,7 @@ window.onload = function () {
 
         for (let i = X; i <= endX; i++) {
             for (let j = Y; j <= endY; j++) {
-                grid[i][j].color = color
+                if (grid[i][j].color != color) grid[i][j].color = color;
             }
         }
     }
@@ -253,7 +253,7 @@ window.onload = function () {
             }
         }
     }
-    function antStart(state, initial, alpha, beta, rho, deposit, objects) {
+    function antStart(state, start, initial, alpha, beta, rho, deposit, objects, bestDistance) {
         return new Promise((resolve) => {
             let i = 0;
             let distanceCumulative = 0;
@@ -289,7 +289,7 @@ window.onload = function () {
                 i++;
                 visited.push({ x: movedTo.x, y: movedTo.y });
                 setColor(movedTo.x, movedTo.y, state ? "green" : "darkgreen");
-                setColor([initial.x - 1, initial.x + 1], [initial.y - 1, initial.y + 1], "red");
+                setColor([start.x - 1, start.x + 1], [start.y - 1, start.y + 1], "red");
                 drawCells(1);
                 [x, y] = [movedTo.x, movedTo.y];
 
@@ -308,30 +308,32 @@ window.onload = function () {
     }
     async function runSimulations(start, alpha, beta, rho, deposit, steps) {
         let currentPoint = start;
-        let newDistance, oldDistance;
+        let newDistance, oldDistance = -1.0;
         let objects = [];
         for (let i = 0; i < steps; i++) {
+            let freespaces = ["#ccc", "red", "green", "darkgreen", "#02b200"];
             console.log("Iteration nº", i + 1, "of", steps);
 
             for (let i = 0; i < gridWidth; i++) {
                 for (let j = 0; j < gridHeight; j++) {
-                    if (grid[i][j].color != "#ccc" && grid[i][j].color != "red" && grid[i][j].color != "green" && grid[i][j].color != "darkgreen" && grid[i][j].color != "#02b200") { objects.push({ x: i, y: j }); }
+                    if (!freespaces.some(freespace => grid[i][j].color === freespace)) { objects.push({ x: i, y: j }); }
                 }
             }
 
-            console.log("Before", currentPoint, start);
-            [currentPoint, newDistance] = await antStart(1, currentPoint, alpha, beta, rho, deposit, objects);
-            if (newDistance < oldDistance) oldDistance = newDistance;
+            console.log("Before", newDistance, oldDistance);
+            [currentPoint, newDistance] = await antStart(1, start, currentPoint, alpha, beta, rho, deposit, objects, oldDistance);
+            if (newDistance <= oldDistance) oldDistance = newDistance;
             objects = [];
+            freespaces.pop(); // Remove door as free space for the ant
 
             for (let i = 0; i < gridWidth; i++) {
                 for (let j = 0; j < gridHeight; j++) {
-                    if (grid[i][j].color != "#ccc" && grid[i][j].color != "red" && grid[i][j].color != "green" && grid[i][j].color != "darkgreen") { objects.push({ x: i, y: j }); } // Included door as obstacle
+                    if (!freespaces.some(freespace => grid[i][j].color === freespace)) { objects.push({ x: i, y: j }); }
                 }
             }
-            console.log("After", currentPoint, start);
-            [currentPoint, newDistance] = await antStart(0, currentPoint, alpha, beta, rho, deposit, objects);
-            if (newDistance < oldDistance) oldDistance = newDistance;
+            console.log("After", newDistance, oldDistance);
+            [currentPoint, newDistance] = await antStart(0, start, currentPoint, alpha, beta, rho, deposit, objects, oldDistance);
+            if (newDistance <= oldDistance) oldDistance = newDistance;
             objects = [];
             drawCells(1);
         }
