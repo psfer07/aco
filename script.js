@@ -183,15 +183,16 @@ window.onload = function () {
             const { x, y } = this.visited[this.visited.length - 1]; // Get the new last element
             return { x: x, y: y, avoid: deadEnd };
         }
-        checkExit(x, y, grid) {
+        checkExit(x, y, grid, state) {
             if (!(x && y)) {
                 x = this.x;
                 y = this.y;
             }
+            const color = state ? "#02b200" : "red";
             return this.directions.some(direction => {
                 const exitX = x + direction.x;
                 const exitY = y + direction.y;
-                return grid[exitX][exitY].color === "#02b200"; // Example condition for exit
+                return grid[exitX][exitY].color === color;
             });
         }
     }
@@ -253,72 +254,59 @@ window.onload = function () {
             }
         }
     }
-    function isFloor(x, y) {
-        let state = true;
-        for (let i = x - 1; i <= x + 1; i++) {
-            for (let j = y - 1; j <= y + 1; j++) {
-                if (grid[i][j].color != "#ccc") {
-                    state = false;
-                }
-            }
-        }
-        return state;
-    }
-    async function runSimulations(start, alpha, beta, rho, deposit, steps) {
-        let currentPoint = start;
-        for (let i = 0; i < steps; i++) {
-            console.log("Iteration nº", i + 1, "of", steps);
-            currentPoint = antStart(1, currentPoint, alpha, beta, rho, deposit); // Update current point
-            antStart(0, currentPoint, alpha, beta, rho, deposit); // Use the returned point as new start
-        }
-    }
     function antStart(state, initial, alpha, beta, rho, deposit) {
         let i = 0;
-        let lastTime = 0;
         let { x, y } = initial;
         let visited = [];
         let deadEnds = [];
         visited.push({ x: x, y: y });
 
-        function moveAnt(timestamp) {
-            if (timestamp - lastTime >= 0) {
-                let ant = new Ant(x, y, visited, objects, alpha, beta, deposit);
-                let dirs = ant.getDirs(x, y);
-                if (dirs.length === 0) {
-                    let newdirs = [];
-                    do {
-                        let revert = ant.revertMove()
-                        deadEnds.push(revert.avoid);
-                        [x, y] = [revert.x, revert.y];
-                        newdirs = ant.getDirs(x, y, deadEnds);
-                    } while (newdirs.length < 1)
-                    ant.x = x;
-                    ant.y = y;
-                    dirs = newdirs;
+        async function moveAnt() {
+            let ant = new Ant(x, y, visited, objects, alpha, beta, deposit);
+            let dirs = ant.getDirs(x, y);
+            if (dirs.length === 0) {
+                let newdirs = [];
+                do {
+                    let revert = ant.revertMove()
+                    deadEnds.push(revert.avoid);
+                    [x, y] = [revert.x, revert.y];
+                    newdirs = ant.getDirs(x, y, deadEnds);
+                } while (newdirs.length < 1)
+                ant.x = x;
+                ant.y = y;
+                dirs = newdirs;
+            }
+            const movedTo = ant.move(grid, dirs);
+            if (i % 50 === 0) { // Evaporates pheromone every 50 iterations
+                for (let i = 0; i < gridWidth; i++) {
+                    for (let j = 0; j < gridHeight; j++)
+                        grid[i][j].pheromone = (1 - rho) * grid[i][j].pheromone;
                 }
-                const movedTo = ant.move(grid, dirs);
-                if (i % 50 === 0) { // Evaporates pheromone every 50 iterations
-                    for (let i = 0; i < gridWidth; i++) {
-                        for (let j = 0; j < gridHeight; j++)
-                            grid[i][j].pheromone = (1 - rho) * grid[i][j].pheromone;
-                    }
-                }
-                i++;
-                visited.push({ x: movedTo.x, y: movedTo.y });
-                setColor(movedTo.x, movedTo.y, state ? "green" : "darkgreen");
-                drawCells(1);
-                [x, y] = [movedTo.x, movedTo.y];
-                console.log(x, y);
-                lastTime = timestamp;
-                // If the exit is found
-                if (ant.checkExit(x, y, grid)) {
-                    callback(); // Simulation done
-                    return visited[visited.length - 1];
-                }
+            }
+            i++;
+            visited.push({ x: movedTo.x, y: movedTo.y });
+            setColor(movedTo.x, movedTo.y, state ? "green" : "darkgreen");
+            drawCells(1);
+            [x, y] = [movedTo.x, movedTo.y];
+            // If the exit is found
+            if (ant.checkExit(x, y, grid, state)) {
+                // callback; // Simulation done
+                console.log(x, y, visited[visited.length - 1]);
+                return { x: x, y: y };
             }
             requestAnimationFrame(moveAnt); // Continue the loop
         }
         requestAnimationFrame(moveAnt); // Start the loop
+    }
+    async function runSimulations(start, alpha, beta, rho, deposit, steps) {
+        let currentPoint = start;
+        for (let i = 0; i < 1; i++) {
+            console.log("Iteración nº", i + 1, "of", steps);
+            console.log("Before", currentPoint, start);
+            currentPoint = antStart(1, currentPoint, alpha, beta, rho, deposit); // Update current point
+            console.log("After", currentPoint, start);
+            antStart(0, currentPoint, alpha, beta, rho, deposit); // Use the returned point as new start
+        }
     }
 
     drawCells();
@@ -333,7 +321,15 @@ window.onload = function () {
             x: Math.floor((event.clientX - rect.left) / cellSize),
             y: Math.floor((event.clientY - rect.top) / cellSize)
         };
-        if (isFloor(start.x, start.y)) {
+        let state = true;
+        for (let i = start.x - 1; i <= start.x + 1; i++) {
+            for (let j = start.y - 1; j <= start.y + 1; j++) {
+                if (grid[i][j].color != "#ccc") {
+                    state = false;
+                }
+            }
+        }
+        if (state) {
             console.log("Coordenadas establecidas en:", start.x, start.y);
             drawCells();
             setColor([start.x - 1, start.x + 1], [start.y - 1, start.y + 1], "red")
