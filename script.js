@@ -255,59 +255,69 @@ window.onload = function () {
         }
     }
     function antStart(state, initial, alpha, beta, rho, deposit) {
-        let i = 0;
-        let { x, y } = initial;
-        let visited = [];
-        let deadEnds = [];
-        visited.push({ x: x, y: y });
-
-        async function moveAnt() {
-            let ant = new Ant(x, y, visited, objects, alpha, beta, deposit);
-            let dirs = ant.getDirs(x, y);
-            if (dirs.length === 0) {
-                let newdirs = [];
-                do {
-                    let revert = ant.revertMove()
-                    deadEnds.push(revert.avoid);
-                    [x, y] = [revert.x, revert.y];
-                    newdirs = ant.getDirs(x, y, deadEnds);
-                } while (newdirs.length < 1)
-                ant.x = x;
-                ant.y = y;
-                dirs = newdirs;
-            }
-            const movedTo = ant.move(grid, dirs);
-            if (i % 50 === 0) { // Evaporates pheromone every 50 iterations
-                for (let i = 0; i < gridWidth; i++) {
-                    for (let j = 0; j < gridHeight; j++)
-                        grid[i][j].pheromone = (1 - rho) * grid[i][j].pheromone;
+        return new Promise((resolve) => {
+            let i = 0;
+            let { x, y } = initial;
+            let visited = [];
+            let deadEnds = [];
+            visited.push({ x, y });
+    
+            function moveAnt() {
+                let ant = new Ant(x, y, visited, objects, alpha, beta, deposit);
+                let dirs = ant.getDirs(x, y);
+                if (dirs.length === 0) {
+                    let newdirs = [];
+                    do {
+                        let revert = ant.revertMove();
+                        deadEnds.push(revert.avoid);
+                        [x, y] = [revert.x, revert.y];
+                        newdirs = ant.getDirs(x, y, deadEnds);
+                    } while (newdirs.length < 1);
+                    ant.x = x;
+                    ant.y = y;
+                    dirs = newdirs;
                 }
+                const movedTo = ant.move(grid, dirs);
+                if (i % 50 === 0) { // Evaporates pheromone every 50 iterations
+                    for (let i = 0; i < gridWidth; i++) {
+                        for (let j = 0; j < gridHeight; j++) {
+                            grid[i][j].pheromone = (1 - rho) * grid[i][j].pheromone;
+                        }
+                    }
+                }
+                i++;
+                visited.push({ x: movedTo.x, y: movedTo.y });
+                setColor(movedTo.x, movedTo.y, state ? "green" : "darkgreen");
+                drawCells(1);
+                [x, y] = [movedTo.x, movedTo.y];
+    
+                // If the exit is found
+                if (ant.checkExit(x, y, grid, state)) {
+                    console.log(x, y, visited[visited.length - 1]);
+                    resolve({ x, y }); // Returns value as an async function
+                    return;
+                }
+    
+                requestAnimationFrame(moveAnt); // Continue the loop
             }
-            i++;
-            visited.push({ x: movedTo.x, y: movedTo.y });
-            setColor(movedTo.x, movedTo.y, state ? "green" : "darkgreen");
-            drawCells(1);
-            [x, y] = [movedTo.x, movedTo.y];
-            // If the exit is found
-            if (ant.checkExit(x, y, grid, state)) {
-                // callback; // Simulation done
-                console.log(x, y, visited[visited.length - 1]);
-                return { x: x, y: y };
-            }
-            requestAnimationFrame(moveAnt); // Continue the loop
-        }
-        requestAnimationFrame(moveAnt); // Start the loop
+    
+            requestAnimationFrame(moveAnt); // Start the loop
+        });
     }
+    
     async function runSimulations(start, alpha, beta, rho, deposit, steps) {
         let currentPoint = start;
         for (let i = 0; i < 1; i++) {
-            console.log("Iteración nº", i + 1, "of", steps);
+            console.log("Iteration nº", i + 1, "of", steps);
+
             console.log("Before", currentPoint, start);
-            currentPoint = antStart(1, currentPoint, alpha, beta, rho, deposit); // Update current point
+            currentPoint = await antStart(1, currentPoint, alpha, beta, rho, deposit);
+            
             console.log("After", currentPoint, start);
-            antStart(0, currentPoint, alpha, beta, rho, deposit); // Use the returned point as new start
+            await antStart(0, currentPoint, alpha, beta, rho, deposit);
         }
     }
+    
 
     drawCells();
     for (let i = 0; i < gridWidth; i++) {
