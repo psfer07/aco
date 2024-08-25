@@ -303,7 +303,6 @@ window.onload = function () {
             requestAnimationFrame(moveAnt); // Start the loop
         });
     }
-
     async function runSimulations(start, alpha, beta, rho, deposit, steps) {
         let currentPoint = start;
         let objects = [];
@@ -317,7 +316,7 @@ window.onload = function () {
             }
 
             console.log("Before", currentPoint, start);
-            currentPoint = await antStart(1, currentPoint, alpha, beta, rho, deposit);
+            currentPoint = await antStart(1, currentPoint, alpha, beta, rho, deposit, objects);
 
             objects = [];
             for (let i = 0; i < gridWidth; i++) {
@@ -326,7 +325,7 @@ window.onload = function () {
                 }
             }
             console.log("After", currentPoint, start);
-            await antStart(0, currentPoint, alpha, beta, rho, deposit);
+            await antStart(0, currentPoint, alpha, beta, rho, deposit, objects);
             objects = [];
         }
     }
