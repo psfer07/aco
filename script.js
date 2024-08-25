@@ -1,15 +1,15 @@
 window.onload = function () {
-    const canvas = document.getElementById("canvas_render");
-    const paint = canvas.getContext("2d");
-    const gridWidth = 180;
-    const gridHeight = 200;
-    const cellSize = 4;
     let start;
     let grid = [];
     let properties = { // Each cell will have these properties by default
         color: "#ccc",
         pheromone: 1.0
     };
+    const canvas = document.getElementById("canvas_render");
+    const paint = canvas.getContext("2d");
+    const gridWidth = 180;
+    const gridHeight = 200;
+    const cellSize = 4;
     const walls = {
         color: "#2d2d2d",
         horz: {
@@ -322,7 +322,7 @@ window.onload = function () {
             objects = [];
             for (let i = 0; i < gridWidth; i++) {
                 for (let j = 0; j < gridHeight; j++) {
-                    if (grid[i][j].color != "#ccc" && grid[i][j].color != "red" && grid[i][j].color != "green"&& grid[i][j].color != "darkgreen" ) { objects.push({ x: i, y: j }); } // Included door as obstacle
+                    if (grid[i][j].color != "#ccc" && grid[i][j].color != "red" && grid[i][j].color != "green" && grid[i][j].color != "darkgreen") { objects.push({ x: i, y: j }); } // Included door as obstacle
                 }
             }
             console.log("After", currentPoint, start);
@@ -330,7 +330,6 @@ window.onload = function () {
             objects = [];
         }
     }
-
 
     drawCells();
     canvas.addEventListener("click", function (event) {
