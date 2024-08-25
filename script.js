@@ -1,5 +1,6 @@
 window.onload = function () {
     let start;
+    let hasStarted = false;
     let grid = [];
     let properties = { // Each cell will have these properties by default
         color: "#ccc",
@@ -171,7 +172,6 @@ window.onload = function () {
             grid[newX][newY].pheromone += this.deposit;
 
             // Update ant's position and visited path
-            this.visited.push({ x: this.x, y: this.y });
             this.x = newX;
             this.y = newY;
             const distance = (Math.abs(directions[index].x) + Math.abs(directions[index].y)) === 2 ? Math.sqrt(2) : 1;
@@ -253,7 +253,7 @@ window.onload = function () {
             }
         }
     }
-    function antStart(state, start, initial, alpha, beta, rho, deposit, objects, bestDistance) {
+    function antStart(state, start, initial, alpha, beta, rho, deposit, objects, bestDistance, oldVisited) {
         return new Promise((resolve) => {
             let i = 0;
             let distanceCumulative = 0;
@@ -263,7 +263,7 @@ window.onload = function () {
             visited.push({ x, y });
 
             function moveAnt() {
-                let ant = new Ant(x, y, visited, objects, alpha, beta, deposit);
+                let ant = new Ant(x, y, visited, objects, state ? Math.pow(alpha, 2) : alpha, beta, deposit); // As ants usually follow its own path after finding food
                 let dirs = ant.getDirs(x, y);
                 if (dirs.length === 0) {
                     let newdirs = [];
@@ -278,8 +278,7 @@ window.onload = function () {
                     dirs = newdirs;
                 }
                 const [movedTo, distance] = ant.move(grid, dirs);
-                distanceCumulative += distance;
-                if (i % 25 === 0) { // Evaporates pheromone every 50 iterations
+                if (i % 15 === 0) { // Evaporates pheromone every 15 moves
                     for (let i = 0; i < gridWidth; i++) {
                         for (let j = 0; j < gridHeight; j++) {
                             grid[i][j].pheromone = (1 - rho) * grid[i][j].pheromone;
@@ -292,11 +291,20 @@ window.onload = function () {
                 setColor([start.x - 1, start.x + 1], [start.y - 1, start.y + 1], "red");
                 drawCells(1);
                 [x, y] = [movedTo.x, movedTo.y];
+                distanceCumulative += distance;
+
+                if (bestDistance < distanceCumulative) {
+                    antStart(state, start, initial, alpha, beta, rho, deposit, objects, bestDistance, oldVisited);
+                    drawCells();
+                    oldVisited.forEach(visit => setColor(visit.x, visit.y, !state ? "green" : "darkgreen"));
+                    drawCells(1);
+                    return;
+                }
 
                 // If the exit is found
                 if (ant.checkExit(x, y, grid, state)) {
-                    console.log(distanceCumulative);
-                    resolve([{ x, y }, distanceCumulative]); // Returns values as an async function
+                    console.log(`Exit found after ${state ? "moving" : "returning"} ${distanceCumulative} cells`);
+                    resolve([{ x, y }, distanceCumulative, visited]);
                     return;
                 }
 
@@ -306,46 +314,72 @@ window.onload = function () {
             requestAnimationFrame(moveAnt); // Start the loop
         });
     }
+
     async function runSimulations(start, alpha, beta, rho, deposit, steps) {
         let currentPoint = start;
-        let newDistance, oldDistance = -1.0;
+        let oldDistance, newDistance = 0;
         let objects = [];
+        let newVisited, oldVisited = [];
+        hasStarted = true;
+
         for (let i = 0; i < steps; i++) {
-            let freespaces = ["#ccc", "red", "green", "darkgreen", "#02b200"];
-            console.log("Iteration nº", i + 1, "of", steps);
+            try {
+                let freespaces = ["#ccc", "red", "green", "darkgreen", "#02b200"];
+                console.log("Iteration nº", i + 1, "of", steps);
 
-            for (let i = 0; i < gridWidth; i++) {
-                for (let j = 0; j < gridHeight; j++) {
-                    if (!freespaces.some(freespace => grid[i][j].color === freespace)) { objects.push({ x: i, y: j }); }
+                for (let i = 0; i < gridWidth; i++) {
+                    for (let j = 0; j < gridHeight; j++) {
+                        if (!freespaces.some(freespace => grid[i][j].color === freespace)) { objects.push({ x: i, y: j }); }
+                    }
                 }
-            }
 
-            console.log("Before", newDistance, oldDistance);
-            [currentPoint, newDistance] = await antStart(1, start, currentPoint, alpha, beta, rho, deposit, objects, oldDistance);
-            if (newDistance <= oldDistance) oldDistance = newDistance;
-            objects = [];
-            freespaces.pop(); // Remove door as free space for the ant
-
-            for (let i = 0; i < gridWidth; i++) {
-                for (let j = 0; j < gridHeight; j++) {
-                    if (!freespaces.some(freespace => grid[i][j].color === freespace)) { objects.push({ x: i, y: j }); }
+                [currentPoint, newDistance, newVisited] = await antStart(1, start, currentPoint, alpha, beta, rho, deposit, objects, oldDistance, oldVisited);
+                if (newDistance < oldDistance || oldDistance === undefined) {
+                    oldDistance = newDistance;
+                    newVisited.forEach(visit => setColor(visit.x, visit.y, "green"));
                 }
+                oldVisited = newVisited;
+                newVisited = [];
+                objects = [];
+                freespaces.pop(); // Remove door as free space for the ant
+
+                for (let i = 0; i < gridWidth; i++) {
+                    for (let j = 0; j < gridHeight; j++) {
+                        if (!freespaces.some(freespace => grid[i][j].color === freespace)) {
+                            objects.push({ x: i, y: j });
+                        }
+                    }
+                }
+                console.log("debug 1")
+                [currentPoint, newDistance, newVisited] = await antStart(0, start, currentPoint, alpha, beta, rho, deposit, objects, oldDistance, oldVisited);
+                console.log("debug 2")
+
+                if (newDistance < oldDistance) {
+                console.log("debug 3")
+                    oldDistance = newDistance;
+                    newVisited.forEach(visit => setColor(visit.x, visit.y, "darkgreen"));
+                }
+                oldVisited = newVisited;
+                newVisited = [];
+                objects = [];
+                drawCells(1);
+
+            } catch (error) {
+                console.log("Error in simulation:", error.message);
+                return;
             }
-            console.log("After", newDistance, oldDistance);
-            [currentPoint, newDistance] = await antStart(0, start, currentPoint, alpha, beta, rho, deposit, objects, oldDistance);
-            if (newDistance <= oldDistance) oldDistance = newDistance;
-            objects = [];
-            drawCells(1);
         }
     }
 
-    drawCells();
+
+    drawCells(); // Initial scenario representation
     canvas.addEventListener("click", function (event) {
         const rect = canvas.getBoundingClientRect();
         start = {
             x: Math.floor((event.clientX - rect.left) / cellSize),
             y: Math.floor((event.clientY - rect.top) / cellSize)
         };
+        hasStarted = false;
         let state = true;
         for (let i = start.x - 1; i <= start.x + 1; i++) {
             for (let j = start.y - 1; j <= start.y + 1; j++) {
@@ -355,7 +389,7 @@ window.onload = function () {
             }
         }
         if (state) {
-            console.log("Coordenadas establecidas en:", start.x, start.y);
+            console.log("Coordenates set in:", start.x, start.y);
             drawCells();
             setColor([start.x - 1, start.x + 1], [start.y - 1, start.y + 1], "red");
             drawCells(1);
@@ -369,16 +403,15 @@ window.onload = function () {
         location.reload();
     });
     document.getElementById("start").addEventListener("click", function () {
-        if (start) {
+        if (start && !hasStarted) {
             runSimulations(start, Number(document.getElementById("alpha").value),
                 Number(document.getElementById("beta").value),
                 Number(document.getElementById("rho").value),
                 Number(document.getElementById("deposit").value),
                 Number(document.getElementById("steps").value)
             );
-            start = false;
         } else {
-            if (start === false) {
+            if (hasStarted) {
                 alert("Espera a que la simulación actual termine o reinicia el simulador.")
             } else {
                 alert("Debes tener seleccionado un punto de partida antes the iniciar la simulación.");
