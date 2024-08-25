@@ -4,7 +4,6 @@ window.onload = function () {
     const gridWidth = 180;
     const gridHeight = 200;
     const cellSize = 4;
-    const objects = [];
     let start;
     let grid = [];
     let properties = { // Each cell will have these properties by default
@@ -254,14 +253,14 @@ window.onload = function () {
             }
         }
     }
-    function antStart(state, initial, alpha, beta, rho, deposit) {
+    function antStart(state, initial, alpha, beta, rho, deposit, objects) {
         return new Promise((resolve) => {
             let i = 0;
             let { x, y } = initial;
             let visited = [];
             let deadEnds = [];
             visited.push({ x, y });
-    
+
             function moveAnt() {
                 let ant = new Ant(x, y, visited, objects, alpha, beta, deposit);
                 let dirs = ant.getDirs(x, y);
@@ -290,41 +289,50 @@ window.onload = function () {
                 setColor(movedTo.x, movedTo.y, state ? "green" : "darkgreen");
                 drawCells(1);
                 [x, y] = [movedTo.x, movedTo.y];
-    
+
                 // If the exit is found
                 if (ant.checkExit(x, y, grid, state)) {
                     console.log(x, y, visited[visited.length - 1]);
                     resolve({ x, y }); // Returns value as an async function
                     return;
                 }
-    
+
                 requestAnimationFrame(moveAnt); // Continue the loop
             }
-    
+
             requestAnimationFrame(moveAnt); // Start the loop
         });
     }
-    
+
     async function runSimulations(start, alpha, beta, rho, deposit, steps) {
         let currentPoint = start;
+        let objects = [];
         for (let i = 0; i < 1; i++) {
             console.log("Iteration nº", i + 1, "of", steps);
 
+            for (let i = 0; i < gridWidth; i++) {
+                for (let j = 0; j < gridHeight; j++) {
+                    if (grid[i][j].color != "#ccc" && grid[i][j].color != "red" && grid[i][j].color != "green" && grid[i][j].color != "darkgreen" && grid[i][j].color != "#02b200") { objects.push({ x: i, y: j }); }
+                }
+            }
+
             console.log("Before", currentPoint, start);
             currentPoint = await antStart(1, currentPoint, alpha, beta, rho, deposit);
-            
+
+            objects = [];
+            for (let i = 0; i < gridWidth; i++) {
+                for (let j = 0; j < gridHeight; j++) {
+                    if (grid[i][j].color != "#ccc" && grid[i][j].color != "red" && grid[i][j].color != "green"&& grid[i][j].color != "darkgreen" ) { objects.push({ x: i, y: j }); } // Included door as obstacle
+                }
+            }
             console.log("After", currentPoint, start);
             await antStart(0, currentPoint, alpha, beta, rho, deposit);
+            objects = [];
         }
     }
-    
+
 
     drawCells();
-    for (let i = 0; i < gridWidth; i++) {
-        for (let j = 0; j < gridHeight; j++) {
-            if (grid[i][j].color != "#ccc" && grid[i][j].color != "red" && grid[i][j].color != "green" && grid[i][j].color != "#02b200") { objects.push({ x: i, y: j }); }
-        }
-    }
     canvas.addEventListener("click", function (event) {
         const rect = canvas.getBoundingClientRect();
         start = {
@@ -359,7 +367,8 @@ window.onload = function () {
                 Number(document.getElementById("beta").value),
                 Number(document.getElementById("rho").value),
                 Number(document.getElementById("deposit").value),
-                Number(document.getElementById("steps").value));
+                Number(document.getElementById("steps").value)
+            );
             start = false;
         } else {
             if (start === false) {
