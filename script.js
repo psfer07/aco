@@ -101,28 +101,35 @@ window.onload = function () {
             this.deposit = deposit;
             this.directions = [
                 { x: 0, y: -1 }, // Up
-                { x: 0, y: 1 }, // Down
-                { x: -1, y: 0 }, // Left
-                { x: 1, y: 0 }, // Right
-                { x: -1, y: -1 }, // Up-left
                 { x: 1, y: -1 }, // Up-right
+                { x: 1, y: 0 },  // Right
+                { x: 1, y: 1 },  // Down-right
+                { x: 0, y: 1 },  // Down
                 { x: -1, y: 1 }, // Down-left
-                { x: 1, y: 1 }  // Down-right
+                { x: -1, y: 0 }, // Left
+                { x: -1, y: -1 } // Up-left
             ];
         }
         _calcCost(pheromone, directions) {
-            let costs = [];
+            let weighs = [];
 
             for (let i = 0; i < directions.length; i++) {
                 const distance = (Math.abs(directions[i].x) + Math.abs(directions[i].y)) === 2 ? Math.sqrt(2) : 1;
-                const cost = Math.pow(pheromone[i], this.alpha) * Math.pow(1 / distance, this.beta);
-                costs.push(cost);
+                const weigh = Math.pow(pheromone[i], this.alpha) * Math.pow(1 / distance, this.beta);
+                weighs.push(weigh);
             }
 
-            const costSum = costs.reduce((sum, value) => sum + value, 0);
-            const probabilities = costs.map(cost => cost / costSum);
+            const lastCellVisitedIndex = this.directions.findIndex(direction =>
+                this.visited[this.visited.length - 1].x === this.x - direction.x &&
+                this.visited[this.visited.length - 1].y === this.y - direction.y
+            );
 
-            let rand = Math.random();
+            if (lastCellVisitedIndex > 0) { weighs[lastCellVisitedIndex - 1] = weighs[lastCellVisitedIndex - 1] / 2; }
+            if (lastCellVisitedIndex < weighs.length - 1) { weighs[lastCellVisitedIndex + 1] = weighs[lastCellVisitedIndex + 1] / 2; }
+
+
+            const probabilities = weighs.map(weigh => weigh / weighs.reduce((sum, value) => sum + value, 0));
+            const rand = Math.random();
             let cumulative = 0;
             for (let i = 0; i < probabilities.length; i++) {
                 cumulative += probabilities[i];
@@ -131,10 +138,14 @@ window.onload = function () {
                 }
             }
         }
-        getDirs(avoid) {
+        getDirs(x, y, avoid) {
+            if (!(x && y)) {
+                x = this.x;
+                y = this.y;
+            }
             return this.directions.filter(direction => {
-                const newX = this.x + direction.x;
-                const newY = this.y + direction.y;
+                const newX = x + direction.x;
+                const newY = y + direction.y;
                 const isObject = this.objects.some(object => newX === object.x && newY === object.y);
                 const isVisited = this.visited.some(visit => newX === visit.x && newY === visit.y);
                 const isAvoided = avoid && avoid.some(deadEnd => deadEnd.x === newX && deadEnd.y === newY);
@@ -244,24 +255,16 @@ window.onload = function () {
             function moveAnt() {
                 try {
                     let ant = new Ant(x, y, visited, objects, state ? Math.pow(alpha, 2) : alpha, beta, deposit);
-                    let dirs = ant.getDirs();
+                    let dirs = ant.getDirs(x, y);
                     if (dirs.length === 0) {
                         let newdirs = [];
                         do {
                             let revert = ant.revertMove();
-                            if (!revert) {
-                                console.error("Cannot revert move; no previous moves to revert.");
-                                reject(new Error("Dead end reached with no possible moves."));
-                                return;
-                            }
                             deadEnds.push(revert.avoid);
                             x = revert.x;
                             y = revert.y;
-                            newdirs = ant.getDirs(deadEnds);
+                            newdirs = ant.getDirs(x, y, deadEnds);
                         } while (newdirs.length < 1);
-
-                        ant.x = x;
-                        ant.y = y;
                         dirs = newdirs;
                     }
 
@@ -319,7 +322,6 @@ window.onload = function () {
             requestAnimationFrame(moveAnt); // Start the loop
         });
     }
-
     async function runSimulations(start, alpha, beta, rho, deposit, steps) {
         let currentPoint = start;
         let oldDistance, newDistance = 0;
@@ -372,7 +374,6 @@ window.onload = function () {
             }
         }
     }
-
 
     drawCells(); // Initial scenario representation
     canvas.addEventListener("click", function (event) {
