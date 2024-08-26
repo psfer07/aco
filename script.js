@@ -6,12 +6,14 @@ window.onload = function () {
     const cellSize = 4;
     let start;
     let hasStarted = false;
-    let grid = Array.from({ length: gridWidth }, () =>
-        Array.from({ length: gridHeight }, () => ({ // Each cell will have these properties by default
-            color: "#ccc",
-            pheromone: 1.0
-        }))
-    );
+    let grid = [];
+    for (let x = 0; x < gridWidth; x++) {
+        let cols = [];
+        for (let y = 0; y < gridHeight; y++) {
+            cols.push({ ...properties });
+        }
+        grid.push(cols);
+    }
     const walls = {
         color: "#2d2d2d",
         horz: {
@@ -99,7 +101,7 @@ window.onload = function () {
             this.alpha = alpha;
             this.beta = beta;
             this.deposit = deposit;
-            this.directions = [
+            this.directions = [  // Directions are set clockwise
                 { x: 0, y: -1 }, // Up
                 { x: 1, y: -1 }, // Up-right
                 { x: 1, y: 0 },  // Right
@@ -113,22 +115,23 @@ window.onload = function () {
         _calcCost(pheromone, directions) {
             let weighs = [];
 
+            // Generic cost calculation formula for Ant Colony Systems
             for (let i = 0; i < directions.length; i++) {
                 const distance = (Math.abs(directions[i].x) + Math.abs(directions[i].y)) === 2 ? Math.sqrt(2) : 1;
                 const weigh = Math.pow(pheromone[i], this.alpha) * Math.pow(1 / distance, this.beta);
                 weighs.push(weigh);
             }
 
-            const lastCellVisitedIndex = this.directions.findIndex(direction =>
+            const lastVisitedCellIndex = this.directions.findIndex(direction =>
                 this.visited[this.visited.length - 1].x === this.x - direction.x &&
                 this.visited[this.visited.length - 1].y === this.y - direction.y
             );
 
-            if (lastCellVisitedIndex > 0) { weighs[lastCellVisitedIndex - 1] = weighs[lastCellVisitedIndex - 1] / 2; }
-            if (lastCellVisitedIndex < weighs.length - 1) { weighs[lastCellVisitedIndex + 1] = weighs[lastCellVisitedIndex + 1] / 2; }
+            if (lastVisitedCellIndex > 0) { weighs[lastVisitedCellIndex - 1] /= 2; }
+            if (lastVisitedCellIndex < weighs.length - 1) { weighs[lastVisitedCellIndex + 1] /= 2; }
 
 
-            const probabilities = weighs.map(weigh => weigh / weighs.reduce((sum, value) => sum + value, 0));
+            const probabilities = this._calcProbabilities(weighs);
             const rand = Math.random();
             let cumulative = 0;
             for (let i = 0; i < probabilities.length; i++) {
@@ -138,27 +141,51 @@ window.onload = function () {
                 }
             }
         }
+        _calcProbabilities(weighs) {
+            let sum = 0;
+            for (let i = 0; i < weighs.length; i++) { sum += weighs[i]; }
+            const probabilities = [];
+            for (let i = 0; i < weighs.length; i++) { probabilities[i] = weighs[i] / sum; }
+            return probabilities; // Current case by all possible cases
+
+        }
         getDirs(x, y, avoid) {
             if (!(x && y)) {
                 x = this.x;
                 y = this.y;
             }
-            return this.directions.filter(direction => {
+            let availableDirections = [];
+            for (const direction of this.directions) {
                 const newX = x + direction.x;
                 const newY = y + direction.y;
-                const isObject = this.objects.some(object => newX === object.x && newY === object.y);
-                const isVisited = this.visited.some(visit => newX === visit.x && newY === visit.y);
-                const isAvoided = avoid && avoid.some(deadEnd => deadEnd.x === newX && deadEnd.y === newY);
 
-                return !isObject && !isVisited && !isAvoided;
-            });
+                let isObject = false;
+                for (let i = 0; i < this.objects.length; i++) {
+                    if (newX === this.objects[i].x && newY === this.objects[i].y) { isObject = true; break; }
+                }
+
+                let isVisited = false;
+                for (let i = 0; i < this.visited.length; i++) {
+                    if (newX === this.visited[i].x && newY === this.visited[i].y) { isVisited = true; break; }
+                }
+
+                let isAvoided = false;
+                if (avoid) {
+                    for (let i = 0; i < avoid.length; i++) {
+                        if (newX === avoid[i].x && newY === avoid[i].y) { isAvoided = true; break; }
+                    }
+                }
+                if (!(isObject && isVisited && isAvoided)) availableDirections.push(direction);
+            }
+            return availableDirections;
         }
         move(grid, directions) {
-            const total_pheromone = directions.map(direction => {
+            let total_pheromone = [];
+            for (const direction of directions) {
                 const inX = this.x + direction.x;
                 const inY = this.y + direction.y;
-                return grid[inX][inY].pheromone;
-            });
+                total_pheromone.push(grid[inX][inY].pheromone)
+            }
 
             const index = this._calcCost(total_pheromone, directions);
             const newX = this.x + directions[index].x;
@@ -178,11 +205,16 @@ window.onload = function () {
         }
         checkExit(grid, state) {
             const color = state ? "#02b200" : "red";
-            return this.directions.some(direction => {
+            let isExit = false;
+            for (const direction of this.directions) {
                 const exitX = this.x + direction.x;
                 const exitY = this.y + direction.y;
-                return grid[exitX][exitY].color === color;
-            });
+                if (grid[exitX][exitY].color === color) {
+                    isExit = true;
+                    break;
+                }
+            }
+            return isExit;
         }
     }
 
@@ -203,22 +235,22 @@ window.onload = function () {
             // Floor
             setColor([2, gridWidth - 3], [2, gridHeight - 3], "#ccc");
             // Walls
-            walls.horz.positions.forEach(wall => {
+            for (const wall of walls.horz.positions) {
                 setColor([wall.x, wall.x + walls.horz.width - 1], [wall.y, wall.y + walls.horz.height - 1], walls.color);
-            });
-            walls.vert.positions.forEach(wall => {
+            }
+            for (const wall of walls.vert.positions) {
                 setColor([wall.x, wall.x + walls.vert.width - 1], [wall.y, wall.y + walls.vert.height - 1], walls.color);
-            });
+            }
             // Windows
-            windows.positions.forEach(window => {
+            for (const window of windows.positions) {
                 setColor([window.x, window.x + windows.width - 1], [window.y, window.y + windows.height - 1], windows.color);
-            });
+            }
             // Door
             setColor([door.x, door.x + door.width - 1], [door.y, door.y + door.height - 1], door.color);
             // Pillars
-            obstacles.pillars.positions.forEach(pillar => {
+            for (const pillar of obstacles.pillars.positions) {
                 setColor([pillar.x, pillar.x + obstacles.pillars.width - 1], [pillar.y, pillar.y + obstacles.pillars.height - 1], obstacles.pillars.color);
-            });
+            }
             // Teacher's table
             const Ttable = obstacles.teacher_table
             setColor([Ttable.x, Ttable.x + Ttable.width - 1], [Ttable.y, Ttable.y + Ttable.height - 1], Ttable.color);
@@ -264,7 +296,7 @@ window.onload = function () {
                             x = revert.x;
                             y = revert.y;
                             newdirs = ant.getDirs(x, y, deadEnds);
-                        } while (newdirs.length < 1);
+                        } while (newdirs.length < 1); // Reverts its position until it has more than one available direction to move
                         dirs = newdirs;
                     }
 
@@ -272,9 +304,10 @@ window.onload = function () {
 
                     // Evaporate pheromones every 15 moves
                     if (moveCount % 15 === 0) {
-                        for (let row = 0; row < gridWidth; row++) {
-                            for (let col = 0; col < gridHeight; col++) {
-                                grid[row][col].pheromone = (1 - rho) * grid[row][col].pheromone;
+                        for (let i = 0; i < gridWidth; i++) {
+                            for (let j = 0; j < gridHeight; j++) {
+                                grid[i][j].pheromone *= (1 - rho); // Applying evaporation
+                                if (grid[i][j].pheromone < 0.1) grid[i][j].pheromone = 0; // Avoid floating-point precision issues
                             }
                         }
                     }
@@ -290,7 +323,7 @@ window.onload = function () {
                     if (bestDistance < distanceCumulative) {
                         console.log("Cumulative distance exceeded best distance. Restarting ant.");
                         drawCells();
-                        oldVisited.forEach(visit => setColor(visit.x, visit.y, !state ? "green" : "darkgreen"));
+                        for (const visit of oldVisited) { setColor(visit.x, visit.y, !state ? "green" : "darkgreen") }
                         drawCells(1);
 
                         // Reset variables for retry
@@ -336,14 +369,18 @@ window.onload = function () {
 
                 for (let i = 0; i < gridWidth; i++) {
                     for (let j = 0; j < gridHeight; j++) {
-                        if (!freespaces.some(freespace => grid[i][j].color === freespace)) { objects.push({ x: i, y: j }); }
+                        for (const freespace of freespaces) {
+                            if (grid[i][j].color === freespace[i]) {
+                                objects.push({ x: i, y: j });
+                            }
+                        }
                     }
                 }
 
                 [currentPoint, newDistance, newVisited] = await antStart(1, start, currentPoint, alpha, beta, rho, deposit, objects, oldDistance, oldVisited);
                 if (newDistance < oldDistance || oldDistance === undefined) {
                     oldDistance = newDistance;
-                    newVisited.forEach(visit => setColor(visit.x, visit.y, "green"));
+                    for (const visit of newVisited) { setColor(visit.x, visit.y, "green") }
                 }
                 oldVisited = newVisited;
                 newVisited = [];
@@ -352,8 +389,10 @@ window.onload = function () {
 
                 for (let i = 0; i < gridWidth; i++) {
                     for (let j = 0; j < gridHeight; j++) {
-                        if (!freespaces.some(freespace => grid[i][j].color === freespace)) {
-                            objects.push({ x: i, y: j });
+                        for (const freespace of freespaces) {
+                            if (grid[i][j].color === freespace[i]) {
+                                objects.push({ x: i, y: j });
+                            }
                         }
                     }
                 }
@@ -361,7 +400,7 @@ window.onload = function () {
                 [currentPoint, newDistance, newVisited] = await antStart(0, start, currentPoint, alpha, beta, rho, deposit, objects, oldDistance, oldVisited);
                 if (newDistance < oldDistance) {
                     oldDistance = newDistance;
-                    newVisited.forEach(visit => setColor(visit.x, visit.y, "darkgreen"));
+                    for (const visit of newVisited) { setColor(visit.x, visit.y, "darkgreen") }
                 }
                 oldVisited = newVisited;
                 newVisited = [];
@@ -388,6 +427,7 @@ window.onload = function () {
             for (let j = start.y - 1; j <= start.y + 1; j++) {
                 if (grid[i][j].color != "#ccc") {
                     state = false;
+                    break;
                 }
             }
         }
