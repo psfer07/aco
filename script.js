@@ -1,11 +1,12 @@
 window.onload = function () {
     let start;
     let hasStarted = false;
-    let grid = [];
-    let properties = { // Each cell will have these properties by default
-        color: "#ccc",
-        pheromone: 1.0
-    };
+    let grid = Array.from({ length: gridWidth }, () =>
+        Array.from({ length: gridHeight }, () => ({ // Each cell will have these properties by default
+            color: "#ccc",
+            pheromone: 1.0
+        }))
+    );
     const canvas = document.getElementById("canvas_render");
     const paint = canvas.getContext("2d");
     const gridWidth = 180;
@@ -88,20 +89,6 @@ window.onload = function () {
     // Set canvas size
     canvas.width = gridWidth * cellSize;
     canvas.height = gridHeight * cellSize;
-
-    // Create matrix
-    let gradientX = 0;
-    for (let x = 0; x < gridWidth; x++) {
-        let cols = [];
-        let gradientY = 0;
-        gradientX += 0.00015;
-        for (let y = 0; y < gridHeight; y++) {
-            gradientY += 0.00015;
-            properties.pheromone = properties.pheromone + gradientX * gradientY;
-            cols.push({ ...properties });
-        }
-        grid.push(cols);
-    }
 
     class Ant {
         constructor(x, y, visited, objects, alpha, beta, deposit) {
@@ -292,7 +279,6 @@ window.onload = function () {
                 drawCells(1);
                 [x, y] = [movedTo.x, movedTo.y];
                 distanceCumulative += distance;
-
                 if (bestDistance < distanceCumulative) {
                     antStart(state, start, initial, alpha, beta, rho, deposit, objects, bestDistance, oldVisited);
                     drawCells();
@@ -303,7 +289,7 @@ window.onload = function () {
 
                 // If the exit is found
                 if (ant.checkExit(x, y, grid, state)) {
-                    console.log(`Exit found after ${state ? "moving" : "returning"} ${distanceCumulative} cells`);
+                    console.log(`Exit found after ${state ? "moving" : "returning"} through ${distanceCumulative} cells`);
                     resolve([{ x, y }, distanceCumulative, visited]);
                     return;
                 }
@@ -350,12 +336,9 @@ window.onload = function () {
                         }
                     }
                 }
-                console.log("debug 1")
-                [currentPoint, newDistance, newVisited] = await antStart(0, start, currentPoint, alpha, beta, rho, deposit, objects, oldDistance, oldVisited);
-                console.log("debug 2")
 
+                [currentPoint, newDistance, newVisited] = await antStart(0, start, currentPoint, alpha, beta, rho, deposit, objects, oldDistance, oldVisited);
                 if (newDistance < oldDistance) {
-                console.log("debug 3")
                     oldDistance = newDistance;
                     newVisited.forEach(visit => setColor(visit.x, visit.y, "darkgreen"));
                 }
