@@ -7,6 +7,10 @@ window.onload = function () {
     let start;
     let hasStarted = false;
     let grid = [];
+    const properties = { // Each cell will have these properties by default
+        color: "#ccc",
+        pheromone: 1.0
+    }
     for (let x = 0; x < gridWidth; x++) {
         let cols = [];
         for (let y = 0; y < gridHeight; y++) {
