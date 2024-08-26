@@ -131,14 +131,10 @@ window.onload = function () {
                 }
             }
         }
-        getDirs(x, y, avoid) {
-            if (!(x && y)) {
-                x = this.x;
-                y = this.y;
-            }
+        getDirs(avoid) {
             return this.directions.filter(direction => {
-                const newX = x + direction.x;
-                const newY = y + direction.y;
+                const newX = this.x + direction.x;
+                const newY = this.y + direction.y;
                 const isObject = this.objects.some(object => newX === object.x && newY === object.y);
                 const isVisited = this.visited.some(visit => newX === visit.x && newY === visit.y);
                 const isAvoided = avoid && avoid.some(deadEnd => deadEnd.x === newX && deadEnd.y === newY);
@@ -248,7 +244,7 @@ window.onload = function () {
             function moveAnt() {
                 try {
                     let ant = new Ant(x, y, visited, objects, state ? Math.pow(alpha, 2) : alpha, beta, deposit);
-                    let dirs = ant.getDirs(x, y);
+                    let dirs = ant.getDirs();
                     if (dirs.length === 0) {
                         let newdirs = [];
                         do {
@@ -261,7 +257,7 @@ window.onload = function () {
                             deadEnds.push(revert.avoid);
                             x = revert.x;
                             y = revert.y;
-                            newdirs = ant.getDirs(x, y, deadEnds);
+                            newdirs = ant.getDirs(deadEnds);
                         } while (newdirs.length < 1);
 
                         ant.x = x;
