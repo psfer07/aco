@@ -1,9 +1,4 @@
 window.onload = function () {
-    const canvas = document.getElementById("canvas_render");
-    const paint = canvas.getContext("2d");
-    const gridWidth = 180;
-    const gridHeight = 200;
-    const cellSize = 4;
     let start;
     let hasStarted = false;
     let grid = Array.from({ length: gridWidth }, () =>
@@ -12,6 +7,11 @@ window.onload = function () {
             pheromone: 1.0
         }))
     );
+    const canvas = document.getElementById("canvas_render");
+    const paint = canvas.getContext("2d");
+    const gridWidth = 180;
+    const gridHeight = 200;
+    const cellSize = 4;
     const walls = {
         color: "#2d2d2d",
         horz: {
@@ -241,8 +241,8 @@ window.onload = function () {
         }
     }
     function antStart(state, start, initial, alpha, beta, rho, deposit, objects, bestDistance, oldVisited) {
-        return new Promise((resolve, reject) => {
-            let moveCount = 0;
+        return new Promise((resolve) => {
+            let i = 0;
             let distanceCumulative = 0;
             let { x, y } = initial;
             let visited = [];
@@ -250,119 +250,56 @@ window.onload = function () {
             visited.push({ x, y });
 
             function moveAnt() {
-                try {
-                    // Ensure grid is defined
-                    if (!grid) {
-                        console.error("Grid is undefined.");
-                        reject(new Error("Grid is undefined."));
-                        return;
-                    }
-
-                    // Ensure current position is within grid boundaries
-                    if (x < 0 || x >= gridWidth || y < 0 || y >= gridHeight) {
-                        console.error(`Current position (${x}, ${y}) is out of grid bounds.`);
-                        reject(new Error(`Invalid position (${x}, ${y})`));
-                        return;
-                    }
-
-                    let ant = new Ant(x, y, visited, objects, state ? Math.pow(alpha, 2) : alpha, beta, deposit);
-                    let dirs = ant.getDirs(x, y);
-                    if (dirs.length === 0) {
-                        let newdirs = [];
-                        do {
-                            let revert = ant.revertMove();
-                            if (!revert) {
-                                console.error("Cannot revert move; no previous moves to revert.");
-                                reject(new Error("Dead end reached with no possible moves."));
-                                return;
-                            }
-                            deadEnds.push(revert.avoid);
-                            x = revert.x;
-                            y = revert.y;
-                            newdirs = ant.getDirs(x, y, deadEnds);
-                        } while (newdirs.length < 1);
-
-                        ant.x = x;
-                        ant.y = y;
-                        dirs = newdirs;
-                    }
-
-                    const [movedTo, distance] = ant.move(grid, dirs);
-
-                    // Validate movedTo
-                    if (!movedTo || movedTo.x < 0 || movedTo.x >= gridWidth || movedTo.y < 0 || movedTo.y >= gridHeight) {
-                        console.error(`Moved to invalid position: (${movedTo ? movedTo.x : 'undefined'}, ${movedTo ? movedTo.y : 'undefined'})`);
-                        reject(new Error(`Invalid movedTo position: (${movedTo ? movedTo.x : 'undefined'}, ${movedTo ? movedTo.y : 'undefined'})`));
-                        return;
-                    }
-
-                    // Evaporate pheromones every 15 moves
-                    if (moveCount % 15 === 0) {
-                        for (let row = 0; row < gridWidth; row++) {
-                            for (let col = 0; col < gridHeight; col++) {
-                                if (grid[row] && grid[row][col]) {
-                                    grid[row][col].pheromone = (1 - rho) * grid[row][col].pheromone;
-                                } else {
-                                    console.error(`Grid cell undefined at (${row}, ${col})`);
-                                }
-                            }
+                let ant = new Ant(x, y, visited, objects, state ? Math.pow(alpha, 2) : alpha, beta, deposit); // As ants usually follow its own path after finding food
+                let dirs = ant.getDirs(x, y);
+                if (dirs.length === 0) {
+                    let newdirs = [];
+                    do {
+                        let revert = ant.revertMove();
+                        deadEnds.push(revert.avoid);
+                        [x, y] = [revert.x, revert.y];
+                        newdirs = ant.getDirs(x, y, deadEnds);
+                    } while (newdirs.length < 1);
+                    ant.x = x;
+                    ant.y = y;
+                    dirs = newdirs;
+                }
+                const [movedTo, distance] = ant.move(grid, dirs);
+                if (i % 15 === 0) { // Evaporates pheromone every 15 moves
+                    for (let i = 0; i < gridWidth; i++) {
+                        for (let j = 0; j < gridHeight; j++) {
+                            grid[i][j].pheromone = (1 - rho) * grid[i][j].pheromone;
                         }
                     }
-
-                    moveCount++;
-                    visited.push({ x: movedTo.x, y: movedTo.y });
-                    setColor(movedTo.x, movedTo.y, state ? "green" : "darkgreen");
-                    setColor([start.x - 1, start.x + 1], [start.y - 1, start.y + 1], "red");
-                    drawCells(1);
-                    x = movedTo.x;
-                    y = movedTo.y;
-                    distanceCumulative += distance;
-
-                    console.log(`Best Distance: ${bestDistance}, Cumulative Distance: ${distanceCumulative}`);
-
-                    if (bestDistance < distanceCumulative) {
-                        console.log("Cumulative distance exceeded best distance. Restarting ant.");
-                        drawCells();
-                        oldVisited.forEach(visit => setColor(visit.x, visit.y, !state ? "green" : "darkgreen"));
-                        drawCells(1);
-
-                        // Reset variables for retry
-                        moveCount = 0;
-                        distanceCumulative = 0;
-                        x = initial.x;
-                        y = initial.y;
-                        visited = [{ x, y }];
-                        deadEnds = [];
-
-                        // Continue the loop without resolving
-                        requestAnimationFrame(moveAnt);
-                        return;
-                    }
-
-                    // Debugging output
-                    console.log("Current Position:", { x, y });
-                    console.log("State:", state);
-                    console.log("Visited:", visited);
-
-                    // Check if the exit is found
-                    if (ant.checkExit(x, y, grid, state)) {
-                        console.log(`Exit found after ${state ? "moving" : "returning"} through ${distanceCumulative} cells`);
-                        console.log({ x, y }, distanceCumulative, visited);
-                        resolve([{ x, y }, distanceCumulative, visited]);
-                        return;
-                    }
-
-                    requestAnimationFrame(moveAnt); // Continue the loop
-                } catch (error) {
-                    console.error("Error during ant movement:", error);
-                    reject(error);
                 }
+                i++;
+                visited.push({ x: movedTo.x, y: movedTo.y });
+                setColor(movedTo.x, movedTo.y, state ? "green" : "darkgreen");
+                setColor([start.x - 1, start.x + 1], [start.y - 1, start.y + 1], "red");
+                drawCells(1);
+                [x, y] = [movedTo.x, movedTo.y];
+                distanceCumulative += distance;
+                if (bestDistance < distanceCumulative) {
+                    antStart(state, start, initial, alpha, beta, rho, deposit, objects, bestDistance, oldVisited);
+                    drawCells();
+                    oldVisited.forEach(visit => setColor(visit.x, visit.y, !state ? "green" : "darkgreen"));
+                    drawCells(1);
+                    return;
+                }
+
+                // If the exit is found
+                if (ant.checkExit(x, y, grid, state)) {
+                    console.log(`Exit found after ${state ? "moving" : "returning"} through ${distanceCumulative} cells`);
+                    resolve([{ x, y }, distanceCumulative, visited]);
+                    return;
+                }
+
+                requestAnimationFrame(moveAnt); // Continue the loop
             }
 
             requestAnimationFrame(moveAnt); // Start the loop
         });
     }
-
 
     async function runSimulations(start, alpha, beta, rho, deposit, steps) {
         let currentPoint = start;
