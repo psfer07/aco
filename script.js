@@ -1,4 +1,9 @@
 window.onload = function () {
+    const canvas = document.getElementById("canvas_render");
+    const paint = canvas.getContext("2d");
+    const gridWidth = 180;
+    const gridHeight = 200;
+    const cellSize = 4;
     let start;
     let hasStarted = false;
     let grid = Array.from({ length: gridWidth }, () =>
@@ -7,11 +12,6 @@ window.onload = function () {
             pheromone: 1.0
         }))
     );
-    const canvas = document.getElementById("canvas_render");
-    const paint = canvas.getContext("2d");
-    const gridWidth = 180;
-    const gridHeight = 200;
-    const cellSize = 4;
     const walls = {
         color: "#2d2d2d",
         horz: {
