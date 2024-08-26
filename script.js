@@ -169,15 +169,11 @@ window.onload = function () {
             const { x, y } = this.visited[this.visited.length - 1]; // Get the new last element
             return { x: x, y: y, avoid: deadEnd };
         }
-        checkExit(x, y, grid, state) {
-            if (!(x && y)) {
-                x = this.x;
-                y = this.y;
-            }
+        checkExit(grid, state) {
             const color = state ? "#02b200" : "red";
             return this.directions.some(direction => {
-                const exitX = x + direction.x;
-                const exitY = y + direction.y;
+                const exitX = this.x + direction.x;
+                const exitY = this.y + direction.y;
                 return grid[exitX][exitY].color === color;
             });
         }
@@ -312,7 +308,7 @@ window.onload = function () {
                     }
 
                     // Check if the exit is found
-                    if (ant.checkExit(x, y, grid, state)) {
+                    if (ant.checkExit(grid, state)) {
                         console.log(`Exit found after ${state ? "moving" : "returning"} through ${distanceCumulative} cells`);
                         resolve([{ x, y }, distanceCumulative, visited]);
                         return;
