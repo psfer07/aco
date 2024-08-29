@@ -300,7 +300,7 @@ window.onload = function () {
                             x = revert.x;
                             y = revert.y;
                             newdirs = ant.getDirs(x, y, deadEnds);
-                        } while (newdirs.length < 1); // Reverts its position until it has more than one available direction to move
+                        } while (newdirs.length < 1); // Reverts its position until it has more than one available directions to move
                         dirs = newdirs;
                     }
 
