@@ -119,7 +119,7 @@ window.onload = function () {
         _calcCost(pheromone, directions) {
             let weighs = [];
 
-            // Generic cost calculation formula for Ant Colony Systems
+            // Generic cost calculation formula for Ant Colony Optimization systems
             for (let i = 0; i < directions.length; i++) {
                 const distance = (Math.abs(directions[i].x) + Math.abs(directions[i].y)) === 2 ? Math.sqrt(2) : 1;
                 const weigh = Math.pow(pheromone[i], this.alpha) * Math.pow(1 / distance, this.beta);
@@ -162,18 +162,18 @@ window.onload = function () {
             for (const direction of this.directions) {
                 const newX = x + direction.x;
                 const newY = y + direction.y;
-
                 let isObject = false;
+                let isVisited = false;
+                let isAvoided = false;
+
                 for (let i = 0; i < this.objects.length; i++) {
                     if (newX === this.objects[i].x && newY === this.objects[i].y) { isObject = true; break; }
                 }
 
-                let isVisited = false;
                 for (let i = 0; i < this.visited.length; i++) {
                     if (newX === this.visited[i].x && newY === this.visited[i].y) { isVisited = true; break; }
                 }
 
-                let isAvoided = false;
                 if (avoid) {
                     for (let i = 0; i < avoid.length; i++) {
                         if (newX === avoid[i].x && newY === avoid[i].y) { isAvoided = true; break; }
@@ -289,8 +289,9 @@ window.onload = function () {
             let deadEnds = [];
             visited.push({ x, y });
 
-            function moveAnt() {
+            function moveAnt(timestamp) {
                 try {
+                    console.log(timestamp)
                     let ant = new Ant(x, y, visited, objects, state ? Math.pow(alpha, 2) : alpha, beta, deposit);
                     let dirs = ant.getDirs(x, y);
                     if (dirs.length === 0) {
@@ -324,6 +325,9 @@ window.onload = function () {
                     updateCanvas();
                     x = movedTo.x;
                     y = movedTo.y;
+                    ant.x = movedTo.x;
+                    ant.y = movedTo.y;
+                    console.log(x, y)
                     distanceCumulative += distance;
                     if (bestDistance < distanceCumulative) {
                         console.log("Cumulative distance exceeded best distance. Restarting ant.");
@@ -449,6 +453,9 @@ window.onload = function () {
     });
     document.getElementById("reset").addEventListener("click", function () {
         location.reload();
+    });
+    document.getElementById("ants").addEventListener("change", function () {
+        document.getElementById("ants_number").textContent = document.getElementById("ants").value;
     });
     document.getElementById("start").addEventListener("click", function () {
         if (start && !hasStarted) {
