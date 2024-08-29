@@ -13,44 +13,6 @@ canvas {
     margin-top: 1vh;
     background-color: #ccc;
 }
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 60px;
-  height: 34px;
-}
-
-.slider {
-  position: absolute;
-  border-radius: 13px;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgb(255, 75, 75);
-  transition: .4s;
-}
-
-.slider:before {
-  position: absolute;
-  border-radius: 15px;
-  content: "";
-  height: 26px;
-  width: 26px;
-  left: 4px;
-  bottom: 4px;
-  background-color: lightgoldenrodyellow;
-  transition: .4s;
-}
-
-input:checked + .slider {
-  background-color: green;
-}
-
-input:checked + .slider:before {
-  transform: translateX(26px);
-}
 button {
   background-color: white;
   color: black;
