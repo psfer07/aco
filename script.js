@@ -231,7 +231,12 @@ window.onload = function () {
 
         for (let i = X; i <= endX; i++) {
             for (let j = Y; j <= endY; j++) {
-                if (grid[i][j].color != color) grid[i][j].color = color;
+                try {
+                    if (grid[i][j].color != color) grid[i][j].color = color;
+                } catch (error) {
+                    new Error(`Error setting the cell (${i}, ${j}) as color ${color}`);
+                    return;
+                }
             }
         }
     }
