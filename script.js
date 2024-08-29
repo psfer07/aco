@@ -1,6 +1,7 @@
 window.onload = function () {
     const canvas = document.getElementById("canvas_render");
     const paint = canvas.getContext("2d");
+    const ants = document.getElementById("ants");
     const gridWidth = 180;
     const gridHeight = 200;
     const cellSize = 4;
@@ -280,6 +281,15 @@ window.onload = function () {
             }
         }
     }
+    function getObjects(freespaces) {
+        for (let i = 0; i < gridWidth; i++) {
+            for (let j = 0; j < gridHeight; j++) {
+                for (const freespace of freespaces) {
+                    if (grid[i][j].color === freespace[i]) objects.push({ x: i, y: j });
+                }
+            }
+        }
+    }
     function antStart(state, start, initial, alpha, beta, rho, deposit, objects, bestDistance, oldVisited) {
         return new Promise((resolve, reject) => {
             let moveCount = 0;
@@ -376,16 +386,7 @@ window.onload = function () {
                 let freespaces = ["#ccc", "red", "green", "darkgreen", "#02b200"];
                 console.log("Iteration nº", i + 1, "of", steps);
 
-                for (let i = 0; i < gridWidth; i++) {
-                    for (let j = 0; j < gridHeight; j++) {
-                        for (const freespace of freespaces) {
-                            if (grid[i][j].color === freespace[i]) {
-                                objects.push({ x: i, y: j });
-                            }
-                        }
-                    }
-                }
-
+                getObjects(freespaces);
                 [currentPoint, newDistance, newVisited] = await antStart(1, start, currentPoint, alpha, beta, rho, deposit, objects, oldDistance, oldVisited);
                 if (newDistance < oldDistance || oldDistance === undefined) {
                     oldDistance = newDistance;
@@ -394,18 +395,9 @@ window.onload = function () {
                 oldVisited = newVisited;
                 newVisited = [];
                 objects = [];
-                freespaces.pop(); // Remove door as free space for the ant
+                freespaces.pop(); // Added door as an object for the ant when returns to the starting point
 
-                for (let i = 0; i < gridWidth; i++) {
-                    for (let j = 0; j < gridHeight; j++) {
-                        for (const freespace of freespaces) {
-                            if (grid[i][j].color === freespace[i]) {
-                                objects.push({ x: i, y: j });
-                            }
-                        }
-                    }
-                }
-
+                getObjects(freespaces);
                 [currentPoint, newDistance, newVisited] = await antStart(0, start, currentPoint, alpha, beta, rho, deposit, objects, oldDistance, oldVisited);
                 if (newDistance < oldDistance) {
                     oldDistance = newDistance;
@@ -454,17 +446,20 @@ window.onload = function () {
     document.getElementById("reset").addEventListener("click", function () {
         location.reload();
     });
-    document.getElementById("ants").addEventListener("change", function () {
-        document.getElementById("ants_number").textContent = document.getElementById("ants").value;
+    ants.addEventListener("change", function () {
+        document.getElementById("ants_number").textContent = ants.value;
     });
     document.getElementById("start").addEventListener("click", function () {
         if (start && !hasStarted) {
-            runSimulations(start, Number(document.getElementById("alpha").value),
-                Number(document.getElementById("beta").value),
-                Number(document.getElementById("rho").value),
-                Number(document.getElementById("deposit").value),
-                Number(document.getElementById("steps").value)
-            );
+            for (let i = 0; i < ants.value; i++) {
+                runSimulations(start,
+                    Number(document.getElementById("alpha").value),
+                    Number(document.getElementById("beta").value),
+                    Number(document.getElementById("rho").value),
+                    Number(document.getElementById("deposit").value),
+                    Number(document.getElementById("steps").value)
+                );
+            }
         } else {
             if (hasStarted) {
                 alert("Espera a que la simulación actual termine o reinicia el simulador.")
