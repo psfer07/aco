@@ -269,6 +269,7 @@ window.onload = function () {
                 }
             }
         }
+        updateCanvas();
     }
     function updateCanvas() {
         // Paints each cell with its corresponding color
@@ -418,9 +419,7 @@ window.onload = function () {
         }
     }
 
-    // Initial room renderization
-    drawRoom();
-    updateCanvas();
+    drawRoom(); // Initial room renderization
     canvas.addEventListener("click", function (event) {
         const rect = canvas.getBoundingClientRect();
         start = {
