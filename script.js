@@ -234,43 +234,43 @@ window.onload = function () {
             }
         }
     }
-    function drawCells(reload) {
-        if (!reload) {
-            // Floor
-            setColor([2, gridWidth - 3], [2, gridHeight - 3], "#ccc");
-            // Walls
-            for (const wall of walls.horz.positions) {
-                setColor([wall.x, wall.x + walls.horz.width - 1], [wall.y, wall.y + walls.horz.height - 1], walls.color);
-            }
-            for (const wall of walls.vert.positions) {
-                setColor([wall.x, wall.x + walls.vert.width - 1], [wall.y, wall.y + walls.vert.height - 1], walls.color);
-            }
-            // Windows
-            for (const window of windows.positions) {
-                setColor([window.x, window.x + windows.width - 1], [window.y, window.y + windows.height - 1], windows.color);
-            }
-            // Door
-            setColor([door.x, door.x + door.width - 1], [door.y, door.y + door.height - 1], door.color);
-            // Pillars
-            for (const pillar of obstacles.pillars.positions) {
-                setColor([pillar.x, pillar.x + obstacles.pillars.width - 1], [pillar.y, pillar.y + obstacles.pillars.height - 1], obstacles.pillars.color);
-            }
-            // Teacher's table
-            const Ttable = obstacles.teacher_table
-            setColor([Ttable.x, Ttable.x + Ttable.width - 1], [Ttable.y, Ttable.y + Ttable.height - 1], Ttable.color);
-            // Tables
-            const table = obstacles.tables;
-            for (let sector = 0; sector < table.sectors.count; sector++) {
-                const sectorX = 2.8 * table.margins.marginsector * sector + table.margins.marginsector * 0.6;
-                for (let col = 0; col < table.sectors.cols; col++) {
-                    const tableX = sectorX + col * (table.width + table.margins.marginX);
-                    for (let row = 0; row < table.sectors.rows; row++) {
-                        const tableY = 48 + row * (table.margins.marginY + table.height);
-                        setColor([tableX, tableX + table.width], [tableY, tableY + table.height], table.color);
-                    }
+    function drawRoom() {
+        // Floor
+        setColor([2, gridWidth - 3], [2, gridHeight - 3], "#ccc");
+        // Walls
+        for (const wall of walls.horz.positions) {
+            setColor([wall.x, wall.x + walls.horz.width - 1], [wall.y, wall.y + walls.horz.height - 1], walls.color);
+        }
+        for (const wall of walls.vert.positions) {
+            setColor([wall.x, wall.x + walls.vert.width - 1], [wall.y, wall.y + walls.vert.height - 1], walls.color);
+        }
+        // Windows
+        for (const window of windows.positions) {
+            setColor([window.x, window.x + windows.width - 1], [window.y, window.y + windows.height - 1], windows.color);
+        }
+        // Door
+        setColor([door.x, door.x + door.width - 1], [door.y, door.y + door.height - 1], door.color);
+        // Pillars
+        for (const pillar of obstacles.pillars.positions) {
+            setColor([pillar.x, pillar.x + obstacles.pillars.width - 1], [pillar.y, pillar.y + obstacles.pillars.height - 1], obstacles.pillars.color);
+        }
+        // Teacher's table
+        const Ttable = obstacles.teacher_table
+        setColor([Ttable.x, Ttable.x + Ttable.width - 1], [Ttable.y, Ttable.y + Ttable.height - 1], Ttable.color);
+        // Tables
+        const table = obstacles.tables;
+        for (let sector = 0; sector < table.sectors.count; sector++) {
+            const sectorX = 2.8 * table.margins.marginsector * sector + table.margins.marginsector * 0.6;
+            for (let col = 0; col < table.sectors.cols; col++) {
+                const tableX = sectorX + col * (table.width + table.margins.marginX);
+                for (let row = 0; row < table.sectors.rows; row++) {
+                    const tableY = 48 + row * (table.margins.marginY + table.height);
+                    setColor([tableX, tableX + table.width], [tableY, tableY + table.height], table.color);
                 }
             }
         }
+    }
+    function updateCanvas() {
         // Paints each cell with its corresponding color
         for (let i = 0; i < grid.length; i++) {
             for (let j = 0; j < grid[i].length; j++) {
@@ -320,15 +320,15 @@ window.onload = function () {
                     visited.push({ x: movedTo.x, y: movedTo.y });
                     setColor(movedTo.x, movedTo.y, state ? "green" : "darkgreen");
                     setColor([start.x - 1, start.x + 1], [start.y - 1, start.y + 1], "red");
-                    drawCells(1);
+                    updateCanvas();
                     x = movedTo.x;
                     y = movedTo.y;
                     distanceCumulative += distance;
                     if (bestDistance < distanceCumulative) {
                         console.log("Cumulative distance exceeded best distance. Restarting ant.");
-                        drawCells();
+                        drawRoom();
                         for (const visit of oldVisited) { setColor(visit.x, visit.y, !state ? "green" : "darkgreen") }
-                        drawCells(1);
+                        updateCanvas();
 
                         // Reset variables for retry
                         moveCount = 0;
@@ -409,7 +409,7 @@ window.onload = function () {
                 oldVisited = newVisited;
                 newVisited = [];
                 objects = [];
-                drawCells(1);
+                updateCanvas();
 
             } catch (error) {
                 console.log("Error in simulation:", error.message);
@@ -418,7 +418,9 @@ window.onload = function () {
         }
     }
 
-    drawCells(); // Initial scenario representation
+    // Initial room renderization
+    drawRoom();
+    updateCanvas();
     canvas.addEventListener("click", function (event) {
         const rect = canvas.getBoundingClientRect();
         start = {
@@ -437,9 +439,9 @@ window.onload = function () {
         }
         if (state) {
             console.log("Coordenates set in:", start.x, start.y);
-            drawCells();
+            drawRoom();
             setColor([start.x - 1, start.x + 1], [start.y - 1, start.y + 1], "red");
-            drawCells(1);
+            updateCanvas();
         } else {
             if (grid[start.x][start.y].color === "red") {
                 alert("Por favor, seleccione otro punto o inicie la simulación.")
