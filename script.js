@@ -157,7 +157,11 @@ window.onload = function () {
         for (let i = X; i <= endX; i++) {
             for (let j = Y; j <= endY; j++) {
                 try {
-                    if (grid[i][j].color != color) grid[i][j].color = color;
+                    if (grid[i][j].color != color) {
+                        grid[i][j].color = color;
+                        paint.fillStyle = grid[i][j].color;
+                        paint.fillRect(i * cellSize, j * cellSize, cellSize, cellSize);
+                    }
                 } catch (error) {
                     new Error(`Error setting the cell (${i}, ${j}) as color ${color}`);
                     return;
@@ -199,16 +203,6 @@ window.onload = function () {
                     const tableY = 48 + row * (table.margins.marginY + table.height);
                     setColor([tableX, tableX + table.width], [tableY, tableY + table.height], table.color);
                 }
-            }
-        }
-        updateCanvas();
-    }
-    function updateCanvas() {
-        // Paints each cell with its corresponding color
-        for (let i = 0; i < grid.length; i++) {
-            for (let j = 0; j < grid[i].length; j++) {
-                paint.fillStyle = grid[i][j].color;
-                paint.fillRect(i * cellSize, j * cellSize, cellSize, cellSize);
             }
         }
     }
@@ -263,7 +257,6 @@ window.onload = function () {
                     visited.push({ x: movedTo.x, y: movedTo.y });
                     setColor(movedTo.x, movedTo.y, state ? "green" : "darkgreen");
                     setColor([start.x - 1, start.x + 1], [start.y - 1, start.y + 1], "red");
-                    updateCanvas();
                     x = movedTo.x;
                     y = movedTo.y;
                     ant.x = movedTo.x;
@@ -274,7 +267,6 @@ window.onload = function () {
                         console.log("Cumulative distance exceeded best distance. Restarting ant.");
                         drawRoom();
                         for (const visit of oldVisited) { setColor(visit.x, visit.y, !state ? "green" : "darkgreen") }
-                        updateCanvas();
 
                         // Reset variables for retry
                         moveCount = 0;
@@ -337,7 +329,6 @@ window.onload = function () {
                 oldVisited = newVisited;
                 newVisited = [];
                 objects = [];
-                updateCanvas();
 
             } catch (error) {
                 console.log("Error in simulation:", error.message);
@@ -367,7 +358,6 @@ window.onload = function () {
             console.log("Coordenates set in:", start.x, start.y);
             drawRoom();
             setColor([start.x - 1, start.x + 1], [start.y - 1, start.y + 1], "red");
-            updateCanvas();
         } else {
             if (grid[start.x][start.y].color === "red") {
                 alert("Por favor, seleccione otro punto o inicie la simulación.")
