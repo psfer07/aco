@@ -56,9 +56,14 @@ window.onload = function () {
                 this.visited[this.visited.length - 1].x === this.x - direction.x &&
                 this.visited[this.visited.length - 1].y === this.y - direction.y
             );
-
-            if (lastVisitedCellIndex > 0) { weighs[lastVisitedCellIndex - 1] /= 2; }
-            if (lastVisitedCellIndex < weighs.length - 1) { weighs[lastVisitedCellIndex + 1] /= 2; }
+            switch (lastVisitedCellIndex) {
+                case lastVisitedCellIndex > 0:
+                    weighs[lastVisitedCellIndex - 1] /= 3;
+                    break;
+                case lastVisitedCellIndex < 0:
+                    weighs[lastVisitedCellIndex + 1] /= 3;
+                    break;
+            }
 
 
             const probabilities = this._calcProbabilities(weighs);
@@ -76,6 +81,7 @@ window.onload = function () {
             for (let i = 0; i < weighs.length; i++) { sum += weighs[i]; }
             const probabilities = [];
             for (let i = 0; i < weighs.length; i++) { probabilities[i] = weighs[i] / sum; }
+            console.log(probabilities)
             return probabilities; // Current case by all possible cases
 
         }
@@ -116,11 +122,10 @@ window.onload = function () {
                 const inY = this.y + direction.y;
                 total_pheromone.push(grid[inX][inY].pheromone)
             }
-
             const index = this._calcCost(total_pheromone, directions);
             const newX = this.x + directions[index].x;
             const newY = this.y + directions[index].y;
-            grid[newX][newY].pheromone += this.deposit;
+            // grid[newX][newY].pheromone += this.deposit;
 
             // Update ant's position and visited path
             this.x = newX;
@@ -226,9 +231,11 @@ window.onload = function () {
 
             function moveAnt(timestamp) {
                 try {
+                    console.log(`Try nº ${moveCount}`)
                     console.log(timestamp)
                     let ant = new Ant(x, y, visited, objects, state ? Math.pow(alpha, 2) : alpha, beta, deposit);
                     let dirs = ant.getDirs(x, y);
+                    console.log(dirs)
                     if (dirs.length === 0) {
                         let newdirs = [];
                         do {
@@ -236,25 +243,25 @@ window.onload = function () {
                             deadEnds.push(revert.avoid);
                             x = revert.x;
                             y = revert.y;
+                            ant.x = revert.x;
+                            ant.y = revert.y;
                             newdirs = ant.getDirs(x, y, deadEnds);
                         } while (newdirs.length < 1); // Reverts its position until it has more than one available directions to move
                         dirs = newdirs;
                     }
 
                     const [movedTo, distance] = ant.move(grid, dirs);
+                    moveCount++;
+                    visited.push({ x: movedTo.x, y: movedTo.y });
 
-                    // Evaporate pheromones every 15 moves
-                    if (moveCount % 15 === 0) {
-                        for (let i = 0; i < gridWidth; i++) {
-                            for (let j = 0; j < gridHeight; j++) {
-                                grid[i][j].pheromone *= (1 - rho); // Applying evaporation
-                                if (grid[i][j].pheromone < 0.1) grid[i][j].pheromone = 0; // Avoid floating-point precision issues
-                            }
+                    // Evaporate pheromones every 20 moves
+                    if (moveCount % 20 === 0) {
+                        for (const visit of visited) {
+                            grid[visit.x][visited.y].pheromone *= (1 - rho); // Applying evaporation
+                            if (grid[visit.x][visited.y].pheromone < 0.00001) grid[visited.x][visited.y].pheromone = 0; // Avoid floating-point precision issues
                         }
                     }
 
-                    moveCount++;
-                    visited.push({ x: movedTo.x, y: movedTo.y });
                     setColor(movedTo.x, movedTo.y, state ? "green" : "darkgreen");
                     setColor([start.x - 1, start.x + 1], [start.y - 1, start.y + 1], "red");
                     x = movedTo.x;
@@ -273,7 +280,9 @@ window.onload = function () {
                         distanceCumulative = 0;
                         x = initial.x;
                         y = initial.y;
-                        visited = [{ x, y }];
+                        ant.x = x;
+                        ant.y = y;
+                        visited = [initial];
                         deadEnds = [];
 
                         // Continue the loop without resolving
@@ -307,7 +316,7 @@ window.onload = function () {
         for (let i = 0; i < steps; i++) {
             try {
                 let freespaces = ["#ccc", "red", "green", "darkgreen", "#02b200"];
-                console.log("Iteration nº", i + 1, "of", steps);
+                console.log(`Step nº ${i + 1} of ${steps}`);
 
                 getObjects(freespaces);
                 [currentPoint, newDistance, newVisited] = await antStart(1, start, currentPoint, alpha, beta, rho, deposit, objects, oldDistance, oldVisited);
@@ -355,7 +364,7 @@ window.onload = function () {
             }
         }
         if (state) {
-            console.log("Coordenates set in:", start.x, start.y);
+            console.log(`Coordenates set in cell (${start.x}, ${start.y})`);
             drawRoom();
             setColor([start.x - 1, start.x + 1], [start.y - 1, start.y + 1], "red");
         } else {
