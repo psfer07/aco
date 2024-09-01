@@ -2,7 +2,6 @@ import { gridWidth, gridHeight, cellSize, room } from './roomConfig.js';
 window.onload = function () {
     const canvas = document.getElementById("canvas_render");
     const paint = canvas.getContext("2d");
-    const ants = document.getElementById("ants");
     let start;
     let hasStarted = false;
     let grid = [];
@@ -45,10 +44,9 @@ window.onload = function () {
         _calcCost(pheromone, directions) {
             let weighs = [];
 
-            // Generic cost calculation formula for Ant Colony Optimization systems
             for (let i = 0; i < directions.length; i++) {
                 const invertedDistance = (Math.abs(directions[i].x) + Math.abs(directions[i].y)) === 2 ? 1 / Math.sqrt(2) : 1;
-                const weigh = Math.pow(pheromone[i], this.alpha) * Math.pow(invertedDistance, this.beta);
+                const weigh = Math.pow(pheromone[i], this.alpha) * Math.pow(invertedDistance, this.beta); // Generic cost calculation formula for Ant Colony Optimization systems
                 weighs.push(weigh);
             }
 
@@ -348,20 +346,15 @@ window.onload = function () {
     document.getElementById("reset").addEventListener("click", function () {
         location.reload();
     });
-    ants.addEventListener("change", function () {
-        document.getElementById("ants_number").textContent = ants.value;
-    });
     document.getElementById("start").addEventListener("click", function () {
         if (start && !hasStarted) {
-            for (let i = 0; i < ants.value; i++) {
-                runSimulations(start,
-                    Number(document.getElementById("alpha").value),
-                    Number(document.getElementById("beta").value),
-                    Number(document.getElementById("rho").value),
-                    Number(document.getElementById("deposit").value),
-                    Number(document.getElementById("steps").value)
-                );
-            }
+            runSimulations(start,
+                Number(document.getElementById("alpha").value),
+                Number(document.getElementById("beta").value),
+                Number(document.getElementById("rho").value),
+                Number(document.getElementById("deposit").value),
+                Number(document.getElementById("steps").value)
+            );
         } else {
             if (hasStarted) {
                 alert("Espera a que la simulación actual termine o reinicia el simulador.")
