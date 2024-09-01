@@ -23,11 +23,11 @@ window.onload = function () {
     canvas.height = gridHeight * cellSize;
 
     class Ant {
-        constructor(x, y, visited, objects, alpha, beta, deposit) {
+        constructor(x, y, visited, obstacle, alpha, beta, deposit) {
             this.x = x;
             this.y = y;
             this.visited = visited;
-            this.objects = objects;
+            this.obstacle = obstacle;
             this.alpha = alpha;
             this.beta = beta;
             this.deposit = deposit;
@@ -47,8 +47,8 @@ window.onload = function () {
 
             // Generic cost calculation formula for Ant Colony Optimization systems
             for (let i = 0; i < directions.length; i++) {
-                const distance = (Math.abs(directions[i].x) + Math.abs(directions[i].y)) === 2 ? Math.sqrt(2) : 1;
-                const weigh = Math.pow(pheromone[i], this.alpha) * Math.pow(1 / distance, this.beta);
+                const invertedDistance = (Math.abs(directions[i].x) + Math.abs(directions[i].y)) === 2 ? 1 / Math.sqrt(2) : 1;
+                const weigh = Math.pow(pheromone[i], this.alpha) * Math.pow(invertedDistance, this.beta);
                 weighs.push(weigh);
             }
 
@@ -56,14 +56,8 @@ window.onload = function () {
                 this.visited[this.visited.length - 1].x === this.x - direction.x &&
                 this.visited[this.visited.length - 1].y === this.y - direction.y
             );
-            switch (lastVisitedCellIndex) {
-                case lastVisitedCellIndex > 0:
-                    weighs[lastVisitedCellIndex - 1] /= 3;
-                    break;
-                case lastVisitedCellIndex < 0:
-                    weighs[lastVisitedCellIndex + 1] /= 3;
-                    break;
-            }
+            if (lastVisitedCellIndex > 0) weighs[lastVisitedCellIndex - 1] /= 3;
+            if (lastVisitedCellIndex < 0) weighs[lastVisitedCellIndex + 1] /= 3;
 
 
             const probabilities = this._calcProbabilities(weighs);
@@ -81,51 +75,34 @@ window.onload = function () {
             for (let i = 0; i < weighs.length; i++) { sum += weighs[i]; }
             const probabilities = [];
             for (let i = 0; i < weighs.length; i++) { probabilities[i] = weighs[i] / sum; }
-            console.log(probabilities)
             return probabilities; // Current case by all possible cases
-
         }
         getDirs(x, y, avoid) {
             if (!(x && y)) {
                 x = this.x;
                 y = this.y;
             }
-            let availableDirections = [];
-            for (const direction of this.directions) {
+            return this.directions.filter(direction => {
                 const newX = x + direction.x;
                 const newY = y + direction.y;
-                let isObject = false;
-                let isVisited = false;
-                let isAvoided = false;
+                const isObject = this.obstacle.some(object => newX === object.x && newY === object.y);
+                const isVisited = this.visited.some(visit => newX === visit.x && newY === visit.y);
+                const isAvoided = avoid && avoid.some(deadEnd => deadEnd.x === newX && deadEnd.y === newY);
 
-                for (let i = 0; i < this.objects.length; i++) {
-                    if (newX === this.objects[i].x && newY === this.objects[i].y) { isObject = true; break; }
-                }
-
-                for (let i = 0; i < this.visited.length; i++) {
-                    if (newX === this.visited[i].x && newY === this.visited[i].y) { isVisited = true; break; }
-                }
-
-                if (avoid) {
-                    for (let i = 0; i < avoid.length; i++) {
-                        if (newX === avoid[i].x && newY === avoid[i].y) { isAvoided = true; break; }
-                    }
-                }
-                if (!(isObject && isVisited && isAvoided)) availableDirections.push(direction);
-            }
-            return availableDirections;
+                return !isObject && !isVisited && !isAvoided;
+            });
         }
         move(grid, directions) {
-            let total_pheromone = [];
-            for (const direction of directions) {
+            const total_pheromone = directions.map(direction => {
                 const inX = this.x + direction.x;
                 const inY = this.y + direction.y;
-                total_pheromone.push(grid[inX][inY].pheromone)
-            }
+                return grid[inX][inY].pheromone;
+            });
+
             const index = this._calcCost(total_pheromone, directions);
             const newX = this.x + directions[index].x;
             const newY = this.y + directions[index].y;
-            // grid[newX][newY].pheromone += this.deposit;
+            grid[newX][newY].pheromone += this.deposit;
 
             // Update ant's position and visited path
             this.x = newX;
@@ -211,14 +188,14 @@ window.onload = function () {
             }
         }
     }
-    function getObjects(freespaces) {
+    function getObjects(object) {
+        let objects = [];
         for (let i = 0; i < gridWidth; i++) {
             for (let j = 0; j < gridHeight; j++) {
-                for (const freespace of freespaces) {
-                    if (grid[i][j].color === freespace[i]) objects.push({ x: i, y: j });
-                }
+                if (!object.some(object => grid[i][j].color === object)) objects.push({ x: i, y: j });
             }
         }
+        return objects;
     }
     function antStart(state, start, initial, alpha, beta, rho, deposit, objects, bestDistance, oldVisited) {
         return new Promise((resolve, reject) => {
@@ -229,24 +206,20 @@ window.onload = function () {
             let deadEnds = [];
             visited.push({ x, y });
 
-            function moveAnt(timestamp) {
+            function moveAnt() {
                 try {
-                    console.log(`Try nº ${moveCount}`)
-                    console.log(timestamp)
-                    let ant = new Ant(x, y, visited, objects, state ? Math.pow(alpha, 2) : alpha, beta, deposit);
+                    let ant = new Ant(x, y, visited, objects, state ? Math.pow(alpha, 2) : alpha, beta, deposit); // As ants usually follow its own path after finding food
                     let dirs = ant.getDirs(x, y);
-                    console.log(dirs)
                     if (dirs.length === 0) {
                         let newdirs = [];
                         do {
                             let revert = ant.revertMove();
                             deadEnds.push(revert.avoid);
-                            x = revert.x;
-                            y = revert.y;
-                            ant.x = revert.x;
-                            ant.y = revert.y;
+                            [x, y] = [revert.x, revert.y];
                             newdirs = ant.getDirs(x, y, deadEnds);
                         } while (newdirs.length < 1); // Reverts its position until it has more than one available directions to move
+                        ant.x = x;
+                        ant.y = y;
                         dirs = newdirs;
                     }
 
@@ -257,18 +230,16 @@ window.onload = function () {
                     // Evaporate pheromones every 20 moves
                     if (moveCount % 20 === 0) {
                         for (const visit of visited) {
-                            grid[visit.x][visited.y].pheromone *= (1 - rho); // Applying evaporation
-                            if (grid[visit.x][visited.y].pheromone < 0.00001) grid[visited.x][visited.y].pheromone = 0; // Avoid floating-point precision issues
+                            grid[visit.x][visit.y].pheromone *= (1 - rho); // Applying evaporation
+                            if (grid[visit.x][visit.y].pheromone < 0.00001) grid[visit.x][visit.y].pheromone = 0; // Avoid floating-point precision issues
                         }
                     }
 
                     setColor(movedTo.x, movedTo.y, state ? "green" : "darkgreen");
                     setColor([start.x - 1, start.x + 1], [start.y - 1, start.y + 1], "red");
-                    x = movedTo.x;
-                    y = movedTo.y;
+                    [x, y] = [movedTo.x, movedTo.y];
                     ant.x = movedTo.x;
                     ant.y = movedTo.y;
-                    console.log(x, y)
                     distanceCumulative += distance;
                     if (bestDistance < distanceCumulative) {
                         console.log("Cumulative distance exceeded best distance. Restarting ant.");
@@ -309,7 +280,7 @@ window.onload = function () {
     async function runSimulations(start, alpha, beta, rho, deposit, steps) {
         let currentPoint = start;
         let oldDistance, newDistance = 0;
-        let objects = [];
+        let obstacles = [];
         let newVisited, oldVisited = [];
         hasStarted = true;
 
@@ -318,26 +289,27 @@ window.onload = function () {
                 let freespaces = ["#ccc", "red", "green", "darkgreen", "#02b200"];
                 console.log(`Step nº ${i + 1} of ${steps}`);
 
-                getObjects(freespaces);
-                [currentPoint, newDistance, newVisited] = await antStart(1, start, currentPoint, alpha, beta, rho, deposit, objects, oldDistance, oldVisited);
+                obstacles = getObjects(freespaces);
+                [currentPoint, newDistance, newVisited] = await antStart(1, start, currentPoint, alpha, beta, rho, deposit, obstacles, oldDistance, oldVisited);
                 if (newDistance < oldDistance || oldDistance === undefined) {
                     oldDistance = newDistance;
-                    for (const visit of newVisited) { setColor(visit.x, visit.y, "green") }
+                    for (const visit of newVisited) { setColor(visit.x, visit.y, "green") };
                 }
                 oldVisited = newVisited;
                 newVisited = [];
-                objects = [];
-                freespaces.pop(); // Added door as an object for the ant when returns to the starting point
+                obstacles = [];
+                freespaces.pop(); // Remove door as free space for the ant
 
-                getObjects(freespaces);
-                [currentPoint, newDistance, newVisited] = await antStart(0, start, currentPoint, alpha, beta, rho, deposit, objects, oldDistance, oldVisited);
+                obstacles = getObjects(freespaces);
+                [currentPoint, newDistance, newVisited] = await antStart(0, start, currentPoint, alpha, beta, rho, deposit, obstacles, oldDistance, oldVisited);
+
                 if (newDistance < oldDistance) {
                     oldDistance = newDistance;
-                    for (const visit of newVisited) { setColor(visit.x, visit.y, "darkgreen") }
+                    for (const visit of newVisited) { setColor(visit.x, visit.y, "darkgreen") };
                 }
                 oldVisited = newVisited;
                 newVisited = [];
-                objects = [];
+                obstacles = [];
 
             } catch (error) {
                 console.log("Error in simulation:", error.message);
