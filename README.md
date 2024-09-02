@@ -1,4 +1,4 @@
-# Rutas de Evacuación Optimizadas: Explorando Algoritmos de Colonias de Hormigas y A* Search
+# Búsqueda de Rutas de Evacuación Optimizadas basado en Algoritmo de Colonia de Hormigas y A* Search
 
 En este repositorio de recogen el código fuente desarrollado para el proyecto de investigación.
 Se puede acceder a la versión estable de forma online a través del siguiente enlace:
