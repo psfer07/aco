@@ -1,4 +1,4 @@
-import { gridWidth, gridHeight, cellSize, room } from './roomConfig.js';
+import { gridWidth, gridHeight, cellSize, room } from './Class layout.js';
 window.onload = function () {
     const canvas = document.getElementById("canvas_render");
     const paint = canvas.getContext("2d");
@@ -167,36 +167,52 @@ window.onload = function () {
             }
         }
     }
-    function drawRoom() {
-        const { walls, windows, exit, elements } = room;
-        setColor([2, gridWidth - 5], [2, gridHeight - 5], "#ccc");
-        for (const wall of walls.horz.positions) { setColor([wall.x, walls.horz.width - 1], [wall.y, walls.horz.height - 1], walls.color); }
-        for (const wall of walls.vert.positions) { setColor([wall.x, walls.vert.width - 1], [wall.y, walls.vert.height - 1], walls.color); }
-        for (const window of windows.positions) { setColor([window.x, windows.width - 1], [window.y, windows.height - 1], windows.color); }
-        setColor([exit.x, exit.width - 1], [exit.y, exit.height - 1], exit.color);
-
-        for (const key in elements) {
-            switch (key) {
-                case 'pillars':
-                    const pillars = elements.pillars;
-                    for (const pillar of pillars.positions) { setColor([pillar.x, pillars.width - 1], [pillar.y, pillars.height - 1], pillars.color); }
+    function drawElements() {
+        const { floor, walls, windows, exit, elements } = room;
+        for (const item in room) {
+            switch (item) {
+                case 'floor':
+                    setColor([floor.margin, floor.width - floor.margin], [floor.margin, floor.height - floor.margin], floor.color);
                     break;
-                case 'teacher_table':
-                    const Ttable = elements.teacher_table
-                    setColor([Ttable.x, Ttable.width - 1], [Ttable.y, Ttable.height - 1], Ttable.color);
+                case 'walls':
+                    for (const wall of walls.horz.positions) { setColor([wall.x, walls.horz.width - 1], [wall.y, walls.horz.height - 1], walls.color); }
+                    for (const wall of walls.vert.positions) { setColor([wall.x, walls.vert.width - 1], [wall.y, walls.vert.height - 1], walls.color); }
                     break;
-                case 'tables':
-                    const table = elements.tables;
-                    for (let sector = 0; sector < table.sectors.count; sector++) {
-                        const sectorX = 2.8 * table.margins.marginsector * sector + table.margins.marginsector * 0.6;
-                        for (let col = 0; col < table.sectors.cols; col++) {
-                            const tableX = sectorX + col * (table.width + table.margins.marginX);
-                            for (let row = 0; row < table.sectors.rows; row++) {
-                                const tableY = 48 + row * (table.margins.marginY + table.height);
-                                setColor([tableX, table.width], [tableY, table.height], table.color);
-                            }
+                case 'windows':
+                    for (const window of windows.positions) { setColor([window.x, windows.width - 1], [window.y, windows.height - 1], windows.color); }
+                    break;
+                case 'exit':
+                    setColor([exit.x, exit.width - 1], [exit.y, exit.height - 1], exit.color);
+                    break;
+                case 'elements':
+                    for (const key in elements) {
+                        switch (key) {
+                            case 'pillars':
+                                const pillars = elements.pillars;
+                                for (const pillar of pillars.positions) { setColor([pillar.x, pillars.width - 1], [pillar.y, pillars.height - 1], pillars.color); }
+                                break;
+                            case 'teacher_table':
+                                const Ttable = elements.teacher_table
+                                setColor([Ttable.x, Ttable.width - 1], [Ttable.y, Ttable.height - 1], Ttable.color);
+                                break;
+                            case 'tables':
+                                const table = elements.tables;
+                                for (let i = 0; i < table.sectors.count; i++) {
+                                    const sectorX = table.margins.groupsMargin * table.margins.sectorMargin * i + table.margins.initialMarginX;
+                                    for (let col = 0; col < table.sectors.cols; col++) {
+                                        const tableX = sectorX + col * (table.width + table.margins.marginX);
+                                        for (let row = 0; row < table.sectors.rows; row++) {
+                                            const tableY = row * (table.margins.marginY + table.height) + table.margins.initialMarginY;
+                                            setColor([tableX, table.width], [tableY, table.height], table.color);
+                                        }
+                                    }
+                                }
+                                break;
                         }
                     }
+                    break;
+                default:
+                    console.warn("This element is not currently supported, so review it before trying to import it :)")
                     break;
             }
         }
@@ -311,7 +327,7 @@ window.onload = function () {
         for (let i = 0; i < steps; i++) {
             try {
                 let objects = [room.walls.color, room.windows.color, room.elements.tables.color, room.elements.teacher_table.color];
-                drawRoom();
+                drawElements();
                 for (const path of bestPath) { setColor(path.x, path.y, startingAnt) };
                 console.log(`Step nº ${i + 1} of ${steps}`);
 
@@ -344,11 +360,11 @@ window.onload = function () {
         }
         console.log("Best distance found:", oldDistance);
         console.log("Simulation done!");
-        drawRoom();
+        drawElements();
         for (const path of bestPath) setColor(path.x, path.y, startingPoint);
     }
 
-    drawRoom(); // Initial room renderization
+    drawElements(); // Initial room renderization
     canvas.addEventListener("click", function (event) {
         const rect = canvas.getBoundingClientRect();
         start = {
@@ -367,7 +383,7 @@ window.onload = function () {
         }
         if (state) {
             console.log(`Coordenates set in cell (${start.x}, ${start.y})`);
-            drawRoom();
+            drawElements();
             setColor([start.x - 1, 2], [start.y - 1, 2], startingPoint);
         } else {
             if (grid[start.x][start.y].color === startingPoint) {

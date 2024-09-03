@@ -3,6 +3,12 @@ export const gridHeight = 200;
 export const cellSize = 4;
 
 export const room = {
+    floor: {
+        color: "#ccc",
+        margin: 2,
+        width: gridWidth - 3,
+        height: gridHeight - 3
+    },
     walls: {
         color: "#2d2d2d",
         horz: {
@@ -55,14 +61,14 @@ export const room = {
         },
         teacher_table: {
             color: "#916242",
-            x: 4 * cellSize,
-            y: 5 * cellSize,
-            width: 15 * cellSize,
-            height: 5 * cellSize
+            x: cellSize * 4,
+            y: cellSize * 5,
+            width: cellSize * 15,
+            height: cellSize * 5
         },
         tables: {
-            width: 4 * cellSize,
-            height: 2 * cellSize,
+            width: cellSize * 4,
+            height: cellSize * 2,
             color: "brown",
             sectors: {
                 count: 3,
@@ -70,9 +76,12 @@ export const room = {
                 rows: 5
             },
             margins: {
-                marginX: 2 * cellSize,
-                marginY: 5 * cellSize,
-                marginsector: 5 * cellSize
+                initialMarginX: cellSize * 3,
+                initialMarginY: cellSize * 12,
+                marginX: cellSize * 2,
+                marginY: cellSize * 5,
+                sectorMargin: cellSize * 5,
+                groupsMargin: cellSize * 0.7
             }
         }
     }
