@@ -32,14 +32,14 @@ export const room = {
             { x: 0, y: 33 * cellSize }
         ]
     },
-    door: {
+    exit: {
         color: "#02b200",
         x: gridWidth - cellSize,
         y: gridHeight - 10 * cellSize,
         width: cellSize,
         height: 7 * cellSize
     },
-    obstacles: {
+    elements: {
         pillars: {
             color: "#2d2d2d",
             width: 2 * cellSize,
