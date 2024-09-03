@@ -292,20 +292,25 @@ window.onload = function () {
                     ant.y = movedTo.y;
                     distanceCumulative += distance;
 
-                    // Check if the exit is found
+                    // Loop exit
                     if (ant.checkExit(grid, state)) { resolve([{ x, y }, distanceCumulative, visited]); return; }
 
-                    // Update the canvas after every batch of moves
+                    // Update canvas
                     setColor(x, y, state ? startingAnt : returningAnt);
                     setColor([start.x - 1, 2], [start.y - 1, 2], startingPoint);
 
-                    moveAnt(); // Continue the loop
+                    // Speed regulation
+                    if (Number(document.getElementById("ant_speed").value) != 4) {
+                        if (moveCount % Number(document.getElementById("ant_speed").value) == 0) requestAnimationFrame(moveAnt);
+                    } else {
+                        moveAnt(); // Continue the loop
+                    }
                 } catch (error) {
                     console.error("Error during ant movement:", error);
                     reject(error);
                 }
             }
-
+            requestAnimationFrame(moveAnt);
             moveAnt(); // Start the loop
         });
     }
@@ -393,6 +398,15 @@ window.onload = function () {
     });
     document.getElementById("reset").addEventListener("click", function () {
         location.reload();
+    });
+    document.getElementById("ant_speed").addEventListener("click", function () {
+        const text = document.getElementById("speed_n");
+        switch (Number(document.getElementById("ant_speed").value)) {
+            case 1: text.textContent = "Normal"; break;
+            case 2: text.textContent = "Rápida"; break;
+            case 3: text.textContent = "Ultrarrápida"; break;
+            case 4: text.textContent = "Flash"; break;
+        }
     });
     document.getElementById("start").addEventListener("click", function () {
         if (start && !hasStarted) {
