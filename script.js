@@ -197,6 +197,7 @@ window.onload = function () {
                             }
                         }
                     }
+                    break;
             }
         }
     }
