@@ -300,18 +300,15 @@ window.onload = function () {
                     setColor([start.x - 1, 2], [start.y - 1, 2], startingPoint);
 
                     // Speed regulation
-                    if (Number(document.getElementById("ant_speed").value) != 4) {
-                        if (moveCount % Number(document.getElementById("ant_speed").value) == 0) requestAnimationFrame(moveAnt);
-                    } else {
-                        moveAnt(); // Continue the loop
-                    }
+                    if (moveCount % (Number(document.getElementById("ant_speed").value) * 2) == 0 && Number(document.getElementById("ant_speed").value) != 4) requestAnimationFrame(moveAnt);
+                    else moveAnt(); // Continue the loop
                 } catch (error) {
                     console.error("Error during ant movement:", error);
                     reject(error);
                 }
             }
-            requestAnimationFrame(moveAnt);
-            moveAnt(); // Start the loop
+            if (Number(document.getElementById("ant_speed").value) != 4) requestAnimationFrame(moveAnt);
+            else moveAnt(); // Start the loop            
         });
     }
     async function runSimulations(start, alpha, beta, rho, deposit, steps) {
