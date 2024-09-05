@@ -1,8 +1,8 @@
 import { roundValues } from "./utils.js";
 
 const canvas = document.getElementById("canvas");
-export const gridWidth = 360;
-export const gridHeight = 400;
+export const gridWidth = 180;
+export const gridHeight = 200;
 
 export let room = roundValues({
     floor: {
@@ -78,11 +78,11 @@ export let room = roundValues({
                 rows: 5
             },
             margins: {
-                initialMarginX: gridWidth * 0.03,
+                initialMarginX: gridWidth * 0.04,
                 initialMarginY: gridWidth * 0.2425,
                 marginX: gridWidth * 0.02,
                 marginY: gridHeight * 0.1,
-                sectorMargin: gridWidth * 0.3575
+                sectorMargin: gridWidth * 0.35
             }
         }
     }
