@@ -112,7 +112,6 @@ select:focus {
 }
 
 .speed-control {
-  margin-top: 30px;
   display: flex;
   padding: 15px;
   align-items: center;
