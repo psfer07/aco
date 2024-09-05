@@ -1,74 +1,76 @@
-export const gridWidth = 180;
-export const gridHeight = 200;
-export const cellSize = 4;
+import { roundValues } from "./utils.js";
 
-export const room = {
+const canvas = document.getElementById("canvas");
+export const gridWidth = 360;
+export const gridHeight = 400;
+
+export let room = roundValues({
     floor: {
         color: "#ccc",
-        margin: 2,
-        width: gridWidth - 3,
-        height: gridHeight - 3
+        margin: gridWidth * 0.01,
+        width: gridWidth * 0.99,
+        height: gridHeight * 0.99
     },
     walls: {
         color: "#2d2d2d",
         horz: {
             width: gridWidth,
-            height: cellSize,
+            height: gridHeight * 0.01,
             positions: [
                 { x: 0, y: 0 },
-                { x: 0, y: gridHeight - cellSize }
+                { x: 0, y: gridHeight * 0.99 }
             ]
         },
         vert: {
-            width: cellSize,
+            width: gridWidth * 0.01,
             height: gridHeight,
             positions: [
                 { x: 0, y: 0 },
-                { x: gridWidth - cellSize, y: 0 }
+                { x: gridWidth * 0.99, y: 0 }
             ]
         }
     },
     windows: {
-        width: cellSize,
-        height: 9 * cellSize,
+        width: gridWidth * 0.01,
+        height: gridHeight * 0.2,
         color: "cyan",
         positions: [
-            { x: 0, y: 3 * cellSize },
-            { x: 0, y: 18 * cellSize },
-            { x: 0, y: 33 * cellSize }
+            { x: 0, y: gridHeight * 0.1 },
+            { x: 0, y: gridHeight * 0.4 },
+            { x: 0, y: gridHeight * 0.7 }
         ]
     },
     exit: {
         color: "#02b200",
-        x: gridWidth - cellSize,
-        y: gridHeight - 10 * cellSize,
-        width: cellSize,
-        height: 7 * cellSize
+        x: gridWidth * 0.99,
+        y: gridHeight * 0.87,
+        width: gridWidth * 0.01,
+        height: gridHeight * 0.1
     },
     elements: {
         pillars: {
             color: "#2d2d2d",
-            width: 2 * cellSize,
-            height: 6 * cellSize,
+            width: gridWidth * 0.02,
+            height: gridHeight * 0.1,
             positions: [
-                { x: cellSize, y: 12 * cellSize },
-                { x: cellSize, y: 27 * cellSize },
-                { x: gridWidth - 2 * cellSize, y: 13 * cellSize },
-                { x: gridWidth - 2 * cellSize, y: 18 * cellSize },
-                { x: gridWidth - 2 * cellSize, y: 24 * cellSize },
-                { x: gridWidth - 2 * cellSize, y: 29 * cellSize }
+                { x: gridWidth * 0.01, y: gridHeight * 0.3 },
+                { x: gridWidth * 0.01, y: gridHeight * 0.6 },
+                { x: gridWidth * 0.97, y: gridHeight * 0.3 },
+                { x: gridWidth * 0.97, y: gridHeight * 0.4 },
+                { x: gridWidth * 0.97, y: gridHeight * 0.5 },
+                { x: gridWidth * 0.97, y: gridHeight * 0.6 }
             ]
         },
         teacher_table: {
             color: "#916242",
-            x: cellSize * 4,
-            y: cellSize * 5,
-            width: cellSize * 15,
-            height: cellSize * 5
+            x: gridWidth * 0.05,
+            y: gridWidth * 0.08,
+            width: gridWidth * 0.25,
+            height: gridWidth * 0.08
         },
         tables: {
-            width: cellSize * 4,
-            height: cellSize * 2,
+            width: gridWidth * 0.1,
+            height: gridWidth * 0.05,
             color: "brown",
             sectors: {
                 count: 3,
@@ -76,13 +78,12 @@ export const room = {
                 rows: 5
             },
             margins: {
-                initialMarginX: cellSize * 3,
-                initialMarginY: cellSize * 12,
-                marginX: cellSize * 2,
-                marginY: cellSize * 5,
-                sectorMargin: cellSize * 5,
-                groupsMargin: cellSize * 0.7
+                initialMarginX: gridWidth * 0.03,
+                initialMarginY: gridWidth * 0.2425,
+                marginX: gridWidth * 0.02,
+                marginY: gridHeight * 0.1,
+                sectorMargin: gridWidth * 0.3575
             }
         }
     }
-};
+});
