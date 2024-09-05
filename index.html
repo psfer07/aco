@@ -4,44 +4,93 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Buscador de rutas de escape</title>
+  <title>Buscador de rutas óptimas de escape</title>
   <link rel="stylesheet" href="styles.css">
   <script type="module" src="script.js"></script>
 </head>
 
 <body>
-  <div style="display: flex">
-    <div style="margin-top: 5vh">
-      <h2>Parámetros numéricos</h2>
-      <p>Evaporación de la feromona</p>
-      <input type="number" id="rho" step="0.1" min="0" value="0.3">
-      <p>Valor de alfa</p>
-      <input type="number" id="alpha" step="0.1" min="0" value="2">
-      <p>Valor de beta</p>
-      <input type="number" id="beta" step="0.1" min="0" value="4">
-      <p>Valor de heurística (feromona depositada)</p>
-      <input type="number" id="deposit" step="0.1" min="0" value="2">
-      <p>Número de pasos (idas y vueltas de cada hormiga)</p>
-      <select id="steps">
-        <option value="40">40 pasos</option>
-        <option value="80">80 pasos</option>
-        <option value="160">160 pasos</option>
-        <option value="240">240 pasos</option>
-        <option value="480">480 pasos</option>
-        <option value="1200">1200 pasos</option>
-      </select>
-    </div>
-    <div style="margin: 0 auto">
-      <header>Simulador para encontrar la ruta de escape óptima</header>
-      <canvas id="canvas_render"></canvas>
-      <div style="margin-top: 1vh; margin-left: 22vh">
-        <span>Velocidad:</span>
-        <span id="speed_n">Normal</span>
-        <input type="range" id="ant_speed" min="1" max="4" value="1"></input>
-        <button id="start">Iniciar/Detener la simulación</button>
-        <button class="reset" id="reset">Reiniciar simulador</button>
+  <div class="container">
+    <main class="main-content">
+      <header class="header">
+        <h1>Buscador de rutas óptimas de escape</h1>
+      </header>
+      <section class="simulation-area">
+        <div class="widget_info">
+          <h1><u>Detalles de la simulación</u></h1>
+          <br>
+          <h4>Estado de la simulación:</h4>
+          <span id="widget_status">Detenida</span>
+          <br>
+          <br>
+          <h4>Iteración nº:</h4>
+          <span id="widget_step">Esperando a la simulación...</span>
+          <br>
+          <br>
+          <h4>Distancia más corta encontrada:</h4>
+          <span id="widget_distance">Esperando a la simulación...</span>
+          <br>
+          <br>
+          <h4>Ruta seguida:</h4>
+          <input id="widget_visited" class="widget_visited" value="Esperando..." readonly></input>
+          <button class="copy-btn"
+            onclick="if (widget_visited.value != 'Esperando...') navigator.clipboard.writeText(widget_visited.value); else alert('Realiza una simulación antes de copiar un camino vacío')">
+            Copiar ruta
+          </button>
+        </div>
+        <canvas id="canvas"></canvas>
+      </section>
+    </main>
+
+    <aside class="sidebar">
+      <h3><u>Parmámetros de la simulación</u></h3>
+      <div class="parameter-group">
+        <label for="rho">Evaporación de la feromona</label>
+        <input type="number" id="rho" step="0.1" min="0" value="0.3">
       </div>
-    </div>
+      <div class="parameter-group">
+        <label for="alpha">Valor de alpha</label>
+        <input type="number" id="alpha" step="0.1" min="0" value="2">
+      </div>
+      <div class="parameter-group">
+        <label for="beta">Valor de beta</label>
+        <input type="number" id="beta" step="0.1" min="0" value="4">
+      </div>
+      <div class="parameter-group">
+        <label for="deposit">Valor de la heurística (feromona depositada)</label>
+        <input type="number" id="deposit" step="0.1" min="0" value="2">
+      </div>
+      <div class="parameter-group">
+        <label for="steps">Número de pasos (Cada ida y vuelta de la hormiga)</label>
+        <select id="steps">
+          <option value="40">40 Pasos</option>
+          <option value="80">80 Pasos</option>
+          <option value="160">160 Pasos</option>
+          <option value="240">240 Pasos</option>
+          <option value="480">480 Pasos</option>
+          <option value="1200">1200 Pasos</option>
+        </select>
+      </div>
+      <div style="flex-direction: column;" class="controls">
+        <div class="speed-control">
+          <label id="speed_n">Nivel de velocidad: x1</label>
+        </div>
+        <input type="range" id="ant_speed" min="1" max="20" value="1"
+          oninput="speed_n.textContent= 'Nivel de velocidad: x' + ant_speed.value">
+      </div>
+      <div class="buttons">
+        <button id="start" class="start-btn">Iniciar/Detener Simulación</button>
+        <button class="reset-btn" onclick="location.reload();">Reiniciar Simulación</button>
+      </div>
+      <div class="theme-toggle-container">
+        <input type="checkbox" class="theme-toggle" id="theme-toggle"
+          onclick="applyTheme(!document.body.classList.contains('dark-mode'))">
+        <label for="theme-toggle" class="theme-toggle-label">
+          <img id="theme-icon" alt="Theme Icon">
+        </label>
+      </div>
+    </aside>
   </div>
-  <br>
 </body>
+
+</html>

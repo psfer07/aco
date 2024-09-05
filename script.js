@@ -1,10 +1,11 @@
-import { gridWidth, gridHeight, cellSize, room } from './Class layout.js';
+import { gridWidth, gridHeight, cellSize, room } from './src/Class layout.js';
 window.onload = function () {
-    const canvas = document.getElementById("canvas_render");
+    const darkThemeMq = window.matchMedia("(prefers-color-scheme: dark)");
+    const canvas = document.getElementById("canvas");
     const paint = canvas.getContext("2d");
     const [startingPoint, startingAnt, returningAnt] = ["red", "green", "darkgreen"];
     let start;
-    let hasStarted = false;
+    let stepNumber = 0;
     let grid = [];
     const properties = { // Each cell will have these properties by default
         color: "#ccc",
@@ -17,6 +18,8 @@ window.onload = function () {
         }
         grid.push(cols);
     }
+
+    document.getElementById("widget_status").textContent = "Detenida";
 
     // Set canvas size
     canvas.width = gridWidth * cellSize;
@@ -146,6 +149,18 @@ window.onload = function () {
         }
     }
 
+    function applyTheme(isDark) {
+        if (isDark) {
+            document.body.classList.add('dark-mode');
+            document.body.classList.remove('light-mode');
+            document.getElementById('theme-icon').src = './src/dark.svg';
+        } else {
+            document.body.classList.add('light-mode');
+            document.body.classList.remove('dark-mode');
+            document.getElementById('theme-icon').src = './src/light.svg';
+        }
+        window.applyTheme = applyTheme;
+    }
     function setColor(x, y, color) {
         const X = Array.isArray(x) ? x[0] : x;
         const endX = Array.isArray(x) ? x[0] + x[1] : x;
@@ -198,7 +213,7 @@ window.onload = function () {
                             case 'tables':
                                 const table = elements.tables;
                                 for (let i = 0; i < table.sectors.count; i++) {
-                                    const sectorX = table.margins.groupsMargin * table.margins.sectorMargin * i + table.margins.initialMarginX;
+                                    const sectorX = table.margins.sectorMargin * i + table.margins.initialMarginX;
                                     for (let col = 0; col < table.sectors.cols; col++) {
                                         const tableX = sectorX + col * (table.width + table.margins.marginX);
                                         for (let row = 0; row < table.sectors.rows; row++) {
@@ -300,15 +315,15 @@ window.onload = function () {
                     setColor([start.x - 1, 2], [start.y - 1, 2], startingPoint);
 
                     // Speed regulation
-                    if (moveCount % (Number(document.getElementById("ant_speed").value) * 2) == 0 && Number(document.getElementById("ant_speed").value) != 4) requestAnimationFrame(moveAnt);
+                    if (moveCount % Number(document.getElementById("ant_speed").value) === 0 &&
+                        Number(document.getElementById("ant_speed").value) != Number(document.getElementById("ant_speed").max)) requestAnimationFrame(moveAnt);
                     else moveAnt(); // Continue the loop
                 } catch (error) {
                     console.error("Error during ant movement:", error);
                     reject(error);
                 }
             }
-            if (Number(document.getElementById("ant_speed").value) != 4) requestAnimationFrame(moveAnt);
-            else moveAnt(); // Start the loop            
+            requestAnimationFrame(moveAnt); // Start the loop
         });
     }
     async function runSimulations(start, alpha, beta, rho, deposit, steps) {
@@ -317,7 +332,7 @@ window.onload = function () {
         let elements = [];
         let visited = [];
         let bestPath = [];
-        hasStarted = true;
+        document.getElementById("widget_status").textContent = "En ejecucción";
 
         // Reset trace through simulations
         for (let i = 0; i < gridWidth; i++) {
@@ -326,12 +341,13 @@ window.onload = function () {
             }
         }
 
-        for (let i = 0; i < steps; i++) {
+        for (stepNumber = 0; stepNumber < steps; stepNumber++) {
             try {
+                let stringPath = '';
                 let objects = [room.walls.color, room.windows.color, room.elements.tables.color, room.elements.teacher_table.color];
                 drawElements();
                 for (const path of bestPath) { setColor(path.x, path.y, startingAnt) };
-                console.log(`Step nº ${i + 1} of ${steps}`);
+                document.getElementById("widget_step").textContent = `${stepNumber + 1} de ${steps}`;
 
                 elements = getObjects(objects);
                 [currentPoint, newDistance, visited] = await antStart(1, start, currentPoint, alpha, beta, rho, deposit, elements);
@@ -350,30 +366,41 @@ window.onload = function () {
                     oldDistance = newDistance;
                     bestPath = visited;
                 }
-                console.log("The run distance is", oldDistance);
-                for (const path of bestPath) setColor(path.x, path.y, startingAnt);
+
                 visited = [];
                 elements = [];
+                for (const path of bestPath) {
+                    setColor(path.x, path.y, startingPoint);
+                    stringPath += `(${path.x}, ${path.y}), `;
+                }
+                stringPath = stringPath.substring(0, stringPath.length - 2); // Remove the last comma and space
+                document.getElementById("widget_visited").value = stringPath
+                document.getElementById("widget_distance").textContent = oldDistance;
 
             } catch (error) {
-                console.log("Error in simulation:", error.message);
+                alert("Error in simulation:", error.message);
                 return;
             }
         }
-        console.log("Best distance found:", oldDistance);
-        console.log("Simulation done!");
+        document.getElementById("widget_status").textContent = "Detenida"
         drawElements();
-        for (const path of bestPath) setColor(path.x, path.y, startingPoint);
+        for (const path of bestPath) setColor(path.x, path.y, startingAnt);
     }
 
+    applyTheme(darkThemeMq.matches);
     drawElements(); // Initial room renderization
+
+    // Listen for changes in the color scheme preference
+    darkThemeMq.addEventListener("change", e => {
+        applyTheme(e.matches);
+    });
     canvas.addEventListener("click", function (event) {
         const rect = canvas.getBoundingClientRect();
         start = {
             x: Math.floor((event.clientX - rect.left) / cellSize),
             y: Math.floor((event.clientY - rect.top) / cellSize)
         };
-        hasStarted = false;
+        document.getElementById("widget_status").textContent = "Detenida";
         let state = true;
         for (let i = start.x - 1; i <= start.x + 1; i++) {
             for (let j = start.y - 1; j <= start.y + 1; j++) {
@@ -386,27 +413,15 @@ window.onload = function () {
         if (state) {
             console.log(`Coordenates set in cell (${start.x}, ${start.y})`);
             drawElements();
-            setColor([start.x - 1, 2], [start.y - 1, 2], startingPoint);
+            setColor([start.x - 1, 2], [start.y - 1, 2], "#ff0101");
         } else {
             if (grid[start.x][start.y].color === startingPoint) {
                 alert("Por favor, seleccione otro punto o inicie la simulación.")
             } else { alert("No puedes empezar ahí. Haz clic en el suelo de la habitación."); }
         }
     });
-    document.getElementById("reset").addEventListener("click", function () {
-        location.reload();
-    });
-    document.getElementById("ant_speed").addEventListener("click", function () {
-        const text = document.getElementById("speed_n");
-        switch (Number(document.getElementById("ant_speed").value)) {
-            case 1: text.textContent = "Normal"; break;
-            case 2: text.textContent = "Rápida"; break;
-            case 3: text.textContent = "Ultrarrápida"; break;
-            case 4: text.textContent = "Flash"; break;
-        }
-    });
     document.getElementById("start").addEventListener("click", function () {
-        if (start && !hasStarted) {
+        if (start && document.getElementById("widget_status").textContent == "Detenida") {
             runSimulations(start,
                 Number(document.getElementById("alpha").value),
                 Number(document.getElementById("beta").value),
@@ -415,7 +430,7 @@ window.onload = function () {
                 Number(document.getElementById("steps").value)
             );
         } else {
-            if (hasStarted) {
+            if (document.getElementById("widget_status").textContent == "En ejecucción") {
                 alert("Espera a que la simulación actual termine o reinicia el simulador.")
             } else {
                 alert("Debes tener seleccionado un punto de partida antes the iniciar la simulación.");
