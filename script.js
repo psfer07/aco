@@ -1,4 +1,4 @@
-import { gridWidth, gridHeight, cellSize, room } from './src/Class layout.js';
+import { gridWidth, gridHeight, room } from './src/Class layout.js';
 window.onload = function () {
     const darkThemeMq = window.matchMedia("(prefers-color-scheme: dark)");
     const canvas = document.getElementById("canvas");
@@ -6,6 +6,7 @@ window.onload = function () {
     const [startingPoint, startingAnt, returningAnt] = ["red", "green", "darkgreen"];
     let start;
     let stepNumber = 0;
+    let cellSize = 4;
     let grid = [];
     const properties = { // Each cell will have these properties by default
         color: "#ccc",
@@ -20,7 +21,8 @@ window.onload = function () {
     }
 
     document.getElementById("widget_status").textContent = "Detenida";
-
+console.log(canvas.width)
+console.log(canvas.height)
     // Set canvas size
     canvas.width = gridWidth * cellSize;
     canvas.height = gridHeight * cellSize;

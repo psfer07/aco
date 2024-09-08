@@ -36,9 +36,8 @@ body {
   margin: 10px;
   padding: 20px;
   border-radius: 15px;
-  width: 250px;
+  width: 35vh;
   box-shadow: 4px 0 10px rgba(0, 0, 0, 0.2);
-  overflow-y: auto;
   transition: background-color 0.3s, color 0.3s;
 }
 
@@ -111,18 +110,20 @@ select:focus {
   width: 100%;
 }
 
-.speed-control {
+.speed-control,
+.cellSize {
   display: flex;
   padding: 15px;
   align-items: center;
 }
 
-.speed-control label,
+.speed-control,
+.cellSize label,
 span {
   margin-right: 10px;
 }
 
-.speed-control input[type="range"] {
+.input[type="range"] {
   margin-left: 10px;
 }
 
@@ -137,7 +138,7 @@ span {
   padding: 10px 10px;
   border-radius: 5px;
   border: 0;
-  margin-top: 15px;
+  margin-top: 5px;
   margin-bottom: 15px;
   cursor: pointer;
   transition: background-color 0.3s, color 0.3s, transform 0.1s;
@@ -175,7 +176,7 @@ span {
   display: flex;
   flex-direction: column;
   width: 100%;
-  height: 100vh;
+  height: 100%;
   padding-top: 10px;
   padding-left: 20px;
   padding-right: 20px;
@@ -229,6 +230,8 @@ span {
 canvas {
   background-color: var(--canvas-bg-color);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  width: 40%;
+  height: 90%;
   margin-bottom: 20px;
   transition: background-color 0.3s;
 }
