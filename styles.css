@@ -7,12 +7,13 @@
 .header {
   background-color: var(--header-bg-color);
   color: var(--header-text-color);
-  padding: 20px;
-  border-radius: 10px;
+  padding-top: 20px;
+  padding-bottom: 15px;
+  border-radius: 15px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
   width: 100%;
+  height: 5em;
   text-align: center;
-  margin-bottom: 20px;
   transition: background-color 0.3s, color 0.3s, box-shadow 0.3s;
 }
 
@@ -20,8 +21,7 @@ body {
   font-family: 'Arial', sans-serif;
   background-color: var(--background-color);
   color: var(--text-color);
-  transition: background-color 0.3s, color 0.3s;
-  line-height: 1.6;
+  transition: background-color 0.3s, color 0.3s, transform 0.9;
 }
 
 .container {
@@ -33,10 +33,11 @@ body {
 .sidebar {
   background-color: var(--sidebar-bg-color);
   color: var(--sidebar-text-color);
-  margin: 10px;
+  margin: 1vh;
   padding: 20px;
   border-radius: 15px;
-  width: 35vh;
+  font-size: 1em;
+  width: 30vh;
   box-shadow: 4px 0 10px rgba(0, 0, 0, 0.2);
   transition: background-color 0.3s, color 0.3s;
 }
@@ -45,8 +46,10 @@ body {
   margin-bottom: 20px;
 }
 
-.sidebar span {
+.sidebar span,
+h4 {
   margin: 0;
+  font-size: 0.875em;
 }
 
 .parameter-group label {
@@ -75,8 +78,8 @@ select:focus {
 .theme-toggle-container {
   display: inline-block;
   position: absolute;
-  bottom: 20px;
-  right: 20px;
+  bottom: 0px;
+  left: 0px;
 }
 
 /* Hide the default checkbox */
@@ -127,9 +130,50 @@ span {
   margin-left: 10px;
 }
 
-.buttons {
+.main-content {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: auto;
+  margin: 1vh;
+}
+
+/* Simulation area styling */
+.simulation-area {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-grow: 1;
+  position: relative;
+}
+
+.simulation-area h4 {
+  margin-top: 10px;
+}
+
+/* Widget info styling */
+.widget_info {
   position: absolute;
-  bottom: 5px;
+  top: 25%;
+  left: 0;
+  background-color: var(--sidebar-bg-color);
+  color: var(--sidebar-text-color);
+  border-radius: 15px;
+  padding: 15px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  transition: border-color 0.3s, background-color 0.3s, color 0.3s;
+}
+
+.widget_info input {
+  background-color: var(--sidebar-bg-color);
+  color: var(--sidebar-text-color);
+  border: 0;
+  transition: border-color 0.3s, background-color 0.3s, color 0.3s;
+}
+
+.buttons {
+  position: relative;
+  top: 10px;
 }
 
 .start-btn,
@@ -172,45 +216,6 @@ span {
   transform: scale(0.95);
 }
 
-.main-content {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  height: 100%;
-  padding-top: 10px;
-  padding-left: 20px;
-  padding-right: 20px;
-}
-
-/* Simulation area styling */
-.simulation-area {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-grow: 1;
-  position: relative;
-}
-
-/* Widget info styling */
-.widget_info {
-  position: absolute;
-  top: 25vh;
-  left: 0;
-  background-color: var(--sidebar-bg-color);
-  color: var(--sidebar-text-color);
-  border-radius: 10px;
-  padding: 15px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-  transition: border-color 0.3s, background-color 0.3s, color 0.3s;
-}
-
-.widget_info input {
-  background-color: var(--sidebar-bg-color);
-  color: var(--sidebar-text-color);
-  border: 0;
-  transition: border-color 0.3s, background-color 0.3s, color 0.3s;
-}
-
 .copy-btn {
   background-color: var(--reset-btn-bg-color);
   color: var(--reset-btn-text-color);
@@ -230,8 +235,6 @@ span {
 canvas {
   background-color: var(--canvas-bg-color);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-  width: 40%;
-  height: 90%;
   margin-bottom: 20px;
   transition: background-color 0.3s;
 }

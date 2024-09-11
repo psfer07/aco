@@ -17,7 +17,7 @@
       </header>
       <section class="simulation-area">
         <div class="widget_info">
-          <h1><u>Detalles de la simulación</u></h1>
+          <h1 style="height: 2em;" ><u>Detalles de la simulación</u></h1>
           <br>
           <h4>Estado de la simulación:</h4>
           <span id="widget_status">Detenida</span>
@@ -37,6 +37,13 @@
             onclick="if (widget_visited.value != 'Esperando...') navigator.clipboard.writeText(widget_visited.value); else alert('Realiza una simulación antes de copiar un camino vacío')">
             Copiar ruta
           </button>
+        </div>
+        <div class="theme-toggle-container">
+          <input type="checkbox" class="theme-toggle" id="theme-toggle"
+            onclick="applyTheme(!document.body.classList.contains('dark-mode'))">
+          <label for="theme-toggle" class="theme-toggle-label">
+            <img id="theme-icon" alt="Theme Icon">
+          </label>
         </div>
         <canvas id="canvas"></canvas>
       </section>
@@ -81,13 +88,6 @@
       <div class="buttons">
         <button id="start" class="start-btn">Iniciar/Detener Simulación</button>
         <button class="reset-btn" onclick="location.reload();">Reiniciar Simulación</button>
-      </div>
-      <div class="theme-toggle-container">
-        <input type="checkbox" class="theme-toggle" id="theme-toggle"
-          onclick="applyTheme(!document.body.classList.contains('dark-mode'))">
-        <label for="theme-toggle" class="theme-toggle-label">
-          <img id="theme-icon" alt="Theme Icon">
-        </label>
       </div>
     </aside>
   </div>
