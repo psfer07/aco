@@ -7,7 +7,7 @@ export default class Ant {
         this.alpha = alpha;
         this.beta = beta;
         this.deposit = deposit;
-        this.godQuotient = (gridWidth + gridHeight) / 200;
+        this.godQuotient = (gridWidth < gridHeight ? gridHeight : gridWidth) / (gridWidth > gridHeight ? gridHeight : gridWidth); // The longer by the shorter
         this.directions = [  // Directions are set clockwise
             { x: 0, y: -1 }, // Up
             { x: 1, y: -1 }, // Up-right
