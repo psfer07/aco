@@ -1,12 +1,17 @@
 import { applyTheme, setColor, runSimulations, drawElements } from './src/source.js';
+const canvasContainer = document.querySelector('.canvas-container');
 const canvas = document.getElementById("canvas");
 const darkThemeMq = window.matchMedia("(prefers-color-scheme: dark)");
 const properties = { // Each cell will have these properties by default
     color: "#ccc",
     pheromone: 1.0
 }
+const containerRect = canvasContainer.getBoundingClientRect();
 window.startingPoint = 'red';
-window.cellSize = 1;
+window.cellSize = Math.floor(window.cellSize = Math.min(
+    Math.floor(containerRect.width / window.gridWidth),
+    Math.floor(containerRect.height / window.gridHeight)
+));
 window.grid = [];
 for (let x = 0; x < window.gridWidth; x++) {
     let cols = [];
@@ -15,12 +20,12 @@ for (let x = 0; x < window.gridWidth; x++) {
 }
 let start;
 
-[canvas.width, canvas.height] = [window.gridWidth, window.gridHeight];
 document.getElementById("widget_status").textContent = "Detenida";
 
 applyTheme(darkThemeMq.matches);
 
 window.onload = function () {
+    [canvas.width, canvas.height] = [window.gridWidth * window.cellSize, window.gridHeight * window.cellSize];
     drawElements();
     darkThemeMq.addEventListener("change", e => {
         applyTheme(e.matches);
@@ -67,5 +72,15 @@ window.onload = function () {
                 alert("Debes tener seleccionado un punto de partida antes the iniciar la simulación.");
             }
         }
+    });
+    window.addEventListener('resize', function () {
+        const containerRect = canvasContainer.getBoundingClientRect();
+        window.cellSize = Math.floor(window.cellSize = Math.min(
+            Math.floor(containerRect.width / window.gridWidth),
+            Math.floor(containerRect.height / window.gridHeight)
+        ));
+        [canvas.width, canvas.height] = [window.gridWidth * window.cellSize, window.gridHeight * window.cellSize];
+        drawElements();
+        console.log(window.cellSize);
     });
 };
