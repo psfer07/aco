@@ -82,7 +82,7 @@ async function antStart(state, start, initial, alpha, beta, rho, deposit, object
                 if (ant.checkExit(window.grid, state)) { resolve([{ x, y }, distanceCumulative, visited]); return; }
 
                 // Update canvas
-                setColor(x, y, state ? startingAnt : returningAnt);
+                for (const visit of visited) setColor(visit.x, visit.y, state ? startingAnt : returningAnt);
                 setColor([start.x - 1, 2], [start.y - 1, 2], window.startingPoint);
 
                 // Speed regulation
@@ -117,11 +117,9 @@ export async function setColor(x, y, color) {
     for (let i = X; i <= endX; i++) {
         for (let j = Y; j <= endY; j++) {
             try {
-                if (window.grid[i][j].color != color) {
-                    window.grid[i][j].color = color;
-                    paint.fillStyle = window.grid[i][j].color;
-                    paint.fillRect(i * window.cellSize, j * window.cellSize, window.cellSize, window.cellSize);
-                }
+                window.grid[i][j].color = color;
+                paint.fillStyle = window.grid[i][j].color;
+                paint.fillRect(i * window.cellSize, j * window.cellSize, window.cellSize, window.cellSize);
             } catch (error) {
                 console.error(`Error setting the cell (${i}, ${j}) as color ${color}`);
                 return;
