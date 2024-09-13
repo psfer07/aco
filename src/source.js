@@ -2,8 +2,8 @@ import room from "./layout.js";
 import Ant from './ant.js'
 const canvas = document.getElementById("canvas");
 const paint = canvas.getContext("2d");
-const [startingPoint, startingAnt, returningAnt] = ["red", "green", "darkgreen"];
-var stepNumber = 0;
+const [startingAnt, returningAnt] = ["green", "darkgreen"];
+let stepNumber = 0;
 
 function getObjects(object) {
     let objects = [];
@@ -22,7 +22,6 @@ function getObjects(object) {
     }
     return objects;
 }
-
 async function antStart(state, start, initial, alpha, beta, rho, deposit, objects) {
     return new Promise((resolve, reject) => {
         let moveCount = 0;
@@ -63,7 +62,7 @@ async function antStart(state, start, initial, alpha, beta, rho, deposit, object
                     ant.y = y;
                     dirs = newdirs;
                 }
-                let nearestPoint = getNearestPoint(x, y, getObjects(state ? room.exit.color : startingPoint));
+                let nearestPoint = getNearestPoint(x, y, getObjects(state ? room.exit.color : window.startingPoint));
                 const [movedTo, distance] = ant.move(window.grid, dirs, nearestPoint);
                 moveCount++;
                 visited.push({ x: movedTo.x, y: movedTo.y });
@@ -84,7 +83,7 @@ async function antStart(state, start, initial, alpha, beta, rho, deposit, object
 
                 // Update canvas
                 setColor(x, y, state ? startingAnt : returningAnt);
-                setColor([start.x - 1, 2], [start.y - 1, 2], startingPoint);
+                setColor([start.x - 1, 2], [start.y - 1, 2], window.startingPoint);
 
                 // Speed regulation
                 if (moveCount % Number(document.getElementById("ant_speed").value) === 0 &&
@@ -98,7 +97,6 @@ async function antStart(state, start, initial, alpha, beta, rho, deposit, object
         requestAnimationFrame(moveAnt); // Start the loop
     });
 }
-
 export async function applyTheme(isDark) {
     if (isDark) {
         document.body.classList.add('dark-mode');
@@ -116,14 +114,13 @@ export async function setColor(x, y, color) {
     const endX = Array.isArray(x) ? x[0] + x[1] : x;
     const Y = Array.isArray(y) ? y[0] : y;
     const endY = Array.isArray(y) ? y[0] + y[1] : y;
-    const cellSize = 4;
     for (let i = X; i <= endX; i++) {
         for (let j = Y; j <= endY; j++) {
             try {
                 if (window.grid[i][j].color != color) {
                     window.grid[i][j].color = color;
                     paint.fillStyle = window.grid[i][j].color;
-                    paint.fillRect(i * cellSize, j * cellSize, cellSize, cellSize);
+                    paint.fillRect(i * window.cellSize, j * window.cellSize, window.cellSize, window.cellSize);
                 }
             } catch (error) {
                 console.error(`Error setting the cell (${i}, ${j}) as color ${color}`);
@@ -226,7 +223,7 @@ export async function runSimulations(start, alpha, beta, rho, deposit, steps) {
             visited = [];
             elements = [];
             for (const path of bestPath) {
-                setColor(path.x, path.y, startingPoint);
+                setColor(path.x, path.y, window.startingPoint);
                 stringPath += `(${path.x}, ${path.y}), `;
             }
             stringPath = stringPath.substring(0, stringPath.length - 2); // Remove the last comma and space

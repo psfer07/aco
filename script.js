@@ -1,20 +1,21 @@
 import { applyTheme, setColor, runSimulations, drawElements } from './src/source.js';
+const canvas = document.getElementById("canvas");
 const darkThemeMq = window.matchMedia("(prefers-color-scheme: dark)");
-const [startingPoint, startingAnt, returningAnt] = ["red", "green", "darkgreen"];
 const properties = { // Each cell will have these properties by default
     color: "#ccc",
     pheromone: 1.0
 }
-let start;
-let cellSize = 4;
+window.startingPoint = 'red';
+window.cellSize = 1;
 window.grid = [];
 for (let x = 0; x < window.gridWidth; x++) {
     let cols = [];
     for (let y = 0; y < window.gridHeight; y++) { cols.push({ ...properties }); }
     window.grid.push(cols);
 }
+let start;
 
-[canvas.width, canvas.height] = [window.gridWidth * cellSize, window.gridHeight * cellSize];
+[canvas.width, canvas.height] = [window.gridWidth, window.gridHeight];
 document.getElementById("widget_status").textContent = "Detenida";
 
 applyTheme(darkThemeMq.matches);
