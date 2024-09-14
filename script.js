@@ -49,11 +49,11 @@ window.onload = function () {
         if (state) {
             console.log(`Clicked at (${start.x}, ${start.y})`);
             drawElements();
-            setColor([start.x - 1, 2], [start.y - 1, 2], "#ff0101");
+            setColor([start.x - 1, 2], [start.y - 1, 2], window.startingPoint);
         } else {
-            if (window.grid[start.x][start.y].color === startingPoint) {
-                alert("Por favor, seleccione otro punto o inicie la simulación.")
-            } else { alert("No puedes empezar ahí. Haz clic en el suelo de la habitación."); }
+            if (window.grid[start.x][start.y].color === window.startingPoint) {
+                window.showToast("Por favor, seleccione otro punto o inicie la simulación.")
+            } else { window.showToast("No puedes empezar ahí. Haz clic en el suelo de la habitación."); }
         }
     });
     document.getElementById("start").addEventListener("click", function () {
@@ -67,9 +67,9 @@ window.onload = function () {
             );
         } else {
             if (document.getElementById("widget_status").textContent == "En ejecucción") {
-                alert("Espera a que la simulación actual termine o reinicia el simulador.")
+                window.showToast("Debe esperar a que la simulación actual termine o si no reinicie el simulador.")
             } else {
-                alert("Debes tener seleccionado un punto de partida antes the iniciar la simulación.");
+                window.showToast("Debe tener seleccionado un punto de partida antes de poder iniciar la simulación.");
             }
         }
     });
@@ -81,6 +81,5 @@ window.onload = function () {
         ));
         [canvas.width, canvas.height] = [window.gridWidth * window.cellSize, window.gridHeight * window.cellSize];
         drawElements();
-        console.log(window.cellSize);
     });
 };

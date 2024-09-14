@@ -229,14 +229,14 @@ export async function runSimulations(start, alpha, beta, rho, deposit, steps) {
             document.getElementById("widget_distance").textContent = oldDistance;
 
         } catch (error) {
-            alert("Ha ocurrido un error. Puede ver más detalles en la consola.")
+            window.showToast("Ha ocurrido un error. Puede ver más detalles en la consola.")
             console.log("Error in simulation:", error.message);
             return;
         }
     }
     document.getElementById("widget_status").textContent = "Detenida"
     drawElements();
-    for (const path of bestPath) setColor(path.x, path.y, startingAnt);
+    for (const path of bestPath) setColor(path.x, path.y, window.startingPoint);
 }
 export function roundValues(obj) {
     if (typeof obj === 'object' && obj !== null) {
@@ -256,3 +256,11 @@ export function roundValues(obj) {
     }
     return obj;
 }
+window.showToast = async function (t) {
+    const toast = document.getElementById('toast');
+    toast.textContent = t;
+    toast.classList.add('show');
+    setTimeout(() => {
+        toast.classList.remove('show');
+    }, 4000);
+};

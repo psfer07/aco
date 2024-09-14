@@ -11,6 +11,28 @@ button {
   font-size: 0.8vw;
 }
 
+.toast {
+  position: fixed;
+  top: 2vh;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--toast-bg-color);
+  color: var(--text-color);
+  padding: 2vh 5vh;
+  border-radius: 1.5vh;
+  box-shadow: 0 0.4vh 1.5vh rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  opacity: 0;
+  font-size: 1vw;
+  font-weight: bold;
+  transition: background-color 0.3s, color 0.3s, opacity 0.3s ease, top 0.3s ease;
+}
+
+.toast.show {
+  opacity: 1;
+  top: 5vh;
+}
+
 .main-content {
   display: flex;
   flex-direction: column;
@@ -255,7 +277,7 @@ span {
 .light-mode {
   --widget-bg-color: #ccc;
   --background-color: #dcf3ed;
-  --text-color: #333;
+  --text-color: #000;
   --sidebar-bg-color: #f1f1f1;
   --sidebar-text-color: #333;
   --header-bg-color: #ffffff;
@@ -273,12 +295,13 @@ span {
   --reset-btn-text-color: #000;
   --reset-btn-hover-bg-color: #acacac;
   --reset-btn-hover-text-color: #000;
+  --toast-bg-color: #6ea5e9;
 }
 
 .dark-mode {
   --widget-bg-color: #ccc;
   --background-color: #2c2a3a;
-  --text-color: #e0e0e0;
+  --text-color: #fff;
   --sidebar-bg-color: #2d2d2d;
   --sidebar-text-color: #e0e0e0;
   --header-bg-color: #333333;
@@ -296,4 +319,5 @@ span {
   --reset-btn-text-color: #f9f9f9;
   --reset-btn-hover-bg-color: #333333;
   --reset-btn-hover-text-color: #ffffff;
+  --toast-bg-color: #1c2e44;
 }

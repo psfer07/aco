@@ -15,6 +15,7 @@
       <header class="header">
         <h1>Buscador de rutas óptimas de escape</h1>
       </header>
+      <div id="toast" class="toast"></div>
       <div class="container">
         <div class="widget-and-theme">
           <div class="widget_info">
@@ -35,7 +36,7 @@
             <h4>Ruta seguida:</h4>
             <input id="widget_visited" class="widget_visited" value="Esperando..." readonly>
             <button class="copy-btn"
-              onclick="if (widget_visited.value != 'Esperando...') navigator.clipboard.writeText(widget_visited.value); else alert('Realiza una simulación antes de copiar un camino vacío')">
+              onclick="if (widget_visited.value != 'Esperando...') navigator.clipboard.writeText(widget_visited.value); else showToast('Debes haber realizado al menos una simulación antes de copiar la ruta seguida')">
               Copiar ruta
             </button>
           </div>
