@@ -1,4 +1,5 @@
 import { applyTheme, setColor, runSimulations, drawElements } from './src/source.js';
+import { scenarios } from './src/layouts.js'
 const canvasContainer = document.querySelector('.canvas-container');
 const canvas = document.getElementById("canvas");
 const darkThemeMq = window.matchMedia("(prefers-color-scheme: dark)");
@@ -6,12 +7,7 @@ const properties = { // Each cell will have these properties by default
     color: "#ccc",
     pheromone: 1.0
 }
-const containerRect = canvasContainer.getBoundingClientRect();
 window.startingPoint = 'red';
-window.cellSize = Math.floor(window.cellSize = Math.min(
-    Math.floor(containerRect.width / window.gridWidth),
-    Math.floor(containerRect.height / window.gridHeight)
-));
 window.grid = [];
 for (let x = 0; x < window.gridWidth; x++) {
     let cols = [];
@@ -25,8 +21,7 @@ document.getElementById("widget_status").textContent = "Detenida";
 applyTheme(darkThemeMq.matches);
 
 window.onload = function () {
-    [canvas.width, canvas.height] = [window.gridWidth * window.cellSize, window.gridHeight * window.cellSize];
-    drawElements();
+    document.getElementById('scenarios-form').dispatchEvent(new Event('change'));
     darkThemeMq.addEventListener("change", e => {
         applyTheme(e.matches);
     });
@@ -48,7 +43,7 @@ window.onload = function () {
         }
         if (state) {
             console.log(`Clicked at (${start.x}, ${start.y})`);
-            drawElements();
+            drawElements(scenarios[window.getSelectedScenario()]);
             setColor([start.x - 1, 2], [start.y - 1, 2], window.startingPoint);
         } else {
             if (window.grid[start.x][start.y].color === window.startingPoint) {
@@ -80,6 +75,6 @@ window.onload = function () {
             Math.floor(containerRect.height / window.gridHeight)
         ));
         [canvas.width, canvas.height] = [window.gridWidth * window.cellSize, window.gridHeight * window.cellSize];
-        drawElements();
+        drawElements(scenarios[window.getSelectedScenario()]);
     });
 };
