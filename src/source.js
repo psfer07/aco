@@ -1,4 +1,3 @@
-import room from "./layouts.js";
 import Ant from './ant.js'
 const canvas = document.getElementById("canvas");
 const paint = canvas.getContext("2d");
@@ -127,7 +126,7 @@ export async function setColor(x, y, color) {
         }
     }
 }
-export async function drawElements() {
+export async function drawElements(room) {
     const { floor, walls, windows, exit, elements } = room;
     for (const item in room) {
         switch (item) {
@@ -172,7 +171,7 @@ export async function drawElements() {
                 }
                 break;
             default:
-                console.warn("This element is not currently supported, so review it before trying to import it :)")
+                console.warn(`This element (${item}) is not currently supported, so review it before trying to import it :)`)
                 break;
         }
     }
@@ -196,7 +195,7 @@ export async function runSimulations(start, alpha, beta, rho, deposit, steps) {
         try {
             let stringPath = '';
             let objects = [room.walls.color, room.windows.color, room.elements.tables.color, room.elements.teacher_table.color];
-            drawElements();
+            window.drawElements(scenarios[window.getSelectedScenario()]);
             for (const path of bestPath) { setColor(path.x, path.y, startingAnt) };
             document.getElementById("widget_step").textContent = `${stepNumber + 1} de ${steps}`;
 
@@ -235,7 +234,7 @@ export async function runSimulations(start, alpha, beta, rho, deposit, steps) {
         }
     }
     document.getElementById("widget_status").textContent = "Detenida"
-    drawElements();
+    window.drawElements(scenarios[window.getSelectedScenario()]);
     for (const path of bestPath) setColor(path.x, path.y, window.startingPoint);
 }
 export function roundValues(obj) {
