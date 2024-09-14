@@ -161,11 +161,13 @@ canvas {
 .sidebar {
   background-color: var(--sidebar-bg-color);
   color: var(--sidebar-text-color);
-  padding: 1.2%;
+  padding: 6%;
   border-radius: 1.5vh;
   font-size: 1em;
+  flex-direction: column;
   width: 30vh;
   overflow-y: auto;
+  height: 80vh;
   box-shadow: 0.4vh 0 1vh rgba(0, 0, 0, 0.2);
   transition: background-color 0.3s, color 0.3s;
 }
@@ -227,7 +229,8 @@ span {
   align-items: flex-start;
   gap: 1.5vh;
   padding: 2vh;
-  background-color: var(--background-color);
+  background-color: var(--sidebar-bg-color);
+  color: var(--sidebar-text-color);
   border-radius: 1.5vh;
   box-shadow: 0 0.4vh 1.5vh rgba(0, 0, 0, 0.2);
   width: 100%;

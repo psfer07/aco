@@ -54,42 +54,48 @@
       </div>
     </main>
 
-    <aside class="sidebar">
-      <h3><u>Parmámetros de la simulación</u></h3>
-      <div class="parameter-group">
-        <label for="rho">Evaporación de la feromona</label>
-        <input type="number" id="rho" step="0.01" min="0" value="0.1" max="11">
-      </div>
-      <div class="parameter-group">
-        <label for="alpha">Valor de alpha</label>
-        <input type="number" id="alpha" step="0.1" min="0" value="2">
-      </div>
-      <div class="parameter-group">
-        <label for="beta">Valor de beta</label>
-        <input type="number" id="beta" step="0.1" min="0" value="4">
-      </div>
-      <div class="parameter-group">
-        <label for="deposit">Valor de la heurística (feromona depositada)</label>
-        <input type="number" id="deposit" step="0.1" min="0" value="2">
-      </div>
-      <div class="parameter-group">
-        <label for="steps">Número de pasos (Cada ida y vuelta de la hormiga)</label>
-        <select id="steps">
-          <option value="40">40 Pasos</option>
-          <option value="80">80 Pasos</option>
-          <option value="160">160 Pasos</option>
-          <option value="240">240 Pasos</option>
-          <option value="480">480 Pasos</option>
-          <option value="1200">1200 Pasos</option>
-        </select>
-      </div>
-      <div style="flex-direction: column;" class="controls">
-        <div class="speed-control">
-          <label id="speed_n">Nivel de velocidad: x1</label>
+    <div>
+      <aside class="sidebar">
+        <h3><u>Parmámetros de la simulación</u></h3>
+        <div class="parameter-group">
+          <label for="rho">Evaporación de la feromona</label>
+          <input type="number" id="rho" step="0.01" min="0" value="0.1" max="11">
         </div>
-        <input type="range" id="ant_speed" min="1" max="20" value="1"
-          oninput="speed_n.textContent= 'Nivel de velocidad: x' + ant_speed.value">
-      </div>
+        <div class="parameter-group">
+          <label for="alpha">Valor de alpha</label>
+          <input type="number" id="alpha" step="0.1" min="0" value="2">
+        </div>
+        <div class="parameter-group">
+          <label for="beta">Valor de beta</label>
+          <input type="number" id="beta" step="0.1" min="0" value="4">
+        </div>
+        <div class="parameter-group">
+          <label for="deposit">Valor de la heurística (feromona depositada)</label>
+          <input type="number" id="deposit" step="0.1" min="0" value="2">
+        </div>
+        <div class="parameter-group">
+          <label for="steps">Número de pasos (Cada ida y vuelta de la hormiga)</label>
+          <select id="steps">
+            <option value="40">40 Pasos</option>
+            <option value="80">80 Pasos</option>
+            <option value="160">160 Pasos</option>
+            <option value="240">240 Pasos</option>
+            <option value="480">480 Pasos</option>
+            <option value="1200">1200 Pasos</option>
+          </select>
+        </div>
+        <div style="flex-direction: column;" class="controls">
+          <div class="speed-control">
+            <label id="speed_n">Nivel de velocidad: x1</label>
+          </div>
+          <input type="range" id="ant_speed" min="1" max="20" value="1"
+            oninput="speed_n.textContent= 'Nivel de velocidad: x' + ant_speed.value">
+        </div>
+        <div class="buttons">
+          <button id="start" class="start-btn">Iniciar/Detener Simulación</button>
+          <button class="reset-btn" onclick="location.reload()">Reiniciar Simulación</button>
+        </div>
+      </aside>
       <form id="scenarios-form">
         <label>
           <input type="radio" name="scenario" value="Class" checked>
@@ -97,15 +103,10 @@
         </label>
         <label>
           <input type="radio" name="scenario" value="School">
-          <span></span> Planta
+          <span></span> Planta de instituto
         </label>
       </form>
-
-      <div class="buttons">
-        <button id="start" class="start-btn">Iniciar/Detener Simulación</button>
-        <button class="reset-btn" onclick="location.reload()">Reiniciar Simulación</button>
-      </div>
-    </aside>
+    </div>
   </div>
 </body>
 
