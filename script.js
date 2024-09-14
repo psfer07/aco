@@ -1,5 +1,5 @@
 import { applyTheme, setColor, runSimulations, drawElements } from './src/source.js';
-import { scenarios } from './src/layouts.js'
+import { dimensions, scenarios, getSelectedScenario } from './src/layouts.js'
 const canvasContainer = document.querySelector('.canvas-container');
 const canvas = document.getElementById("canvas");
 const darkThemeMq = window.matchMedia("(prefers-color-scheme: dark)");
@@ -21,15 +21,15 @@ document.getElementById("widget_status").textContent = "Detenida";
 applyTheme(darkThemeMq.matches);
 
 window.onload = function () {
-    document.getElementById('scenarios-form').dispatchEvent(new Event('change'));
+    drawElements(scenarios[getSelectedScenario()])
     darkThemeMq.addEventListener("change", e => {
         applyTheme(e.matches);
     });
     canvas.addEventListener("click", function (event) {
         const rect = canvas.getBoundingClientRect();
         start = {
-            x: Math.floor((event.clientX - rect.left) / cellSize),
-            y: Math.floor((event.clientY - rect.top) / cellSize)
+            x: Math.floor((event.clientX - rect.left) / window.cellSize),
+            y: Math.floor((event.clientY - rect.top) / window.cellSize)
         };
         document.getElementById("widget_status").textContent = "Detenida";
         let state = true;
@@ -43,7 +43,7 @@ window.onload = function () {
         }
         if (state) {
             console.log(`Clicked at (${start.x}, ${start.y})`);
-            drawElements(scenarios[window.getSelectedScenario()]);
+            drawElements(scenarios[getSelectedScenario()]);
             setColor([start.x - 1, 2], [start.y - 1, 2], window.startingPoint);
         } else {
             if (window.grid[start.x][start.y].color === window.startingPoint) {
@@ -70,11 +70,15 @@ window.onload = function () {
     });
     window.addEventListener('resize', function () {
         const containerRect = canvasContainer.getBoundingClientRect();
-        window.cellSize = Math.floor(window.cellSize = Math.min(
+        const selected = getSelectedScenario();
+        [window.gridWidth, window.gridHeight] = [dimensions[selected].gridWidth, dimensions[selected].gridHeight];
+        console.log("Hola nigga", dimensions[selected].gridWidth, dimensions[selected].gridHeight)
+        window.cellSize = Math.floor(Math.min(
             Math.floor(containerRect.width / window.gridWidth),
             Math.floor(containerRect.height / window.gridHeight)
         ));
+        console.log(window.cellSize, window.gridHeight)
         [canvas.width, canvas.height] = [window.gridWidth * window.cellSize, window.gridHeight * window.cellSize];
-        drawElements(scenarios[window.getSelectedScenario()]);
+        drawElements(scenarios[getSelectedScenario()]);
     });
 };

@@ -1,4 +1,5 @@
 import Ant from './ant.js'
+import { scenarios, getSelectedScenario } from './layouts.js'
 const canvas = document.getElementById("canvas");
 const paint = canvas.getContext("2d");
 const [startingAnt, returningAnt] = ["green", "darkgreen"];
@@ -61,7 +62,7 @@ async function antStart(state, start, initial, alpha, beta, rho, deposit, object
                     ant.y = y;
                     dirs = newdirs;
                 }
-                let nearestPoint = getNearestPoint(x, y, getObjects(state ? room.exit.color : window.startingPoint));
+                let nearestPoint = getNearestPoint(x, y, getObjects(state ? scenarios[getSelectedScenario()].exit.color : window.startingPoint));
                 const [movedTo, distance] = ant.move(window.grid, dirs, nearestPoint);
                 moveCount++;
                 visited.push({ x: movedTo.x, y: movedTo.y });
@@ -89,7 +90,7 @@ async function antStart(state, start, initial, alpha, beta, rho, deposit, object
                     Number(document.getElementById("ant_speed").value) != Number(document.getElementById("ant_speed").max)) requestAnimationFrame(moveAnt);
                 else moveAnt(); // Continue the loop
             } catch (error) {
-                console.error("Error during ant movement:", error);
+                console.log("Error during ant movement:", error);
                 reject(error);
             }
         }
@@ -120,7 +121,6 @@ export async function setColor(x, y, color) {
                 paint.fillStyle = window.grid[i][j].color;
                 paint.fillRect(i * window.cellSize, j * window.cellSize, window.cellSize, window.cellSize);
             } catch (error) {
-                console.error(`Error setting the cell (${i}, ${j}) as color ${color}`);
                 return;
             }
         }
@@ -177,6 +177,7 @@ export async function drawElements(room) {
     }
 }
 export async function runSimulations(start, alpha, beta, rho, deposit, steps) {
+    const room = scenarios[getSelectedScenario()];
     let currentPoint = start;
     let [oldDistance, newDistance] = [0, Infinity];
     let elements = [];
@@ -195,7 +196,7 @@ export async function runSimulations(start, alpha, beta, rho, deposit, steps) {
         try {
             let stringPath = '';
             let objects = [room.walls.color, room.windows.color, room.elements.tables.color, room.elements.teacher_table.color];
-            window.drawElements(scenarios[window.getSelectedScenario()]);
+            drawElements(scenarios[getSelectedScenario()]);
             for (const path of bestPath) { setColor(path.x, path.y, startingAnt) };
             document.getElementById("widget_step").textContent = `${stepNumber + 1} de ${steps}`;
 
@@ -230,11 +231,12 @@ export async function runSimulations(start, alpha, beta, rho, deposit, steps) {
         } catch (error) {
             window.showToast("Ha ocurrido un error. Puede ver más detalles en la consola.")
             console.log("Error in simulation:", error.message);
+            document.getElementById("widget_status").textContent = "Detenida"
             return;
         }
     }
     document.getElementById("widget_status").textContent = "Detenida"
-    window.drawElements(scenarios[window.getSelectedScenario()]);
+    drawElements(scenarios[getSelectedScenario()]);
     for (const path of bestPath) setColor(path.x, path.y, window.startingPoint);
 }
 export function roundValues(obj) {
