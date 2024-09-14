@@ -221,6 +221,72 @@ span {
   margin-left: 1vh;
 }
 
+#scenarios-form {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.5vh;
+  padding: 2vh;
+  background-color: var(--background-color);
+  border-radius: 1.5vh;
+  box-shadow: 0 0.4vh 1.5vh rgba(0, 0, 0, 0.2);
+  width: 100%;
+  margin: 2vh auto;
+}
+
+#scenarios-form label {
+  display: flex;
+  align-items: center;
+  gap: 1vh;
+  cursor: pointer;
+  font-size: 1.2vh;
+  color: var(--text-color);
+  transition: color 0.3s;
+}
+
+#scenarios-form input[type="radio"] {
+  opacity: 0;
+  position: absolute;
+}
+
+#scenarios-form input[type="radio"]+span {
+  display: inline-block;
+  width: 2.5vh;
+  height: 2.5vh;
+  border: 0.2vh solid var(--input-border-color);
+  border-radius: 50%;
+  background-color: var(--input-bg-color);
+  position: relative;
+  transition: background-color 0.3s, border-color 0.3s;
+}
+
+#scenarios-form input[type="radio"]:checked+span {
+  background-color: var(--start-btn-bg-color);
+  border-color: var(--start-btn-hover-bg-color);
+}
+
+#scenarios-form input[type="radio"]:checked+span::after {
+  content: '';
+  display: block;
+  width: 1.3vh;
+  height: 1.3vh;
+  background-color: var(--start-btn-text-color);
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+#scenarios-form label:hover span {
+  border-color: var(--start-btn-hover-bg-color);
+}
+
+#scenarios-form label:hover {
+  color: var(--start-btn-hover-text-color);
+}
+
+
 .buttons {
   position: relative;
   top: 1vh;

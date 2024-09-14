@@ -52,7 +52,6 @@
           <canvas id="canvas"></canvas>
         </div>
       </div>
-
     </main>
 
     <aside class="sidebar">
@@ -91,6 +90,17 @@
         <input type="range" id="ant_speed" min="1" max="20" value="1"
           oninput="speed_n.textContent= 'Nivel de velocidad: x' + ant_speed.value">
       </div>
+      <form id="scenarios-form">
+        <label>
+          <input type="radio" name="scenario" value="Class" checked>
+          <span></span> Clase
+        </label>
+        <label>
+          <input type="radio" name="scenario" value="School">
+          <span></span> Planta
+        </label>
+      </form>
+
       <div class="buttons">
         <button id="start" class="start-btn">Iniciar/Detener Simulación</button>
         <button class="reset-btn" onclick="location.reload()">Reiniciar Simulación</button>
