@@ -1,4 +1,4 @@
-import room from "./layout.js";
+import room from "./layouts.js";
 import Ant from './ant.js'
 const canvas = document.getElementById("canvas");
 const paint = canvas.getContext("2d");
