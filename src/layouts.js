@@ -9,8 +9,8 @@ export const dimensions = {
         gridHeight: 200
     },
     School: {
-        gridWidth: 1000,
-        gridHeight: 400
+        gridWidth: 500,
+        gridHeight: 200
     }
 }
 
@@ -133,10 +133,11 @@ export function getSelectedScenario() { return document.querySelector('input[nam
 document.getElementById('scenarios-form').addEventListener('change', () => {
     const selected = getSelectedScenario();
     [window.gridWidth, window.gridHeight] = [dimensions[selected].gridWidth, dimensions[selected].gridHeight];
-    window.cellSize = Math.floor(Math.min(
+    window.cellSize = Math.min(
         Math.floor(containerRect.width / window.gridWidth),
         Math.floor(containerRect.height / window.gridHeight)
-    ));
+    );
+    if (window.cellSize == 0) window.cellSize++
     [canvas.width, canvas.height] = [window.gridWidth * window.cellSize, window.gridHeight * window.cellSize];
     console.log(window.gridWidth, window.gridHeight)
     drawElements(scenarios[selected]);

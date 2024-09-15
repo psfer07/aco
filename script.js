@@ -73,11 +73,13 @@ window.onload = function () {
         const selected = getSelectedScenario();
         [window.gridWidth, window.gridHeight] = [dimensions[selected].gridWidth, dimensions[selected].gridHeight];
         console.log("Hola nigga", dimensions[selected].gridWidth, dimensions[selected].gridHeight)
-        window.cellSize = Math.floor(Math.min(
+        window.cellSize = Math.min(
             Math.floor(containerRect.width / window.gridWidth),
             Math.floor(containerRect.height / window.gridHeight)
-        ));
+        );
+        if (window.cellSize == 0) window.cellSize++
         console.log(window.cellSize, window.gridHeight)
+        console.log([window.gridWidth * window.cellSize, window.gridHeight * window.cellSize]);
         [canvas.width, canvas.height] = [window.gridWidth * window.cellSize, window.gridHeight * window.cellSize];
         drawElements(scenarios[getSelectedScenario()]);
     });
