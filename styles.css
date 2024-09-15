@@ -74,8 +74,8 @@ body {
 .widget-and-theme {
   flex: 1;
   display: flex;
-  min-width: 7%;
-  max-width: 17%;
+  min-width: 20%;
+  max-width: 22%;
   flex-direction: row;
   background-color: var(--background-color);
 }
