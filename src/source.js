@@ -24,6 +24,7 @@ function getObjects(object) {
 }
 async function antStart(state, start, initial, alpha, beta, rho, deposit, objects) {
     return new Promise((resolve, reject) => {
+        const room = scenarios[getSelectedScenario()];
         let moveCount = 0;
         let distanceCumulative = 0;
         let { x, y } = initial;
@@ -62,7 +63,12 @@ async function antStart(state, start, initial, alpha, beta, rho, deposit, object
                     ant.y = y;
                     dirs = newdirs;
                 }
-                let nearestPoint = getNearestPoint(x, y, getObjects(state ? scenarios[getSelectedScenario()].exit.color : window.startingPoint));
+                let exits = [];
+                for (const key in room.exits) {
+                    const exit = room.exits[key];
+                    exits.push(exit.color);
+                }
+                let nearestPoint = getNearestPoint(x, y, getObjects(state ? exits : window.startingPoint));
                 const [movedTo, distance] = ant.move(window.grid, dirs, nearestPoint);
                 moveCount++;
                 visited.push({ x: movedTo.x, y: movedTo.y });
@@ -127,28 +133,27 @@ export async function setColor(x, y, color) {
     }
 }
 export async function drawElements(room) {
-    const { floor, walls, windows, exit, elements } = room;
+    const { floor, walls, windows, exits, elements } = room;
     for (const item in room) {
         switch (item) {
             case 'floor':
                 setColor([floor.margin, floor.width - floor.margin], [floor.margin, floor.height - floor.margin], floor.color);
                 break;
             case 'walls':
-                for (const wall of walls.horz.positions) { setColor([wall.x, walls.horz.width - 1], [wall.y, walls.horz.height - 1], walls.color); }
-                for (const wall of walls.vert.positions) { setColor([wall.x, walls.vert.width - 1], [wall.y, walls.vert.height - 1], walls.color); }
+                for (const key in walls) { const wall = walls[key]; setColor([wall.x, wall.width - 1], [wall.y, wall.height - 1], wall.color); }
                 break;
             case 'windows':
-                for (const window of windows.positions) { setColor([window.x, windows.width - 1], [window.y, windows.height - 1], windows.color); }
+                for (const key in windows) { const window = windows[key]; setColor([window.x, window.width - 1], [window.y, window.height - 1], window.color); }
                 break;
-            case 'exit':
-                setColor([exit.x, exit.width - 1], [exit.y, exit.height - 1], exit.color);
+            case 'exits':
+                for (const key in exits) { const exit = exits[key]; setColor([exit.x, exit.width - 1], [exit.y, exit.height - 1], exit.color); }
                 break;
             case 'elements':
                 for (const key in elements) {
                     switch (key) {
                         case 'pillars':
                             const pillars = elements.pillars;
-                            for (const pillar of pillars.positions) { setColor([pillar.x, pillars.width - 1], [pillar.y, pillars.height - 1], pillars.color); }
+                            for (const key in pillars) { const pillar = pillars[key]; setColor([pillar.x, pillar.width - 1], [pillar.y, pillar.height - 1], pillar.color); }
                             break;
                         case 'teacher_table':
                             const Ttable = elements.teacher_table
@@ -171,7 +176,7 @@ export async function drawElements(room) {
                 }
                 break;
             default:
-                console.warn(`This element (${item}) is not currently supported, so review it before trying to import it :)`)
+                console.warn(`This element (${item}) is not currently supported, so review it before trying to import it`)
                 break;
         }
     }
@@ -195,7 +200,22 @@ export async function runSimulations(start, alpha, beta, rho, deposit, steps) {
     for (stepNumber = 0; stepNumber < steps; stepNumber++) {
         try {
             let stringPath = '';
-            let objects = [room.walls.color, room.windows.color, room.elements.tables.color, room.elements.teacher_table.color];
+            let objects = [];
+
+            for (const key in room) {
+                const element = room[key];
+                if (key === 'walls' || key === 'windows' || key === 'elements') {
+                    for (const subKey in element) {
+                        const subElement = element[subKey];
+                        if (subElement.color) objects.push(subElement.color);
+                        if (typeof subElement === 'object' && !subElement.color) {
+                            for (const part in subElement) {
+                                if (subElement[part].color) objects.push(subElement[part].color);
+                            }
+                        }
+                    }
+                }
+            }
             drawElements(scenarios[getSelectedScenario()]);
             for (const path of bestPath) { setColor(path.x, path.y, startingAnt) };
             document.getElementById("widget_step").textContent = `${stepNumber + 1} de ${steps}`;
@@ -209,7 +229,10 @@ export async function runSimulations(start, alpha, beta, rho, deposit, steps) {
             for (const path of bestPath) setColor(path.x, path.y, startingAnt);
             visited = [];
             elements = [];
-            objects.push(room.exit.color); // Added the exit as an object for the ant to avoid
+            for (const key in room.exits) {
+                const exit = room.exits[key];
+                objects.push(exit.color); // Added all exits as objects for the ant to avoid
+            }
 
             elements = getObjects(objects);
             [currentPoint, newDistance, visited] = await antStart(0, start, currentPoint, alpha, beta, rho, deposit, elements);
