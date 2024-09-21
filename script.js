@@ -18,13 +18,11 @@ let start;
 
 document.getElementById("widget_status").textContent = "Detenida";
 
-applyTheme(darkThemeMq.matches);
+if (localStorage.getItem('theme')) { localStorage.getItem('theme') == 'dark' ? applyTheme(1) : applyTheme(); } else { applyTheme(darkThemeMq.matches); }
 
 window.onload = function () {
     drawElements(scenarios[getSelectedScenario()])
-    darkThemeMq.addEventListener("change", e => {
-        applyTheme(e.matches);
-    });
+    darkThemeMq.addEventListener("change", e => applyTheme(e.matches));
     canvas.addEventListener("click", function (event) {
         const rect = canvas.getBoundingClientRect();
         start = {
