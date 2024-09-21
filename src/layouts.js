@@ -10,7 +10,7 @@ export const dimensions = {
     },
     School: {
         gridWidth: 500,
-        gridHeight: 400
+        gridHeight: 250
     }
 }
 
@@ -137,6 +137,86 @@ export const scenarios = roundValues({
     },
 
     School: {
+        floor: {
+            color: "#ccc",
+            margin: dimensions.School.gridWidth * 0.01,
+            width: dimensions.School.gridWidth * 0.99,
+            height: dimensions.School.gridHeight * 0.99
+        },
+        walls: {
+            0: {
+                color: "#2d2d2d",
+                width: dimensions.School.gridWidth,
+                height: dimensions.School.gridHeight * 0.01,
+                x: 0,
+                y: 0
+            },
+            1: {
+                color: "#2d2d2d",
+                width: dimensions.School.gridWidth,
+                height: dimensions.School.gridHeight * 0.01,
+                x: 0,
+                y: dimensions.School.gridHeight * 0.988
+            },
+            2: {
+                color: "#2d2d2d",
+                width: dimensions.School.gridHeight * 0.01,
+                height: dimensions.School.gridHeight,
+                x: 0,
+                y: 0
+            },
+            3: {
+                color: "#2d2d2d",
+                width: dimensions.School.gridHeight * 0.01,
+                height: dimensions.School.gridHeight,
+                x: dimensions.School.gridWidth * 0.994,
+                y: 0
+            }
+        },
+        exits: {
+            0: {
+                color: "#02b200",
+                width: dimensions.School.gridHeight * 0.15,
+                height: dimensions.School.gridWidth * 0.15,
+                x: dimensions.School.gridWidth * 0.28,
+                y: dimensions.School.gridHeight * 0.01
+            }
+        },
+        elements: {
+            classes: {
+                small: {
+                    count: 2,
+                    top: {
+                        0: {
+                            color: "#2d2d2d",
+                            width: dimensions.School.gridWidth * 0.004,
+                            height: dimensions.School.gridHeight * 0.35,
+                            x: dimensions.School.gridWidth * 0.13,
+                            y: dimensions.School.gridWidth * 0.006
+                        },
+                        1: {
+                            color: "#2d2d2d",
+                            width: dimensions.School.gridWidth * 0.128,
+                            height: dimensions.School.gridWidth * 0.004,
+                            x: dimensions.School.gridWidth * 0.006,
+                            y: dimensions.School.gridWidth * 0.182
+                        }
+                    },
+                    bottom: {
+
+                    }
+                },
+                large: {
+                    count: 3,
+                    top: {
+
+                    },
+                    bottom: {
+
+                    }
+                }
+            }
+        }
     }
 });
 
@@ -153,5 +233,4 @@ document.getElementById('scenarios-form').addEventListener('change', () => {
     [canvas.width, canvas.height] = [window.gridWidth * window.cellSize, window.gridHeight * window.cellSize];
     drawElements(scenarios[selected]);
 });
-
 document.getElementById('scenarios-form').dispatchEvent(new Event('change'));
