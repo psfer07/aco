@@ -156,7 +156,7 @@ export async function drawElements(room) {
                             for (const key in pillars) { const pillar = pillars[key]; setColor([pillar.x, pillar.width - 1], [pillar.y, pillar.height - 1], pillar.color); }
                             break;
                         case 'teacher_table':
-                            const Ttable = elements.teacher_table
+                            const Ttable = elements.teacher_table;
                             setColor([Ttable.x, Ttable.width - 1], [Ttable.y, Ttable.height - 1], Ttable.color);
                             break;
                         case 'tables':
@@ -172,11 +172,29 @@ export async function drawElements(room) {
                                 }
                             }
                             break;
+                        case 'classes':
+                            const classes = elements.classes;
+                            for (const key in classes) {
+                                const Class = classes[key];
+                                const count = Class.count;
+                                for (let i = 0; i < count; i++) {
+                                    for (const subKey in Class) {
+                                        const position = Class[subKey];
+                                        for (const classKey in position) {
+                                            const object = position[classKey];
+                                            setColor([object.x, object.width], [object.y, object.height], object.color);
+                                        }
+                                    }
+                                }
+                            }
+                            break;
+                        default:
+                            console.warn(`The element '${key}' is not currently supported by the simulator. See the layouts.js file for structure information.`);
                     }
                 }
                 break;
             default:
-                console.warn(`This element (${item}) is not currently supported, so review it before trying to import it`)
+                console.warn(`The item '${item}' is not currently supported by the simulator. See the layouts.js file for structure information.`);
                 break;
         }
     }
