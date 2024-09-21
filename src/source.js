@@ -107,12 +107,12 @@ export async function applyTheme(isDark) {
     if (isDark) {
         document.body.classList.add('dark-mode');
         document.body.classList.remove('light-mode');
-        document.getElementById('theme-icon').src = './src/dark.svg';
+        document.getElementById('theme-icon').src = './src/svgs/dark.svg';
         localStorage.setItem('theme', 'dark');
     } else {
         document.body.classList.add('light-mode');
         document.body.classList.remove('dark-mode');
-        document.getElementById('theme-icon').src = './src/light.svg';
+        document.getElementById('theme-icon').src = './src/svgs/light.svg';
         localStorage.setItem('theme', 'light');
     }
     window.applyTheme = applyTheme;
