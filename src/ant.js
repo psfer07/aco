@@ -7,7 +7,7 @@ export default class Ant {
         this.alpha = alpha;
         this.beta = beta;
         this.deposit = deposit;
-        this.godQuotient = (gridWidth < gridHeight ? gridHeight : gridWidth) / (gridWidth > gridHeight ? gridHeight : gridWidth); // The longer by the shorter
+        this.correctionRatio = (gridWidth < gridHeight ? gridHeight : gridWidth) / (gridWidth > gridHeight ? gridHeight : gridWidth); // The longer by the shorter
         this.directions = [  // Directions are set clockwise
             { x: 0, y: -1 }, // Up
             { x: 1, y: -1 }, // Up-right
@@ -49,7 +49,7 @@ export default class Ant {
             }
         }
 
-        weighs[bestDirectionIndex] += this.godQuotient; // Algorithm improvement aside the original ACO algorithm
+        weighs[bestDirectionIndex] += this.correctionRatio; // Algorithm improvement aside the original ACO algorithm
 
         const lastVisitedCellIndex = this.directions.findIndex(direction =>
             this.visited[this.visited.length - 1].x === this.x - direction.x &&
