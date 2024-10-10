@@ -22,7 +22,11 @@ if (localStorage.getItem('theme')) { localStorage.getItem('theme') == 'dark' ? a
 
 window.onload = function () {
     drawElements(scenarios[getSelectedScenario()])
-    darkThemeMq.addEventListener("change", e => applyTheme(e.matches));
+    darkThemeMq.addEventListener("change", e => {
+        applyTheme(e.matches);
+        localStorage.setItem('theme', e.matches ? 'dark' : 'light');
+    });
+    
     canvas.addEventListener("click", function (event) {
         const rect = canvas.getBoundingClientRect();
         start = {
