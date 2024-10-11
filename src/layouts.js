@@ -225,6 +225,8 @@ export function getSelectedScenario() { return document.querySelector('input[nam
 document.getElementById('scenarios-form').addEventListener('change', () => {
     const selected = getSelectedScenario();
     [window.gridWidth, window.gridHeight] = [dimensions[selected].gridWidth, dimensions[selected].gridHeight];
+
+    // Set unitary scaling factor (USF)
     window.cellSize = Math.min(
         Math.floor(containerRect.width / window.gridWidth),
         Math.floor(containerRect.height / window.gridHeight)

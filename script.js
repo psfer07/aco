@@ -7,7 +7,7 @@ const properties = { // Each cell will have these properties by default
     color: "#ccc",
     pheromone: 1.0
 }
-window.startingPoint = 'red';
+window.startingPoint = 'red'; // Global color for the starting point
 window.grid = [];
 for (let x = 0; x < window.gridWidth; x++) {
     let cols = [];
@@ -18,10 +18,11 @@ let start;
 
 document.getElementById("widget_status").textContent = "Detenida";
 
+// Load last used theme if available
 if (localStorage.getItem('theme')) { localStorage.getItem('theme') == 'dark' ? applyTheme(1) : applyTheme(); } else { applyTheme(darkThemeMq.matches); }
 
 window.onload = function () {
-    drawElements(scenarios[getSelectedScenario()])
+    drawElements(scenarios[getSelectedScenario()]) // Initial drawing
     darkThemeMq.addEventListener("change", e => {
         applyTheme(e.matches);
         localStorage.setItem('theme', e.matches ? 'dark' : 'light');
@@ -29,31 +30,36 @@ window.onload = function () {
     
     canvas.addEventListener("click", function (event) {
         const rect = canvas.getBoundingClientRect();
+        let clickedOnFloor = true;
         start = {
             x: Math.floor((event.clientX - rect.left) / window.cellSize),
             y: Math.floor((event.clientY - rect.top) / window.cellSize)
         };
         document.getElementById("widget_status").textContent = "Detenida";
-        let state = true;
         for (let i = start.x - 1; i <= start.x + 1; i++) {
             for (let j = start.y - 1; j <= start.y + 1; j++) {
                 if (window.grid[i][j].color != "#ccc") {
-                    state = false;
+                    clickedOnFloor = false;
                     break;
                 }
             }
         }
-        if (state) {
+        // If clicked on a valid position
+        if (clickedOnFloor) {
             console.log(`Clicked at (${start.x}, ${start.y})`);
             drawElements(scenarios[getSelectedScenario()]);
             setColor([start.x - 1, 2], [start.y - 1, 2], window.startingPoint);
         } else {
+
+            // If clicked on the current starting point
             if (window.grid[start.x][start.y].color === window.startingPoint) {
                 window.showToast("Por favor, seleccione otro punto o inicie la simulación.")
-            } else { window.showToast("No puedes empezar ahí. Haz clic en el suelo de la habitación."); }
+            } else { window.showToast("No puedes empezar ahí. Haz clic en el suelo de la habitación."); } // If clicked elsewhere
         }
     });
     document.getElementById("start").addEventListener("click", function () {
+
+        // If there is any point set and the simulation is down
         if (start && document.getElementById("widget_status").textContent == "Detenida") {
             runSimulations(start,
                 Number(document.getElementById("alpha").value),
@@ -74,6 +80,8 @@ window.onload = function () {
         const containerRect = canvasContainer.getBoundingClientRect();
         const selected = getSelectedScenario();
         [window.gridWidth, window.gridHeight] = [dimensions[selected].gridWidth, dimensions[selected].gridHeight];
+
+        // Set unitary scaling factor (USF)
         window.cellSize = Math.min(
             Math.floor(containerRect.width / window.gridWidth),
             Math.floor(containerRect.height / window.gridHeight)

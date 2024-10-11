@@ -5,6 +5,7 @@ const paint = canvas.getContext("2d");
 const [startingAnt, returningAnt] = ["green", "darkgreen"];
 let stepNumber = 0;
 
+// This function returns the coordinates of every obstacle in the scenario
 function getObjects(object) {
     let objects = [];
     if (Array.isArray(object)) {
@@ -22,6 +23,8 @@ function getObjects(object) {
     }
     return objects;
 }
+
+// 'Main' function
 async function antStart(state, start, initial, alpha, beta, rho, deposit, objects) {
     return new Promise((resolve, reject) => {
         const room = scenarios[getSelectedScenario()];
@@ -30,21 +33,24 @@ async function antStart(state, start, initial, alpha, beta, rho, deposit, object
         let { x, y } = initial;
         let visited = [{ x, y }];
         let deadEnds = [];
-        let ant = new Ant(x, y, visited, objects, state ? Math.pow(alpha, 2) : alpha, beta, deposit, window.gridWidth, window.gridHeight);
+        let ant = new Ant(
+            x, y, // Initial coordinates of the ant
+            visited, objects, // Different types of elements in the scenario
+            alpha, beta, deposit, // User-provided heuristic parameters
+            window.gridWidth, window.gridHeight // Scenario dimensions
+        );
 
         function moveAnt() {
-            function getNearestPoint(x0, y0, objects) {
+            function getNearestExit(x0, y0, objects) {
                 let nearest = {};
                 let currentDistance = Infinity;
 
                 for (const object of objects) {
-                    const distance = Math.sqrt(Math.pow(object.x - x0, 2) + Math.pow(object.y - y0, 2));
+                    const distance = Math.sqrt(Math.pow(object.x - x0, 2) + Math.pow(object.y - y0, 2)); // Euclidean formula
                     if (distance < currentDistance) {
                         nearest = { x: object.x, y: object.y };
                         currentDistance = distance;
-                    } else {
-                        break;
-                    }
+                    } else { break; }
                 }
                 return nearest;
             }
@@ -58,7 +64,7 @@ async function antStart(state, start, initial, alpha, beta, rho, deposit, object
                         deadEnds.push(revert.avoid);
                         [x, y] = [revert.x, revert.y];
                         newdirs = ant.getDirs(x, y, deadEnds);
-                    } while (newdirs.length < 1);
+                    } while (newdirs.length < 1); // Until the ant has an alternative path to follow
                     ant.x = x;
                     ant.y = y;
                     dirs = newdirs;
@@ -68,16 +74,13 @@ async function antStart(state, start, initial, alpha, beta, rho, deposit, object
                     const exit = room.exits[key];
                     exits.push(exit.color);
                 }
-                let nearestPoint = getNearestPoint(x, y, getObjects(state ? exits : window.startingPoint));
-                const [movedTo, distance] = ant.move(window.grid, dirs, nearestPoint);
+                let nearestExit = getNearestExit(x, y, getObjects(state ? exits : window.startingPoint));
+                const [movedTo, distance] = ant.move(window.grid, dirs, nearestExit);
                 moveCount++;
                 visited.push({ x: movedTo.x, y: movedTo.y });
 
                 // Evaporate pheromone
-                for (const visit of visited) {
-                    window.grid[visit.x][visit.y].pheromone *= (1 - rho);
-                    if (window.grid[visit.x][visit.y].pheromone < 0.00001) window.grid[visit.x][visit.y].pheromone = 0;
-                }
+                for (const visit of visited) { window.grid[visit.x][visit.y].pheromone *= (1 - rho); }
 
                 [x, y] = [movedTo.x, movedTo.y];
                 ant.x = movedTo.x;
@@ -91,7 +94,7 @@ async function antStart(state, start, initial, alpha, beta, rho, deposit, object
                 for (const visit of visited) setColor(visit.x, visit.y, state ? startingAnt : returningAnt);
                 setColor([start.x - 1, 2], [start.y - 1, 2], window.startingPoint);
 
-                // Speed regulation
+                // Dynamic speed regulation
                 if (moveCount % Number(document.getElementById("ant_speed").value) === 0 &&
                     Number(document.getElementById("ant_speed").value) != Number(document.getElementById("ant_speed").max)) requestAnimationFrame(moveAnt);
                 else moveAnt(); // Continue the loop
@@ -103,6 +106,7 @@ async function antStart(state, start, initial, alpha, beta, rho, deposit, object
         requestAnimationFrame(moveAnt); // Start the loop
     });
 }
+
 export async function applyTheme(isDark) {
     if (isDark) {
         document.body.classList.add('dark-mode');
@@ -118,6 +122,8 @@ export async function applyTheme(isDark) {
     window.applyTheme = applyTheme;
 }
 export async function setColor(x, y, color) {
+
+    // If the parameters are intervals, the function operates with the sum of the first and the second
     const X = Array.isArray(x) ? x[0] : x;
     const endX = Array.isArray(x) ? x[0] + x[1] : x;
     const Y = Array.isArray(y) ? y[0] : y;
@@ -125,9 +131,9 @@ export async function setColor(x, y, color) {
     for (let i = X; i <= endX; i++) {
         for (let j = Y; j <= endY; j++) {
             try {
-                window.grid[i][j].color = color;
+                window.grid[i][j].color = color; // Make low-level changes
                 paint.fillStyle = window.grid[i][j].color;
-                paint.fillRect(i * window.cellSize, j * window.cellSize, window.cellSize, window.cellSize);
+                paint.fillRect(i * window.cellSize, j * window.cellSize, window.cellSize, window.cellSize); // Make graphical changes
             } catch (error) {
                 return;
             }
@@ -136,6 +142,8 @@ export async function setColor(x, y, color) {
 }
 export async function drawElements(room) {
     const { floor, walls, windows, exits, elements } = room;
+
+    // Iterates one by one and displays the objects respectingly
     for (const item in room) {
         switch (item) {
             case 'floor':
@@ -210,7 +218,7 @@ export async function runSimulations(start, alpha, beta, rho, deposit, steps) {
     let bestPath = [];
     document.getElementById("widget_status").textContent = "En ejecucción";
 
-    // Reset trace through simulations
+    // Reset pheromone trace through simulations
     for (let i = 0; i < window.gridWidth; i++) {
         for (let j = 0; j < window.gridHeight; j++) {
             if (window.grid[i][j].pheromone != 1.0) window.grid[i][j].pheromone = 1.0;
@@ -222,6 +230,7 @@ export async function runSimulations(start, alpha, beta, rho, deposit, steps) {
             let stringPath = '';
             let objects = [];
 
+            // Get the color of every wall, window and all the elements
             for (const key in room) {
                 const element = room[key];
                 if (key === 'walls' || key === 'windows' || key === 'elements') {
@@ -237,11 +246,13 @@ export async function runSimulations(start, alpha, beta, rho, deposit, steps) {
                 }
             }
             drawElements(scenarios[getSelectedScenario()]);
-            for (const path of bestPath) { setColor(path.x, path.y, startingAnt) };
+            for (const path of bestPath) setColor(path.x, path.y, startingAnt);
             document.getElementById("widget_step").textContent = `${stepNumber + 1} de ${steps}`;
 
             elements = getObjects(objects);
             [currentPoint, newDistance, visited] = await antStart(1, start, currentPoint, alpha, beta, rho, deposit, elements);
+
+            // Check if the new distance is lower than the older one stored or stores it if there was no stored distance before
             if (newDistance < oldDistance || oldDistance == 0) {
                 oldDistance = newDistance;
                 bestPath = visited;
@@ -249,13 +260,14 @@ export async function runSimulations(start, alpha, beta, rho, deposit, steps) {
             for (const path of bestPath) setColor(path.x, path.y, startingAnt);
             visited = [];
             elements = [];
-            for (const key in room.exits) {
-                const exit = room.exits[key];
-                objects.push(exit.color); // Added all exits as objects for the ant to avoid
-            }
+
+            // Include all exits as objects for the ant to avoid and the returning
+            for (const key in room.exits) objects.push(room.exits[key].color);
 
             elements = getObjects(objects);
             [currentPoint, newDistance, visited] = await antStart(0, start, currentPoint, alpha, beta, rho, deposit, elements);
+
+            // Check if the new distance is lower than the older one stored
             if (newDistance < oldDistance) {
                 oldDistance = newDistance;
                 bestPath = visited;
@@ -283,7 +295,9 @@ export async function runSimulations(start, alpha, beta, rho, deposit, steps) {
     for (const path of bestPath) setColor(path.x, path.y, window.startingPoint);
 }
 export function roundValues(obj) {
-    if (typeof obj === 'object' && obj !== null) {
+
+    // Iterates on each value to check if it is a number
+    if (typeof obj === 'object' && obj !== null) { // If it is not a number, the value remains the same
         if (Array.isArray(obj)) {
             return obj.map(item => roundValues(item));
         } else {
@@ -295,16 +309,16 @@ export function roundValues(obj) {
             }
             return roundedObj;
         }
-    } else if (typeof obj === 'number') {
+    } else if (typeof obj === 'number') { // Rounds the value if it is a number
         return Math.round(obj);
     }
+
+    // Returns the number-rounded object
     return obj;
 }
 window.showToast = async function (t) {
     const toast = document.getElementById('toast');
     toast.textContent = t;
     toast.classList.add('show');
-    setTimeout(() => {
-        toast.classList.remove('show');
-    }, 4000);
+    setTimeout(() => { toast.classList.remove('show'); }, 4000); // Shows toast for 4 secs
 };
