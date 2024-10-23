@@ -1,5 +1,5 @@
 import Ant from './ant.js'
-import { scenarios, getSelectedScenario } from './layouts.js'
+import { scenarios, getSelectedScenario, dimensions } from './layouts.js'
 const canvas = document.getElementById("canvas");
 const paint = canvas.getContext("2d");
 const [startingAnt, returningAnt] = ["green", "darkgreen"];
@@ -88,7 +88,10 @@ async function antStart(state, start, initial, alpha, beta, rho, deposit, object
                 distanceCumulative += distance;
 
                 // Loop exit
-                if (ant.checkExit(window.grid, state)) { resolve([{ x, y }, distanceCumulative, visited]); return; }
+                if (ant.checkExit(window.grid, state)) {
+                    resolve([{ x, y }, distanceCumulative, visited]);
+                    return;
+                }
 
                 // Update canvas
                 for (const visit of visited) setColor(visit.x, visit.y, state ? startingAnt : returningAnt);
@@ -182,16 +185,37 @@ export async function drawElements(room) {
                                 }
                             }
                             break;
+                        case 'spaces':
+                            const spaces = elements.spaces;
+                            for (const key in spaces) { const space = spaces[key]; setColor([space.x, space.width - 1], [space.y, space.height - 1], space.color); }
+                            break;
                         case 'classes':
                             const classes = elements.classes;
                             for (const key in classes) {
                                 const Class = classes[key];
-                                const count = Class.count;
-                                for (let i = 0; i < count; i++) {
-                                    for (const subKey in Class) {
-                                        const position = Class[subKey];
-                                        for (const classKey in position) {
-                                            const object = position[classKey];
+                                for (const subKey in Class) {
+                                    const position = Class[subKey];
+
+                                    // Print full classroom
+                                    for (const classKey in position) {
+                                        const object = position[classKey];
+                                        if (subKey == 'class') {
+                                            if (key == 'top') {
+                                                setColor([object.x, object.width], [object.y, object.height], object.color);
+                                                setColor([object.x + window.gridWidth * 0.14, object.width], [object.y, object.height], object.color);
+                                                setColor([object.x + window.gridWidth * 0.35, object.width], [object.y, object.height], object.color);
+                                                setColor([object.x + window.gridWidth * 0.49, object.width], [object.y, object.height], object.color);
+                                                setColor([object.x + window.gridWidth * 0.63, object.width], [object.y, object.height], object.color);
+                                                setColor([object.x + window.gridWidth * 0.856, object.width], [object.y, object.height], object.color);
+                                            } else {
+                                                setColor([object.x, object.width], [object.y, object.height], object.color);
+                                                setColor([object.x + window.gridWidth * 0.14, object.width], [object.y, object.height], object.color);
+                                                setColor([object.x + window.gridWidth * 0.41, object.width], [object.y, object.height], object.color);
+                                                setColor([object.x + window.gridWidth * 0.55, object.width], [object.y, object.height], object.color);
+                                                setColor([object.x + window.gridWidth * 0.69, object.width], [object.y, object.height], object.color);
+                                                setColor([object.x + window.gridWidth * 0.856, object.width], [object.y, object.height], object.color);
+                                            }
+                                        } else {
                                             setColor([object.x, object.width], [object.y, object.height], object.color);
                                         }
                                     }
@@ -199,7 +223,8 @@ export async function drawElements(room) {
                             }
                             break;
                         default:
-                            console.warn(`The element '${key}' is not currently supported by the simulator. See the layouts.js file for structure information.`);
+                            const object = elements[key]
+                            setColor([object.x, object.width], [object.y, object.height], object.color);
                     }
                 }
                 break;
@@ -217,78 +242,82 @@ export async function runSimulations(start, alpha, beta, rho, deposit, steps) {
     let visited = [];
     let bestPath = [];
     document.getElementById("widget_status").textContent = "En ejecucción";
-
-    // Reset pheromone trace through simulations
-    for (let i = 0; i < window.gridWidth; i++) {
-        for (let j = 0; j < window.gridHeight; j++) {
-            if (window.grid[i][j].pheromone != 1.0) window.grid[i][j].pheromone = 1.0;
+    try {
+        // Reset pheromone trace through simulations
+        for (let i = 0; i < window.gridWidth; i++) {
+            for (let j = 0; j < window.gridHeight; j++) {
+                if (window.grid[i][j].pheromone != 1.0) window.grid[i][j].pheromone = 1.0;
+            }
         }
-    }
 
-    for (stepNumber = 0; stepNumber < steps; stepNumber++) {
-        try {
-            let stringPath = '';
-            let objects = [];
+        for (stepNumber = 0; stepNumber < steps; stepNumber++) {
+            try {
+                let stringPath = '';
+                let objects = [];
 
-            // Get the color of every wall, window and all the elements
-            for (const key in room) {
-                const element = room[key];
-                if (key === 'walls' || key === 'windows' || key === 'elements') {
-                    for (const subKey in element) {
-                        const subElement = element[subKey];
-                        if (subElement.color) objects.push(subElement.color);
-                        if (typeof subElement === 'object' && !subElement.color) {
-                            for (const part in subElement) {
-                                if (subElement[part].color) objects.push(subElement[part].color);
+                // Get the color of every wall, window and all the elements
+                for (const key in room) {
+                    const element = room[key];
+                    if (key === 'walls' || key === 'windows' || key === 'elements') {
+                        for (const subKey in element) {
+                            const subElement = element[subKey];
+                            if (subElement.color) objects.push(subElement.color);
+                            if (typeof subElement === 'object' && !subElement.color) {
+                                for (const part in subElement) {
+                                    if (subElement[part].color) objects.push(subElement[part].color);
+                                }
                             }
                         }
                     }
                 }
+                drawElements(scenarios[getSelectedScenario()]);
+                for (const path of bestPath) setColor(path.x, path.y, startingAnt);
+                document.getElementById("widget_step").textContent = `${stepNumber + 1} de ${steps}`;
+
+                elements = getObjects(objects);
+                [currentPoint, newDistance, visited] = await antStart(1, start, currentPoint, alpha, beta, rho, deposit, elements);
+
+                // Check if the new distance is lower than the older one stored or stores it if there was no stored distance before
+                if (newDistance < oldDistance || oldDistance == 0) {
+                    oldDistance = newDistance;
+                    bestPath = visited;
+                }
+                for (const path of bestPath) setColor(path.x, path.y, startingAnt);
+                visited = [];
+                elements = [];
+
+                // Include all exits as objects for the ant to avoid and the returning
+                for (const key in room.exits) objects.push(room.exits[key].color);
+
+                elements = getObjects(objects);
+                [currentPoint, newDistance, visited] = await antStart(0, start, currentPoint, alpha, beta, rho, deposit, elements);
+
+                // Check if the new distance is lower than the older one stored
+                if (newDistance < oldDistance) {
+                    oldDistance = newDistance;
+                    bestPath = visited;
+                }
+
+                visited = [];
+                elements = [];
+                for (const path of bestPath) {
+                    setColor(path.x, path.y, window.startingPoint);
+                    stringPath += `(${path.x}, ${path.y}), `;
+                }
+                stringPath = stringPath.substring(0, stringPath.length - 2); // Remove the last comma and space
+                document.getElementById("widget_visited").value = stringPath
+                document.getElementById("widget_distance").textContent = oldDistance;
+
+            } catch (error) {
+                window.showToast("Ha ocurrido un error inesperado. Consulte la consola de depuración para más detalles.")
+                console.log("Error in simulation:", error.message);
+                document.getElementById("widget_status").textContent = "Detenida"
+                return;
             }
-            drawElements(scenarios[getSelectedScenario()]);
-            for (const path of bestPath) setColor(path.x, path.y, startingAnt);
-            document.getElementById("widget_step").textContent = `${stepNumber + 1} de ${steps}`;
-
-            elements = getObjects(objects);
-            [currentPoint, newDistance, visited] = await antStart(1, start, currentPoint, alpha, beta, rho, deposit, elements);
-
-            // Check if the new distance is lower than the older one stored or stores it if there was no stored distance before
-            if (newDistance < oldDistance || oldDistance == 0) {
-                oldDistance = newDistance;
-                bestPath = visited;
-            }
-            for (const path of bestPath) setColor(path.x, path.y, startingAnt);
-            visited = [];
-            elements = [];
-
-            // Include all exits as objects for the ant to avoid and the returning
-            for (const key in room.exits) objects.push(room.exits[key].color);
-
-            elements = getObjects(objects);
-            [currentPoint, newDistance, visited] = await antStart(0, start, currentPoint, alpha, beta, rho, deposit, elements);
-
-            // Check if the new distance is lower than the older one stored
-            if (newDistance < oldDistance) {
-                oldDistance = newDistance;
-                bestPath = visited;
-            }
-
-            visited = [];
-            elements = [];
-            for (const path of bestPath) {
-                setColor(path.x, path.y, window.startingPoint);
-                stringPath += `(${path.x}, ${path.y}), `;
-            }
-            stringPath = stringPath.substring(0, stringPath.length - 2); // Remove the last comma and space
-            document.getElementById("widget_visited").value = stringPath
-            document.getElementById("widget_distance").textContent = oldDistance;
-
-        } catch (error) {
-            window.showToast("Ha ocurrido un error. Puede ver más detalles en la consola.")
-            console.log("Error in simulation:", error.message);
-            document.getElementById("widget_status").textContent = "Detenida"
-            return;
         }
+    } catch (err) {
+        window.showToast("Ha ocurrido un error inesperado. Consulte la consola de depuración para más detalles.")
+        console.log(err)
     }
     document.getElementById("widget_status").textContent = "Detenida"
     drawElements(scenarios[getSelectedScenario()]);
