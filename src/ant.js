@@ -116,7 +116,7 @@ export default class Ant {
         return { x: x, y: y, avoid: deadEnd };
     }
     checkExit(grid, state) {
-        const color = state ? "#02b200" : "red"; // Tells to look for the exit or for the starting point
+        const color = state ? "#9fb4ab" : "red"; // Tells to look for the exit or for the starting point
         let isExit = false;
 
         // If any of the next cells looks like an exit, returns true and finishes the loop
