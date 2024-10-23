@@ -10,7 +10,7 @@ export const dimensions = {
     },
     School: {
         gridWidth: 500,
-        gridHeight: 250
+        gridHeight: 170
     }
 }
 
@@ -78,7 +78,7 @@ export const scenarios = roundValues({
         },
         exits: {
             0: {
-                color: "#02b200",
+                color: "#9fb4ab",
                 width: dimensions.Class.gridWidth * 0.01,
                 height: dimensions.Class.gridHeight * 0.1,
                 x: dimensions.Class.gridWidth * 0.99,
@@ -156,64 +156,385 @@ export const scenarios = roundValues({
                 width: dimensions.School.gridWidth,
                 height: dimensions.School.gridHeight * 0.01,
                 x: 0,
-                y: dimensions.School.gridHeight * 0.988
+                y: dimensions.School.gridHeight * 0.99
             },
             2: {
                 color: "#2d2d2d",
-                width: dimensions.School.gridHeight * 0.01,
+                width: dimensions.School.gridWidth * 0.01 / 3,
                 height: dimensions.School.gridHeight,
                 x: 0,
                 y: 0
             },
             3: {
                 color: "#2d2d2d",
-                width: dimensions.School.gridHeight * 0.01,
+                width: dimensions.School.gridWidth * 0.01 / 3,
                 height: dimensions.School.gridHeight,
-                x: dimensions.School.gridWidth * 0.994,
+                x: dimensions.School.gridWidth * (1 - 0.01 / 3),
                 y: 0
+            }
+        },
+        windows: {
+            0: {
+                color: "cyan",
+                width: dimensions.School.gridWidth * 0.01 / 3,
+                height: dimensions.School.gridHeight * 0.15,
+                x: 0,
+                y: dimensions.School.gridHeight * 0.4
+            },
+            1: {
+                color: "cyan",
+                width: dimensions.School.gridWidth * 0.01 / 3,
+                height: dimensions.School.gridHeight * 0.15,
+                x: dimensions.School.gridWidth * (1 - 0.01 / 3),
+                y: dimensions.School.gridHeight * 0.4
             }
         },
         exits: {
             0: {
-                color: "#02b200",
-                width: dimensions.School.gridHeight * 0.15,
-                height: dimensions.School.gridWidth * 0.15,
-                x: dimensions.School.gridWidth * 0.28,
-                y: dimensions.School.gridHeight * 0.01
+                color: "#9fb4ab",
+                width: dimensions.School.gridWidth * 0.05,
+                height: dimensions.School.gridHeight * 0.23,
+                x: dimensions.School.gridWidth * 0.3,
+                y: dimensions.School.gridHeight * 0.15
+            },
+            1: {
+                color: "#9fb4ab",
+                width: dimensions.School.gridWidth * 0.06,
+                height: dimensions.School.gridHeight * 0.23,
+                x: dimensions.School.gridWidth * 0.77,
+                y: dimensions.School.gridHeight * 0.15
             }
         },
         elements: {
             classes: {
-                small: {
-                    count: 2,
-                    top: {
-                        0: {
+                top: {
+                    class: {
+                        // Class walls
+                        left: {
                             color: "#2d2d2d",
-                            width: dimensions.School.gridWidth * 0.004,
-                            height: dimensions.School.gridHeight * 0.35,
-                            x: dimensions.School.gridWidth * 0.13,
-                            y: dimensions.School.gridWidth * 0.006
+                            width: dimensions.School.gridWidth * 0.002,
+                            height: dimensions.School.gridHeight * 0.375,
+                            x: 0,
+                            y: 0
                         },
-                        1: {
+                        right: {
                             color: "#2d2d2d",
-                            width: dimensions.School.gridWidth * 0.128,
-                            height: dimensions.School.gridWidth * 0.004,
-                            x: dimensions.School.gridWidth * 0.006,
-                            y: dimensions.School.gridWidth * 0.182
-                        }
-                    },
-                    bottom: {
+                            width: dimensions.School.gridWidth * 0.002,
+                            height: dimensions.School.gridHeight * 0.375,
+                            x: dimensions.School.gridWidth * 0.138,
+                            y: 0
+                        },
+                        top: {
+                            color: "#2d2d2d",
+                            width: dimensions.School.gridWidth * 0.14,
+                            height: dimensions.School.gridHeight * 0.0075,
+                            x: 0,
+                            y: 0
+                        },
+                        bottom: {
+                            color: "#2d2d2d",
+                            width: dimensions.School.gridWidth * 0.14,
+                            height: dimensions.School.gridHeight * 0.002,
+                            x: 0,
+                            y: dimensions.School.gridHeight * 0.375
+                        },
 
+                        // Class outer objects
+                        o1: {
+                            color: "#2d2d2d",
+                            width: dimensions.School.gridWidth * 0.039,
+                            height: dimensions.School.gridHeight * 0.04,
+                            x: dimensions.School.gridWidth * 0.0275,
+                            y: dimensions.School.gridHeight * 0.375
+                        },
+                        o2: {
+                            color: "#2d2d2d",
+                            width: dimensions.School.gridWidth * 0.02,
+                            height: dimensions.School.gridHeight * 0.04,
+                            x: dimensions.School.gridWidth * 0.0925,
+                            y: dimensions.School.gridHeight * 0.375
+                        },
+
+                        // Class windows
+                        w1: {
+                            color: "cyan",
+                            width: dimensions.School.gridWidth * 0.025,
+                            height: dimensions.School.gridHeight * 0.0075,
+                            x: dimensions.School.gridWidth * 0.005,
+                            y: 0
+                        },
+                        w2: {
+                            color: "cyan",
+                            width: dimensions.School.gridWidth * 0.025,
+                            height: dimensions.School.gridHeight * 0.0075,
+                            x: dimensions.School.gridWidth * 0.04,
+                            y: 0
+                        },
+                        w3: {
+                            color: "cyan",
+                            width: dimensions.School.gridWidth * 0.025,
+                            height: dimensions.School.gridHeight * 0.0075,
+                            x: dimensions.School.gridWidth * 0.074,
+                            y: 0
+                        },
+                        w4: {
+                            color: "cyan",
+                            width: dimensions.School.gridWidth * 0.025,
+                            height: dimensions.School.gridHeight * 0.0075,
+                            x: dimensions.School.gridWidth * 0.1075,
+                            y: 0
+                        },
+
+                        // Class doors
+                        d1: {
+                            color: "#ccc",
+                            width: dimensions.School.gridWidth * 0.02,
+                            height: dimensions.School.gridHeight * 0.0075,
+                            x: dimensions.School.gridWidth * 0.005,
+                            y: dimensions.School.gridHeight * 0.375,
+                        },
+                        d2: {
+                            color: "#ccc",
+                            width: dimensions.School.gridWidth * 0.02,
+                            height: dimensions.School.gridHeight * 0.0075,
+                            x: dimensions.School.gridWidth * 0.07,
+                            y: dimensions.School.gridHeight * 0.375,
+                        },
+                        d3: {
+                            color: "#ccc",
+                            width: dimensions.School.gridWidth * 0.02,
+                            height: dimensions.School.gridHeight * 0.0075,
+                            x: dimensions.School.gridWidth * 0.113,
+                            y: dimensions.School.gridHeight * 0.375,
+                        }
                     }
                 },
-                large: {
-                    count: 3,
-                    top: {
+                bottom: {
+                    class: {
+                        // Class walls
+                        left: {
+                            color: "#2d2d2d",
+                            width: dimensions.School.gridWidth * 0.002,
+                            height: dimensions.School.gridHeight * 0.375,
+                            x: 0,
+                            y: dimensions.School.gridHeight * 0.625
+                        },
+                        right: {
+                            color: "#2d2d2d",
+                            width: dimensions.School.gridWidth * 0.002,
+                            height: dimensions.School.gridHeight * 0.375,
+                            x: dimensions.School.gridWidth * 0.138,
+                            y: dimensions.School.gridHeight * 0.625
+                        },
+                        top: {
+                            color: "#2d2d2d",
+                            width: dimensions.School.gridWidth * 0.14,
+                            height: dimensions.School.gridHeight * 0.0075,
+                            x: 0,
+                            y: dimensions.School.gridHeight * 0.625
+                        },
+                        bottom: {
+                            color: "#2d2d2d",
+                            width: dimensions.School.gridWidth * 0.14,
+                            height: dimensions.School.gridHeight * 0.002,
+                            x: 0,
+                            y: dimensions.School.gridHeight * 0.625
+                        },
 
+                        // Class outer objects
+                        o1: {
+                            color: "#2d2d2d",
+                            width: dimensions.School.gridWidth * 0.039,
+                            height: dimensions.School.gridHeight * 0.04,
+                            x: dimensions.School.gridWidth * 0.0275,
+                            y: dimensions.School.gridHeight * 0.59
+                        },
+                        o2: {
+                            color: "#2d2d2d",
+                            width: dimensions.School.gridWidth * 0.02,
+                            height: dimensions.School.gridHeight * 0.04,
+                            x: dimensions.School.gridWidth * 0.0925,
+                            y: dimensions.School.gridHeight * 0.59
+                        },
+
+                        // Class windows
+                        w1: {
+                            color: "cyan",
+                            width: dimensions.School.gridWidth * 0.025,
+                            height: dimensions.School.gridHeight * 0.0075,
+                            x: dimensions.School.gridWidth * 0.005,
+                            y: dimensions.School.gridHeight * 0.99
+                        },
+                        w2: {
+                            color: "cyan",
+                            width: dimensions.School.gridWidth * 0.025,
+                            height: dimensions.School.gridHeight * 0.0075,
+                            x: dimensions.School.gridWidth * 0.04,
+                            y: dimensions.School.gridHeight * 0.99
+                        },
+                        w3: {
+                            color: "cyan",
+                            width: dimensions.School.gridWidth * 0.025,
+                            height: dimensions.School.gridHeight * 0.0075,
+                            x: dimensions.School.gridWidth * 0.074,
+                            y: dimensions.School.gridHeight * 0.99
+                        },
+                        w4: {
+                            color: "cyan",
+                            width: dimensions.School.gridWidth * 0.025,
+                            height: dimensions.School.gridHeight * 0.0075,
+                            x: dimensions.School.gridWidth * 0.1075,
+                            y: dimensions.School.gridHeight * 0.99
+                        },
+
+                        // Class doors
+                        d1: {
+                            color: "#ccc",
+                            width: dimensions.School.gridWidth * 0.02,
+                            height: dimensions.School.gridHeight * 0.0075,
+                            x: dimensions.School.gridWidth * 0.005,
+                            y: dimensions.School.gridHeight * 0.625,
+                        },
+                        d2: {
+                            color: "#ccc",
+                            width: dimensions.School.gridWidth * 0.02,
+                            height: dimensions.School.gridHeight * 0.0075,
+                            x: dimensions.School.gridWidth * 0.07,
+                            y: dimensions.School.gridHeight * 0.625,
+                        },
+                        d3: {
+                            color: "#ccc",
+                            width: dimensions.School.gridWidth * 0.02,
+                            height: dimensions.School.gridHeight * 0.0075,
+                            x: dimensions.School.gridWidth * 0.113,
+                            y: dimensions.School.gridHeight * 0.625,
+                        }
                     },
-                    bottom: {
+                    office: {
+                        // Office walls
+                        left: {
+                            color: "#2d2d2d",
+                            width: dimensions.School.gridWidth * 0.001,
+                            height: dimensions.School.gridHeight * 0.18,
+                            x: dimensions.School.gridWidth * 0.3,
+                            y: dimensions.School.gridHeight * 0.84
+                        },
+                        right: {
+                            color: "#2d2d2d",
+                            width: dimensions.School.gridWidth * 0.001,
+                            height: dimensions.School.gridHeight * 0.18,
+                            x: dimensions.School.gridWidth * 0.408,
+                            y: dimensions.School.gridHeight * 0.84
+                        },
+                        top: {
+                            color: "#2d2d2d",
+                            width: dimensions.School.gridWidth * 0.11,
+                            height: dimensions.School.gridHeight * 0.003,
+                            x: dimensions.School.gridWidth * 0.3,
+                            y: dimensions.School.gridHeight * 0.83
+                        },
+                        center: {
+                            color: "#2d2d2d",
+                            width: dimensions.School.gridWidth * 0.001,
+                            height: dimensions.School.gridHeight * 0.18,
+                            x: dimensions.School.gridWidth * 0.354,
+                            y: dimensions.School.gridHeight * 0.84
+                        },
 
+                        // Office window
+                        w1: {
+                            color: "cyan",
+                            width: dimensions.School.gridWidth * 0.02,
+                            height: dimensions.School.gridHeight * 0.0075,
+                            x: dimensions.School.gridWidth * 0.31,
+                            y: dimensions.School.gridHeight * 0.99
+                        },
+                        w2: {
+                            color: "cyan",
+                            width: dimensions.School.gridWidth * 0.02,
+                            height: dimensions.School.gridHeight * 0.0075,
+                            x: dimensions.School.gridWidth * 0.343,
+                            y: dimensions.School.gridHeight * 0.99
+                        },
+                        w3: {
+                            color: "cyan",
+                            width: dimensions.School.gridWidth * 0.02,
+                            height: dimensions.School.gridHeight * 0.0075,
+                            x: dimensions.School.gridWidth * 0.378,
+                            y: dimensions.School.gridHeight * 0.99
+                        },
+
+                        // Office doors
+                        d1: {
+                            color: "#ccc",
+                            width: dimensions.School.gridWidth * 0.0475,
+                            height: dimensions.School.gridHeight * 0.0075,
+                            x: dimensions.School.gridWidth * 0.33,
+                            y: dimensions.School.gridHeight * 0.83
+                        }
                     }
+                }
+            },
+            pillars: {
+                // Top
+                0: {
+                    color: "#2d2d2d",
+                    width: dimensions.School.gridWidth * 0.02,
+                    height: dimensions.School.gridHeight * 0.23,
+                    x: dimensions.School.gridWidth * 0.28,
+                    y: dimensions.School.gridHeight * 0.15
+                },
+                1: {
+                    color: "#2d2d2d",
+                    width: dimensions.School.gridWidth * 0.026,
+                    height: dimensions.School.gridHeight * 0.23,
+                    x: dimensions.School.gridWidth * 0.83,
+                    y: dimensions.School.gridHeight * 0.15
+                },
+                2: {
+                    color: "#2d2d2d",
+                    width: dimensions.School.gridWidth * 0.068,
+                    height: dimensions.School.gridHeight * 0.01,
+                    x: dimensions.School.gridWidth * 0.282,
+                    y: dimensions.School.gridHeight * 0.14
+                },
+                3: {
+                    color: "#2d2d2d",
+                    width: dimensions.School.gridWidth * 0.084,
+                    height: dimensions.School.gridHeight * 0.01,
+                    x: dimensions.School.gridWidth * 0.772,
+                    y: dimensions.School.gridHeight * 0.14
+                },
+                // Bottom
+                4: {
+                    color: "#2d2d2d",
+                    width: dimensions.School.gridWidth * 0.02,
+                    height: dimensions.School.gridHeight * 0.365,
+                    x: dimensions.School.gridWidth * 0.28,
+                    y: dimensions.School.gridHeight * 0.625
+                },
+                5: {
+                    color: "#2d2d2d",
+                    width: dimensions.School.gridWidth * 0.026,
+                    height: dimensions.School.gridHeight * 0.365,
+                    x: dimensions.School.gridWidth * 0.83,
+                    y: dimensions.School.gridHeight * 0.625
+                },
+            },
+            spaces: {
+                0: {
+                    color: "#ccc",
+                    width: dimensions.School.gridWidth * 0.068,
+                    height: dimensions.School.gridHeight * 0.01,
+                    x: dimensions.School.gridWidth * 0.282,
+                    y: 0
+                },
+                1: {
+                    color: "#ccc",
+                    width: dimensions.School.gridWidth * 0.084,
+                    height: dimensions.School.gridHeight * 0.01,
+                    x: dimensions.School.gridWidth * 0.772,
+                    y: 0
                 }
             }
         }
@@ -233,6 +554,7 @@ document.getElementById('scenarios-form').addEventListener('change', () => {
     );
     if (window.cellSize == 0) window.cellSize++
     [canvas.width, canvas.height] = [window.gridWidth * window.cellSize, window.gridHeight * window.cellSize];
+    console.log(canvas.width, canvas.height)
     drawElements(scenarios[selected]);
 });
 document.getElementById('scenarios-form').dispatchEvent(new Event('change'));
