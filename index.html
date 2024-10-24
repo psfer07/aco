@@ -89,7 +89,7 @@
             <label id="speed_n">Nivel de velocidad: x1</label>
           </div>
           <input type="range" id="ant_speed" min="1" max="20" value="1"
-            oninput="label = ant_speed.value == ant_speed.max ? String('Máxima') : Number(ant_speed.value)
+            oninput="label = ant_speed.value == ant_speed.max ? String('Máxima') : String('x' + ant_speed.value)
             speed_n.textContent= 'Nivel de velocidad: ' + label">
         </div>
         <div class="buttons">
@@ -99,12 +99,12 @@
       </aside>
       <form id="scenarios-form">
         <label>
-          <input type="radio" name="scenario" value="Class" checked>
-          <span></span> Clase
+          <input type="radio" name="scenario" value="School" checked>
+          <span></span> Planta de instituto
         </label>
         <label>
-          <input type="radio" name="scenario" value="School">
-          <span></span> Planta de instituto
+          <input type="radio" name="scenario" value="Class">
+          <span></span> Clase
         </label>
       </form>
     </div>
