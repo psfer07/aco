@@ -546,6 +546,17 @@ export function getSelectedScenario() { return document.querySelector('input[nam
 document.getElementById('scenarios-form').addEventListener('change', () => {
     const selected = getSelectedScenario();
     [window.gridWidth, window.gridHeight] = [dimensions[selected].gridWidth, dimensions[selected].gridHeight];
+    
+    // Reset matrix
+    window.grid = [];
+    for (let x = 0; x < window.gridWidth; x++) {
+        let cols = [];
+        for (let y = 0; y < window.gridHeight; y++) { cols.push({ ...{ // Each cell will have these properties by default
+            color: "#ccc",
+            pheromone: 1.0
+        } }); }
+        window.grid.push(cols);
+    }
 
     // Set unitary scaling factor (USF)
     window.cellSize = Math.min(

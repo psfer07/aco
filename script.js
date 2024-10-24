@@ -3,17 +3,8 @@ import { dimensions, scenarios, getSelectedScenario } from './src/layouts.js'
 const canvasContainer = document.querySelector('.canvas-container');
 const canvas = document.getElementById("canvas");
 const darkThemeMq = window.matchMedia("(prefers-color-scheme: dark)");
-const properties = { // Each cell will have these properties by default
-    color: "#ccc",
-    pheromone: 1.0
-}
+
 window.startingPoint = 'red'; // Global color for the starting point
-window.grid = [];
-for (let x = 0; x < window.gridWidth; x++) {
-    let cols = [];
-    for (let y = 0; y < window.gridHeight; y++) { cols.push({ ...properties }); }
-    window.grid.push(cols);
-}
 let start;
 
 document.getElementById("widget_status").textContent = "Detenida";
