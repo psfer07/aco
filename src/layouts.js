@@ -179,14 +179,14 @@ export const scenarios = roundValues({
                 width: dimensions.School.gridWidth * 0.01 / 3,
                 height: dimensions.School.gridHeight * 0.15,
                 x: 0,
-                y: dimensions.School.gridHeight * 0.4
+                y: dimensions.School.gridHeight * 0.425
             },
             1: {
                 color: "cyan",
                 width: dimensions.School.gridWidth * 0.01 / 3,
                 height: dimensions.School.gridHeight * 0.15,
                 x: dimensions.School.gridWidth * (1 - 0.01 / 3),
-                y: dimensions.School.gridHeight * 0.4
+                y: dimensions.School.gridHeight * 0.425
             }
         },
         exits: {
@@ -201,6 +201,22 @@ export const scenarios = roundValues({
                 color: "#9fb4ab",
                 width: dimensions.School.gridWidth * 0.06,
                 height: dimensions.School.gridHeight * 0.23,
+                x: dimensions.School.gridWidth * 0.77,
+                y: dimensions.School.gridHeight * 0.15
+            },
+
+            // Exit patches
+            2: {
+                color: "#9fb3ab",
+                width: dimensions.School.gridWidth * 0.05,
+                height: dimensions.School.gridHeight * 0.225,
+                x: dimensions.School.gridWidth * 0.3,
+                y: dimensions.School.gridHeight * 0.15
+            },
+            3: {
+                color: "#9fb3ab",
+                width: dimensions.School.gridWidth * 0.06,
+                height: dimensions.School.gridHeight * 0.225,
                 x: dimensions.School.gridWidth * 0.77,
                 y: dimensions.School.gridHeight * 0.15
             }
