@@ -546,6 +546,12 @@ export function getSelectedScenario() { return document.querySelector('input[nam
 document.getElementById('scenarios-form').addEventListener('change', () => {
     const selected = getSelectedScenario();
     [window.gridWidth, window.gridHeight] = [dimensions[selected].gridWidth, dimensions[selected].gridHeight];
+
+    // Reset labels
+    document.getElementById('widget_status').textContent = 'Detenida'
+    document.getElementById('widget_step').textContent = 'Esperando a la simulación...'
+    document.getElementById('widget_distance').textContent = 'Esperando a la simulación...'
+    document.getElementById('widget_visited').value = 'Esperando a la simulación...'
     
     // Reset matrix
     window.grid = [];
@@ -564,7 +570,7 @@ document.getElementById('scenarios-form').addEventListener('change', () => {
         Math.floor(containerRect.height / window.gridHeight)
     );
     if (window.cellSize == 0) window.cellSize++
-    [canvas.width, canvas.height] = [window.gridWidth * window.cellSize, window.gridHeight * window.cellSize];
+    [canvas.width, canvas.height] = [window.gridWidth * window.cellSize, window.gridHeight * window.cellSize]; // Set canvas dimensions
     console.log(canvas.width, canvas.height)
     drawElements(scenarios[selected]);
 });
