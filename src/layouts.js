@@ -587,7 +587,6 @@ document.getElementById('scenarios-form').addEventListener('change', () => {
     );
     if (window.cellSize == 0) window.cellSize++
     [canvas.width, canvas.height] = [window.gridWidth * window.cellSize, window.gridHeight * window.cellSize]; // Set canvas dimensions
-    console.log(canvas.width, canvas.height)
     drawElements(scenarios[selected]);
 });
 document.getElementById('scenarios-form').dispatchEvent(new Event('change'));
