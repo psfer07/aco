@@ -49,9 +49,8 @@ window.onload = function () {
         }
     });
     document.getElementById("start").addEventListener("click", function () {
-
         // If there is any point set and the simulation is down
-        if (start && document.getElementById("widget_status").textContent == "Detenida") {
+        if (start && !window.isRunning) {
             runSimulations(start,
                 Number(document.getElementById("alpha").value),
                 Number(document.getElementById("beta").value),
@@ -59,6 +58,7 @@ window.onload = function () {
                 Number(document.getElementById("deposit").value),
                 Number(document.getElementById("steps").value)
             );
+            window.isRunning = true
         } else {
             if (document.getElementById("widget_status").textContent == "En ejecucción") {
                 window.showToast("Debe esperar a que la simulación actual termine o si no reinicie el simulador.")

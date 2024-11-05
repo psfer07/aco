@@ -55,56 +55,58 @@ async function antStart(state, start, initial, alpha, beta, rho, deposit, object
                 return nearest;
             }
 
-            try {
-                let dirs = ant.getDirs(x, y);
-                if (dirs.length === 0) {
-                    let newdirs = [];
-                    do {
-                        let revert = ant.revertMove();
-                        deadEnds.push(revert.avoid);
-                        [x, y] = [revert.x, revert.y];
-                        newdirs = ant.getDirs(x, y, deadEnds);
-                    } while (newdirs.length < 1); // Until the ant has an alternative path to follow
-                    ant.x = x;
-                    ant.y = y;
-                    dirs = newdirs;
+            if (window.isRunning) {
+                try {
+                    let dirs = ant.getDirs(x, y);
+                    if (dirs.length === 0) {
+                        let newdirs = [];
+                        do {
+                            let revert = ant.revertMove();
+                            deadEnds.push(revert.avoid);
+                            [x, y] = [revert.x, revert.y];
+                            newdirs = ant.getDirs(x, y, deadEnds);
+                        } while (newdirs.length < 1); // Until the ant has an alternative path to follow
+                        ant.x = x;
+                        ant.y = y;
+                        dirs = newdirs;
+                    }
+                    let exits = [];
+                    for (const key in room.exits) {
+                        const exit = room.exits[key];
+                        exits.push(exit.color);
+                    }
+                    let nearestExit = getNearestExit(x, y, getObjects(state ? exits : window.startingPoint));
+                    const [movedTo, distance] = ant.move(window.grid, dirs, nearestExit);
+                    moveCount++;
+                    visited.push({ x: movedTo.x, y: movedTo.y });
+
+                    // Evaporate pheromone
+                    for (const visit of visited) { window.grid[visit.x][visit.y].pheromone *= (1 - rho); }
+
+                    [x, y] = [movedTo.x, movedTo.y];
+                    ant.x = movedTo.x;
+                    ant.y = movedTo.y;
+                    distanceCumulative += distance;
+
+                    // Loop exit
+                    if (ant.checkExit(window.grid, state)) {
+                        resolve([{ x, y }, distanceCumulative, visited]);
+                        return;
+                    }
+
+                    // Update canvas
+                    for (const visit of visited) setColor(visit.x, visit.y, state ? startingAnt : returningAnt);
+                    setColor([start.x - 1, 2], [start.y - 1, 2], window.startingPoint);
+
+                    // Dynamic speed regulation
+                    if (moveCount % Number(document.getElementById("ant_speed").value) === 0 &&
+                        Number(document.getElementById("ant_speed").value) != Number(document.getElementById("ant_speed").max)) requestAnimationFrame(moveAnt);
+                    else moveAnt(); // Continue the loop
+                } catch (error) {
+                    console.log("Error during ant movement:", error);
+                    reject(error);
                 }
-                let exits = [];
-                for (const key in room.exits) {
-                    const exit = room.exits[key];
-                    exits.push(exit.color);
-                }
-                let nearestExit = getNearestExit(x, y, getObjects(state ? exits : window.startingPoint));
-                const [movedTo, distance] = ant.move(window.grid, dirs, nearestExit);
-                moveCount++;
-                visited.push({ x: movedTo.x, y: movedTo.y });
-
-                // Evaporate pheromone
-                for (const visit of visited) { window.grid[visit.x][visit.y].pheromone *= (1 - rho); }
-
-                [x, y] = [movedTo.x, movedTo.y];
-                ant.x = movedTo.x;
-                ant.y = movedTo.y;
-                distanceCumulative += distance;
-
-                // Loop exit
-                if (ant.checkExit(window.grid, state)) {
-                    resolve([{ x, y }, distanceCumulative, visited]);
-                    return;
-                }
-
-                // Update canvas
-                for (const visit of visited) setColor(visit.x, visit.y, state ? startingAnt : returningAnt);
-                setColor([start.x - 1, 2], [start.y - 1, 2], window.startingPoint);
-
-                // Dynamic speed regulation
-                if (moveCount % Number(document.getElementById("ant_speed").value) === 0 &&
-                    Number(document.getElementById("ant_speed").value) != Number(document.getElementById("ant_speed").max)) requestAnimationFrame(moveAnt);
-                else moveAnt(); // Continue the loop
-            } catch (error) {
-                console.log("Error during ant movement:", error);
-                reject(error);
-            }
+            } else { return; }
         }
         requestAnimationFrame(moveAnt); // Start the loop
     });

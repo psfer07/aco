@@ -563,6 +563,9 @@ document.getElementById('scenarios-form').addEventListener('change', () => {
     const selected = getSelectedScenario();
     [window.gridWidth, window.gridHeight] = [dimensions[selected].gridWidth, dimensions[selected].gridHeight];
 
+    // Cancel any running function instance
+    window.isRunning = false
+
     // Reset labels
     document.getElementById('widget_status').textContent = 'Detenida'
     document.getElementById('widget_step').textContent = 'Esperando a la simulación...'
