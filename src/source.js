@@ -106,7 +106,7 @@ async function antStart(state, start, initial, alpha, beta, rho, deposit, object
                     console.log("Error during ant movement:", error);
                     reject(error);
                 }
-            } else { return; }
+            } else { setToDefaults(); return; }
         }
         requestAnimationFrame(moveAnt); // Start the loop
     });
@@ -346,6 +346,28 @@ export function roundValues(obj) {
 
     // Returns the number-rounded object
     return obj;
+}
+export async function setToDefaults() {
+    // Reset matrix
+    window.grid = [];
+    for (let x = 0; x < window.gridWidth; x++) {
+        let cols = [];
+        for (let y = 0; y < window.gridHeight; y++) {
+            cols.push({
+                ...{ // Each cell will have these properties by default
+                    color: "#ccc",
+                    pheromone: 1.0
+                }
+            });
+        }
+        window.grid.push(cols);
+    }
+
+    // Reset labels
+    document.getElementById('widget_status').textContent = 'Detenida'
+    document.getElementById('widget_step').textContent = 'Esperando a la simulación...'
+    document.getElementById('widget_distance').textContent = 'Esperando a la simulación...'
+    document.getElementById('widget_visited').value = 'Esperando a la simulación...'
 }
 window.showToast = async function (t) {
     const toast = document.getElementById('toast');

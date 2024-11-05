@@ -1,4 +1,4 @@
-import { roundValues, drawElements } from "./source.js";
+import { roundValues, drawElements, setToDefaults } from "./source.js";
 const canvas = document.getElementById("canvas");
 const canvasContainer = document.querySelector('.canvas-container');
 const containerRect = canvasContainer.getBoundingClientRect();
@@ -566,23 +566,8 @@ document.getElementById('scenarios-form').addEventListener('change', () => {
     // Cancel any running function instance
     window.isRunning = false
 
-    // Reset labels
-    document.getElementById('widget_status').textContent = 'Detenida'
-    document.getElementById('widget_step').textContent = 'Esperando a la simulación...'
-    document.getElementById('widget_distance').textContent = 'Esperando a la simulación...'
-    document.getElementById('widget_visited').value = 'Esperando a la simulación...'
+    setToDefaults()
     
-    // Reset matrix
-    window.grid = [];
-    for (let x = 0; x < window.gridWidth; x++) {
-        let cols = [];
-        for (let y = 0; y < window.gridHeight; y++) { cols.push({ ...{ // Each cell will have these properties by default
-            color: "#ccc",
-            pheromone: 1.0
-        } }); }
-        window.grid.push(cols);
-    }
-
     // Set unitary scaling factor (USF)
     window.cellSize = Math.min(
         Math.floor(containerRect.width / window.gridWidth),
