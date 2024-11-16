@@ -57,8 +57,8 @@ export default class Ant {
             this.visited[this.visited.length - 1].x === this.x - direction.x &&
             this.visited[this.visited.length - 1].y === this.y - direction.y
         );
-        if (lastVisitedCellIndex > 0) weighs[lastVisitedCellIndex - 1] /= 3;
-        if (lastVisitedCellIndex < 0) weighs[lastVisitedCellIndex + 1] /= 3;
+        weighs[lastVisitedCellIndex - 1] /= 3;
+        weighs[lastVisitedCellIndex + 1] /= 3;
 
         // Roulette-wheelish selection
         const probabilities = calcProbabilities(weighs);
