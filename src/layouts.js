@@ -1,4 +1,4 @@
-import { roundValues, drawElements, setToDefaults } from "./source.js";
+import { roundValues, drawElements } from "./source.js";
 const canvas = document.getElementById("canvas");
 const canvasContainer = document.querySelector('.canvas-container');
 const containerRect = canvasContainer.getBoundingClientRect();
