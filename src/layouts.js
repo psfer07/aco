@@ -561,6 +561,7 @@ export function getSelectedScenario() { return document.querySelector('input[nam
 
 document.getElementById('scenarios-form').addEventListener('change', () => {
     const selected = getSelectedScenario();
+    if (selected == 'School') window.showToast("Este escenario se encuentra en mantenimiento, por lo que no podrás probarlo hasta que el desarrollador solucione el problema.");
     [window.gridWidth, window.gridHeight] = [dimensions[selected].gridWidth, dimensions[selected].gridHeight];
 
     // Cancel any running function instance
